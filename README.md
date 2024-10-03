@@ -1,10 +1,10 @@
-# PlantPatrol
+# IES Project - Group 205 (PlantPatrol)
 
-## IES Project - Group 205
+## Project Abstract
 
 A platform to help managing greenhouses for a plant store, on an eco-friendlier way.
 
-### Members & Roles
+## Project team
 
 | Nº Mec |       Name       |       Role    |
 | ------ | ---------------- | ------------- | 
