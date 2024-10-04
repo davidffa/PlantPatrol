@@ -13,4 +13,5 @@ A platform to help managing greenhouses for a plant store, on an eco-friendlier 
 | 113538 | Maria Linhares   | Product owner |
 | 114990 | Henrique Freitas | Architect     |
 
-
+## Bookmarks
+Editable version of the report: https://docs.google.com/document/d/1IEPZ6IrZv8LE_uK1MBIUIc9MwFxcrrgZ/edit
