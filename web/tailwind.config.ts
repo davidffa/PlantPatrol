@@ -10,9 +10,15 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        green: "#4F8E2F",
+        "dark-green": "#32671F",
+        beje: "#DCC9B6",
+        brown: "#5A3A31"
       },
+      fontFamily: {
+        sans: 'var(--font-inter)',
+        alt: 'var(--font-roboto)'
+      }
     },
   },
   plugins: [
