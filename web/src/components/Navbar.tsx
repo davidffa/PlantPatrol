@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 type Props = {
-  showUser: boolean;
+  showUser?: boolean;
 }
 
 export function Navbar({ showUser = true }: Props) {

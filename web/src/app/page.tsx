@@ -4,14 +4,19 @@ import { UnderlineInput } from "@/components/UnderlineInput";
 import { FormEvent, useState } from "react";
 import Image from "next/image";
 import { Navbar } from "@/components/Navbar";
+import { useRouter } from "next/navigation";
 
-export default function Home() {
+export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
+
+  const router = useRouter();
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     alert("Form submitted!");
+
+    router.push("/change-password");
   }
 
   return (
