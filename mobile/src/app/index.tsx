@@ -1,5 +1,5 @@
-import React, { useState, useRef } from "react";
-import { Text, View, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
+import React, { useState, useRef, useEffect } from "react";
+import { Text, View, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Keyboard } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function Home() {
@@ -12,6 +12,16 @@ export default function Home() {
   ]);
   const [newMessage, setNewMessage] = useState("");
   const scrollViewRef = useRef<ScrollView>(null); // Reference to the ScrollView
+
+  useEffect(() => {
+    // Scroll chat down when the keyboard is opened
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      () => scrollViewRef.current?.scrollToEnd({ animated: false })
+    )
+
+    return () => keyboardDidShowListener.remove();
+  }, []);
 
   const handleSendMessage = () => {
     if (newMessage.trim() === "") return; // Prevent sending empty messages
@@ -43,7 +53,7 @@ export default function Home() {
           <ScrollView
             className="flex-1"
             ref={scrollViewRef} // Attach the ref to the ScrollView
-            onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
+            onContentSizeChange={() => scrollViewRef.current?.scrollToEnd()}
           >
             {messages.map((message) => (
               <View key={message.id} className="bg-blue-100 rounded-lg m-2 p-3 self-end max-w-[80%]">
@@ -55,10 +65,10 @@ export default function Home() {
         </View>
 
         {/* Input */}
-        <View className="flex-row items-center px-3 mb-10 mx-6">
+        <View className="flex-row items-center px-3 mb-8 mx-6">
           <Ionicons name="happy-outline" size={24} color="gray" />
           <TextInput
-            className="flex-1 max-h-32 rounded-lg px-4 py-1 mx-2 bg-white border border-gray-300"
+            className="flex-1 max-h-32 rounded-lg px-4 py-2 mx-2 bg-white border border-gray-300"
             placeholder="Write your message"
             value={newMessage}
             onChangeText={setNewMessage}
