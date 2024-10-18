@@ -39,7 +39,7 @@ export default function Home() {
         </View>
 
         {/* Chat container */}
-        <View className="flex-1 m-6 bg-white rounded-lg p-3">
+        <View className="flex-1 mx-6 mb-6 bg-white rounded-lg p-3">
           <ScrollView
             className="flex-1"
             ref={scrollViewRef} // Attach the ref to the ScrollView
@@ -55,16 +55,17 @@ export default function Home() {
         </View>
 
         {/* Input */}
-        <View className="flex-row items-center p-3 mb-10 mx-6 rounded-lg">
+        <View className="flex-row items-center px-3 mb-10 mx-6">
           <Ionicons name="happy-outline" size={24} color="gray" />
           <TextInput
-            className="flex-1 h-10 rounded-lg px-4 mx-2 bg-white border border-gray-300"
+            className="flex-1 max-h-32 rounded-lg px-4 py-1 mx-2 bg-white border border-gray-300"
             placeholder="Write your message"
             value={newMessage}
             onChangeText={setNewMessage}
+            multiline
           />
-          <TouchableOpacity onPress={handleSendMessage}>
-            <Ionicons name="send" size={24} color="black" />
+          <TouchableOpacity onPress={handleSendMessage} disabled={newMessage.trim() === ""}>
+            <Ionicons name="send" size={24} color={newMessage.trim() === "" ? "gray" : "black"} />
           </TouchableOpacity>
         </View>
       </View>
