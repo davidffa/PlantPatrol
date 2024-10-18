@@ -1,68 +1,50 @@
 import React from 'react'
 import Image from 'next/image'
-import {humidity} from '../../../public/weather-humidity-rain-svgrepo-com.svg';
-import IconSVG from './IconSVG';
+import SolarPower from '@mui/icons-material/SolarPower'
+import OpacityIcon from '@mui/icons-material/Opacity';
+import DeviceThermostatIcon from '@mui/icons-material/DeviceThermostat';
+import Co2Icon from '@mui/icons-material/Co2';
 type Props = {
     greenhouse: string,
     image: string,
-    humidity?: number,
-    temperature?: number,
-    aiq?: number,
-    uv?: number
+    humidity: number,
+    temperature: number,
+    aiq: number ,
+    uv: number,
 }
 
 export default function GHouseCards({ greenhouse, image, humidity, temperature, aiq, uv }: Props) {
     return (
-        <div className="card bg-base-100 image-full w-96 shadow-xl">
+        <div className="card cursor-pointer shadow-md  hover:shadow-green hover:translate-y-[-4px]  transition-all ease-in-out image-full w-full " >
             <figure>
                 <Image
                     src={image}
                     alt={greenhouse}
                     width={500}
                     height={500}
-                    />
+                />
             </figure>
-            <div className="card-body">
-                <div className="w-full p-2 flex flex-col h-">
-                    <div className='h-1/2 w-full p-2 text-left text-black'>
-                    {greenhouse}
+            <div className="card-body ">
+                <div className="w-full p-2 flex flex-col ">
+                    <div className='h-1/2 w-full p-2 text-left text-2xl text-white'>
+                        {greenhouse}
                     </div>
-                    <div className='h-1/2 w-full p-2 grid grid-cols-2'>
-                        <div className='flex w-full p-3 text-center'>
-                            <IconSVG
-                            SvgIcon={humidity}
-                            color="white"
-                            width="48"
-                            height="48"
-                            src="/weather-humidity-rain-svgrepo-com.svg" alt={''}/>
-                            {humidity}
+                    <div className='h-1/2 w-full p-1 grid grid-cols-2 align-bottom'>
+                        <div className='flex w-full p-3 text-left text-white justify-between text-md '>
+                            <OpacityIcon fontSize='large'/>
+                            {humidity}%
                         </div>
-                        <div className='flex w-full p-3 text-center'>
-                            <IconSVG
-                            SvgIcon={humidity}
-                            color="white"
-                            width="48"
-                            height="48"
-                            src="/temperature-svgrepo-com.svg" alt={''}/>
-                            {temperature}
+                        <div className='flex w-full p-3 text-left text-white justify-between text-md '>
+                            <DeviceThermostatIcon fontSize='large'/>
+                            {temperature}ºC
                         </div>
-                        <div className='flex w-full p-3 text-center'>
-                            <IconSVG
-                            SvgIcon={humidity}
-                            color="white"
-                            width="48"
-                            height="48"
-                            src="/uv-index-alt-svgrepo-com.svg" alt={''}/>
-                            {uv}
+                        <div className='flex w-full p-3 text-left text-white justify-between text-md '>
+                            <SolarPower fontSize="large" />
+                            {uv}mW/cm2
                         </div>
-                        <div className='flex w-full p-3 text-center'>
-                            <IconSVG
-                            SvgIcon={humidity}
-                            color="white"
-                            width="48"
-                            height="48"
-                            src="/carbon-footprint-industry-ecology-environment-carbon-dioxide-conservation-carbon-label-svgrepo-com.svg" alt={''}/>
-                            {aiq}
+                        <div className='flex w-full p-3 text-left text-white justify-between text-md '>
+                            <Co2Icon fontSize="large" />
+                            {aiq}AIQ
                         </div>
                     </div>
                 </div>
