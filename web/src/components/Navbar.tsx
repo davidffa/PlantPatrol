@@ -15,14 +15,20 @@ export function Navbar({ showUser = true }: Props) {
 
       {
         showUser && (
-          <div className="flex items-center">
-            <div className="cursor-pointer rounded-full bg-white me-8 p-2 border border-black flex items-center justify-center">
-              <Image
-                src="/user.svg"
-                width={28}
-                height={28}
-                alt="User image"
-              />
+          <div className="flex items-center justify-center">
+            <div className="dropdown dropdown-end me-8">
+              <div tabIndex={0} role="button" className="btn rounded-full p-2">
+                <Image
+                  src="/user.svg"
+                  width={28}
+                  height={28}
+                  alt="User image"
+                />
+              </div>
+              <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+                <li><a>Change Password</a></li>
+                <li><a>Logout</a></li>
+              </ul>
             </div>
           </div>
         )
