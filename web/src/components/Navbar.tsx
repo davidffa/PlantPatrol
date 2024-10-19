@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import Drawer from "./Drawer";
 
 type Props = {
   showUser?: boolean;
@@ -7,11 +8,12 @@ type Props = {
 
 export function Navbar({ showUser = true }: Props) {
   return (
-    <div className="bg-dark-green w-full h-20 flex justify-between">
-      <Link className="flex items-center justify-center bg-green gap-4 px-6" href="/">
+    <div className="bg-dark-green w-full h-16  flex justify-between items-center">
+      <Link className="flex items-center justify-center bg-green gap-4 px-6 h-full" href="/">
         <Image src="/logo.png" height={38} width={38} alt="PlantPatrol logo" />
         <span className="text-white text-xl font-bold font-alt">PlantPatrol</span>
       </Link>
+      <Drawer></Drawer>
 
       {
         showUser && (
