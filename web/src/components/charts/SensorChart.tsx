@@ -10,7 +10,8 @@ import {
   Title,
   Tooltip,
   Legend,
-  elements,
+  ChartData,
+  Point,
 } from "chart.js";
 
 ChartJS.register(
@@ -24,8 +25,7 @@ ChartJS.register(
 );
 
 type Props = {
-  data: any
-
+  data: ChartData<"line", (number | Point | null)[], unknown>;
 }
 
 export const SensorChart = ({ data }: Props) => {
