@@ -20,7 +20,7 @@ export default function Drawer() {
         </div>
         <div className="drawer-side bg-transparent fixed top-16 h-full">
             <label htmlFor="my-drawer" aria-label="close sidebar" className="drawer-overlay"></label>
-            <ul className="menu bg-base-200 text-base-content min-h-full w-80 p-4 border-none">
+            <ul className="menu bg-base-200 text-base-content min-h-full py-4 border-none">
                 {/* Sidebar content here */}
                 <li className="p-2"><a><img src="/home.svg"/>Greenhouses</a></li>
                 <li className="p-2"><a> <img src="/users.svg"/>Chat</a></li>
