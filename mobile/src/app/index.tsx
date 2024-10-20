@@ -18,6 +18,14 @@ export default function Home() {
     setPlants(staticPlants.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase())))
   }, [searchQuery]);
 
+  function toggleAlert(id: string) {
+    if (alertPlantIds.includes(id)) {
+      setAlertPlantIds(prev => prev.filter(it => it !== id));
+    } else {
+      setAlertPlantIds([...alertPlantIds, id]);
+    }
+  }
+
   return (
     <SafeAreaView className="bg-white flex-1">
       <View className="px-8 mt-4 flex-1">
@@ -57,7 +65,7 @@ export default function Home() {
             gap: 8
           }}
           numColumns={2}
-          renderItem={({ item }) => <PlantCard name={item.name} image={item.imageUrl} alert={alertPlantIds.includes(item.id)} />}
+          renderItem={({ item }) => <PlantCard name={item.name} image={item.imageUrl} alert={alertPlantIds.includes(item.id)} onToggleAlert={() => toggleAlert(item.id)} />}
           keyExtractor={item => item.id}
         />
       </View>
