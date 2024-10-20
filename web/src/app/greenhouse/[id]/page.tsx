@@ -12,6 +12,10 @@ import { DataCharts as data } from "../../../utils/data"
 import Chart from "chart.js/auto";
 import { CategoryScale } from "chart.js";
 
+
+import { Navbar } from '@/components/Navbar';
+
+
 type Props = {
   params: { id: string }
 }
@@ -52,6 +56,7 @@ export default function GreenHouse({ params }: Props) {
 
   return (
     <>
+    <Navbar />
       <div className='w-full p-2 my-6 text-center flex-col justify-center'>
         <div className="text-5xl text-black p-3">
           GreenHouse {id}
