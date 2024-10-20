@@ -1,84 +1,66 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Text, View, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Keyboard } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { useEffect, useState } from "react";
+import { View, Text, TouchableOpacity, TextInput, FlatList } from "react-native";
+import { Feather, Fontisto } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { plants as staticPlants } from "@/utils/plants";
+import { PlantCard } from "@/components/PlantCard";
+
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Home() {
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      text: "Good afternoon.\nLast month I bought two May flowers and have been watering them every day.\nHowever, they seem to me to be withered.\nCould you help me?",
-      time: "15:34",
-    },
-  ]);
-  const [newMessage, setNewMessage] = useState("");
-  const scrollViewRef = useRef<ScrollView>(null); // Reference to the ScrollView
+  const router = useRouter();
+
+  const [plants, setPlants] = useState(staticPlants);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [alertPlantIds, setAlertPlantIds] = useState(["1", "4", "6"]);
 
   useEffect(() => {
-    // Scroll chat down when the keyboard is opened
-    const keyboardDidShowListener = Keyboard.addListener(
-      "keyboardDidShow",
-      () => scrollViewRef.current?.scrollToEnd({ animated: false })
-    )
-
-    return () => keyboardDidShowListener.remove();
-  }, []);
-
-  const handleSendMessage = () => {
-    if (newMessage.trim() === "") return; // Prevent sending empty messages
-
-    const newMessageObject = {
-      id: messages.length + 1,
-      text: newMessage,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    };
-
-    setMessages([...messages, newMessageObject]);
-    setNewMessage(""); // Clear the input field
-  };
+    setPlants(staticPlants.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase())))
+  }, [searchQuery]);
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{ flex: 1 }}
-    >
-      <View className="flex-1 bg-slate-200">
-        {/* Header */}
-        <View className="flex flex-row items-center mt-8 p-8">
-          <Ionicons name="arrow-back" size={24} color="black" />
-          <Text className="text-3xl font-bold text-green ml-8">PlantPatrol</Text>
-        </View>
+    <SafeAreaView className="bg-white flex-1">
+      <View className="px-8 mt-4 flex-1">
+        <View className="flex-row justify-between">
+          <View className="gap-4">
+            <Text className="font-bold text-xl">Welcome to</Text>
+            <Text className="font-bold text-green text-4xl">PlantPatrol</Text>
+          </View>
 
-        {/* Chat container */}
-        <View className="flex-1 mx-6 mb-6 bg-white rounded-lg p-3">
-          <ScrollView
-            className="flex-1"
-            ref={scrollViewRef} // Attach the ref to the ScrollView
-            onContentSizeChange={() => scrollViewRef.current?.scrollToEnd()}
-          >
-            {messages.map((message) => (
-              <View key={message.id} className="bg-blue-100 rounded-lg m-2 p-3 self-end max-w-[80%]">
-                <Text className="text-black">{message.text}</Text>
-                <Text className="text-xs text-gray-500 text-right mt-1">{message.time}</Text>
-              </View>
-            ))}
-          </ScrollView>
-        </View>
-
-        {/* Input */}
-        <View className="flex-row items-center px-3 mb-8 mx-6">
-          <Ionicons name="happy-outline" size={24} color="gray" />
-          <TextInput
-            className="flex-1 max-h-32 rounded-lg px-4 py-2 mx-2 bg-white border border-gray-300"
-            placeholder="Write your message"
-            value={newMessage}
-            onChangeText={setNewMessage}
-            multiline
-          />
-          <TouchableOpacity onPress={handleSendMessage} disabled={newMessage.trim() === ""}>
-            <Ionicons name="send" size={24} color={newMessage.trim() === "" ? "gray" : "black"} />
+          <TouchableOpacity className="flex-row bg-green my-auto px-4 py-2 rounded-md gap-2" activeOpacity={0.7} onPress={() => router.push("chat")}>
+            <Text className="text-white font-bold">Help</Text>
+            <Feather name="message-circle" size={18} color="white" />
           </TouchableOpacity>
         </View>
+
+        <View className="mt-8">
+          <View className="flex-row w-full gap-2">
+            <View className="flex-row items-center bg-gray-100 rounded-lg px-4 w-10/12">
+              <Feather name="search" size={18} />
+              <TextInput className="px-4 w-full" placeholder="Search" value={searchQuery} onChangeText={setSearchQuery} />
+            </View>
+            <TouchableOpacity className="bg-green rounded-lg p-4">
+              <Fontisto color="white" name="equalizer" size={18} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <FlatList
+          className="mt-6"
+          data={plants}
+          contentContainerStyle={{
+            paddingBottom: 20,
+            gap: 24
+          }}
+          columnWrapperStyle={{
+            paddingRight: 8,
+            gap: 8
+          }}
+          numColumns={2}
+          renderItem={({ item }) => <PlantCard name={item.name} image={item.imageUrl} alert={alertPlantIds.includes(item.id)} />}
+          keyExtractor={item => item.id}
+        />
       </View>
-    </KeyboardAvoidingView>
-  );
+    </SafeAreaView>
+  )
 }
