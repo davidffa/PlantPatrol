@@ -24,18 +24,18 @@ export default function Inventory() {
         </div>
       </div>
       <div className="w-full grid md:grid-cols-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5  gap-12 align-center p-4">
-        <InventoryCard image='/roseimg.svg' title='Rose' available={4} minimum={3}/>
-        <InventoryCard image='/redroseimg.svg' title='Red Rose' available={4} minimum={3}/>
-        <InventoryCard image='/yellowroseimg.svg' title='Yellow Rose' available={4} minimum={3}/>
-        <InventoryCard image='/mayflowerimg.svg' title='May Flower' available={4} minimum={3}/>
-        <InventoryCard image='/ballcactusimg.svg' title='Ball Cactus' available={4} minimum={3}/>
-        <InventoryCard image='/crysanthemumimg.svg' title='Crysanthemum' available={4} minimum={3}/>
-        <InventoryCard image='/roseimg.svg' title='Rose1' available={4} minimum={3}/>
-        <InventoryCard image='/redroseimg.svg' title='Red Rose1' available={4} minimum={3}/>
-        <InventoryCard image='/yellowroseimg.svg' title='Yellow Rose1' available={4} minimum={3}/>
-        <InventoryCard image='/mayflowerimg.svg' title='May Flower1' available={4} minimum={3}/>
-        <InventoryCard image='/ballcactusimg.svg' title='Ball Cactus1' available={4} minimum={3}/>
-        <InventoryCard image='/crysanthemumimg.svg' title='Crysanthemum1' available={4} minimum={3}/>
+        <InventoryCard image='/roseimg.svg' title='Rose' available={4} minimum={3} manager/>
+        <InventoryCard image='/redroseimg.svg' title='Red Rose' available={4} minimum={3} manager/>
+        <InventoryCard image='/yellowroseimg.svg' title='Yellow Rose' available={4} minimum={3} manager/>
+        <InventoryCard image='/mayflowerimg.svg' title='May Flower' available={4} minimum={3} manager/>
+        <InventoryCard image='/ballcactusimg.svg' title='Ball Cactus' available={4} minimum={3} manager/>
+        <InventoryCard image='/crysanthemumimg.svg' title='Crysanthemum' available={4} minimum={3} manager/>
+        <InventoryCard image='/roseimg.svg' title='Rose1' available={4} minimum={3} manager/>
+        <InventoryCard image='/redroseimg.svg' title='Red Rose1' available={4} minimum={3} manager/>
+        <InventoryCard image='/yellowroseimg.svg' title='Yellow Rose1' available={4} minimum={3} manager/>
+        <InventoryCard image='/mayflowerimg.svg' title='May Flower1' available={4} minimum={3} manager/>
+        <InventoryCard image='/ballcactusimg.svg' title='Ball Cactus1' available={4} minimum={3} manager/>
+        <InventoryCard image='/crysanthemumimg.svg' title='Crysanthemum1' available={4} minimum={3} manager/>
       </div>
       
 

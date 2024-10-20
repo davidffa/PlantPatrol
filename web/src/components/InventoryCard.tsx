@@ -4,15 +4,20 @@ type Props = {
     title: string,
     image: string,
     available: number,
-    minimum: number
+    minimum: number,
+    manager: boolean
 }
 
 
-export default function InventoryCard({ title, image, available, minimum}: Props){
+export default function InventoryCard({ title, image, available, minimum, manager}: Props){
     
     const [min, setValue] = useState(minimum); 
+    const [ava, setValue2] = useState(available); 
     const handleValueChange = (newValue: number) => {
       setValue(newValue); 
+    };
+    const handleValueChange2 = (newValue: number) => {
+      setValue2(newValue); 
     };
 
     return (
@@ -24,30 +29,59 @@ export default function InventoryCard({ title, image, available, minimum}: Props
                 />
             </figure>
             <div className="card-body ">
-                <div className="w-full  flex flex-col ">
-                    <div className='h-4/6 w-full  text-left text-2xl text-white'>
-                        {title}
-                    </div>
-                    <div className=' h-1/6 w-full grid grid-cols-2 align-bottom'>
-                        <div className='flex w-full text-left text-white justify-between text-md mt-12'>
-                            <p>Available:</p>
+                {manager &&
+                    <div className="w-full  flex flex-col ">
+                        <div className='h-4/6 w-full  text-left text-2xl text-white'>
+                            {title}
                         </div>
-                        <div className='flex  text-right text-white justify-between mt-12 px-6'>{available}</div>
-                        <div>
-                             
-                        </div>  
+                        <div className=' h-1/6 w-full grid grid-cols-2 align-bottom'>
+                            <div className='flex w-full text-left text-white justify-between text-md mt-12'>
+                                <p>Available:</p>
+                            </div>
+                            <div className='flex  text-right text-white justify-between mt-12 px-6'>{available}</div>
+                            <div>
+                                
+                            </div> 
+                        </div>
+                        <div className='h-1/6 flex w-full align-bottom justify-between '>
+                            <div className='flex  text-left text-white justify-between mt-12 '>
+                                <p>Minimum:</p>
+                            </div>
+                            <div >
+                                <EditInput min={minimum} minvalue={min} onChange={handleValueChange}/>
+                            
+                            </div> 
+                        </div>               
                     </div>
+                }
+                {!manager &&
+                    <div className="w-full  flex flex-col ">
+                        <div className='h-4/6 w-full  text-left text-2xl text-white'>
+                            {title}
+                        </div>
+                        <div className='h-1/6 flex w-full align-bottom justify-between '>
+                            <div className='flex  text-left text-white justify-between mt-12 '>
+                                <p>Available:</p>
+                            </div>
+                            <div>
+                                <EditInput min={available} minvalue={ava} onChange={handleValueChange2}/>
+                            </div> 
+                        </div>
+                        <div className=' h-1/6 w-full grid grid-cols-2 align-bottom'>
+                            <div className='flex w-full text-left text-white justify-between text-md mt-12'>
+                                <p>Minimum:</p>
+                            </div>
+                            <div className='flex  text-right text-white justify-between mt-12 px-6'>{minimum}</div>
+                            <div>
+                                
+                            </div> 
+                        </div>
+                    </div>
+
+                }
                     
-                    <div className='h-1/6 flex w-full align-bottom justify-between '>
-                        <div className='flex  text-left text-white justify-between mt-12 '>
-                            <p>Minimum:</p>
-                        </div>
-                        <div >
-                            <EditInput min={minimum} minvalue={min} onChange={handleValueChange}/>
-                           
-                        </div>                
-                    </div>
-                </div>
+                    
+                
             </div>
         </div>
     )
