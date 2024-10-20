@@ -1,12 +1,14 @@
 import Image from "next/image";
+import Link from "next/link";
 
 type Props = {
+  id: string;
   name: string;
   imageUrl: string;
   age: number;
 }
 
-export function EmployeeCard({ name, imageUrl, age }: Props) {
+export function EmployeeCard({ id, name, imageUrl, age }: Props) {
   return (
     <div className="flex justify-between w-full bg-slate-100 py-5 px-10 rounded-lg shadow-md">
       <div className="flex gap-6 items-center">
@@ -23,9 +25,11 @@ export function EmployeeCard({ name, imageUrl, age }: Props) {
           <p className="text-xl">Age: {age}</p>
         </div>
       </div>
-      <button className="rounded-lg bg-dark-green text-white font-semibold text-lg my-auto p-6">
-        Manage Account
-      </button>
+      <Link href={`/employees/${id}`} className="rounded-lg my-auto">
+        <button className="rounded-lg bg-dark-green text-white font-semibold text-lg p-6">
+          Manage Account
+        </button>
+      </Link>
     </div>
   )
 }

@@ -24,9 +24,9 @@ export default function Employees() {
       </div>
 
       <div className="p-16 overflow-y-scroll flex flex-col gap-8">
-        <EmployeeCard name="Paulo Miranda" imageUrl="/employee.png" age={26} />
-        <EmployeeCard name="Joaquim Costa" imageUrl="/employee.png" age={56} />
-        <EmployeeCard name="Rosa Marques" imageUrl="/employee-girl.png" age={41} />
+        <EmployeeCard id="1" name="Paulo Miranda" imageUrl="/employee.png" age={26} />
+        <EmployeeCard id="2" name="Joaquim Costa" imageUrl="/employee.png" age={56} />
+        <EmployeeCard id="3" name="Rosa Marques" imageUrl="/employee-girl.png" age={41} />
       </div>
     </>
   )
