@@ -1,6 +1,7 @@
 import React, {useState} from 'react'
 import EditInput from './EditInput';
 import Image from 'next/image'
+import Link from 'next/link';
 type Props = {
 	title: string,
 	image: string,
@@ -9,7 +10,7 @@ type Props = {
 	manager?: boolean
 }
 
-export default function InventoryCard({ title, image, available, minimum, manager=false}: Props){
+export default function InventoryCard({title, image, available, minimum, manager=false}: Props){
 	
 	const [min, setValue] = useState(minimum); 
 	const [ava, setValue2] = useState(available); 
@@ -20,20 +21,23 @@ export default function InventoryCard({ title, image, available, minimum, manage
 		setValue2(newValue); 
 	};
 
+
+
 	return (
-		<div className="card cursor-pointer shadow-md  hover:shadow-green hover:translate-y-[-4px]  transition-all ease-in-out image-full w-60" >
-			<figure>
-				<Image
-					src={image}
-					alt={title}
-					height={300}
-					width={350}
-				/>
-			</figure>
-			<div className="card-body ">
-				{manager ? 
-					(
-					<div className="w-full  flex flex-col ">
+	<div>
+		{manager ? 
+		(
+			<div className="card cursor-pointer shadow-md hover:shadow-green hover:translate-y-[-4px]  transition-all ease-in-out image-full w-60" >
+				<figure>
+					<Image
+						src={image}
+						alt={title}
+						height={300}
+						width={350}
+					/>
+				</figure>
+				<div className="card-body ">
+					<div className="w-full flex flex-col ">
 						<div className='h-4/6 w-full  text-left text-2xl text-white'>
 							{title}
 						</div>
@@ -53,8 +57,20 @@ export default function InventoryCard({ title, image, available, minimum, manage
 							</div> 
 						</div>               
 					</div>
+				</div>
+				</div>
 					) :
 					(
+			<div className="card cursor-pointer shadow-md  hover:shadow-green hover:translate-y-[-4px]  transition-all ease-in-out image-full w-60" >
+				<figure>
+					<Image
+						src={image}
+						alt={title}
+						height={300}
+						width={350}
+					/>
+				</figure>
+				<div className="card-body " >
 					<div className="w-full  flex flex-col ">
 						<div className='h-4/6 w-full  text-left text-2xl text-white'>
 							{title}
@@ -75,9 +91,10 @@ export default function InventoryCard({ title, image, available, minimum, manage
 							<div></div> 
 						</div>
 					</div>
-					)
-				}
+				</div>
 			</div>
-		</div>
+			)
+		}
+	</div>	
 	)
 }
