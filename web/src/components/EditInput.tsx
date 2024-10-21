@@ -1,5 +1,6 @@
 'use client';
 import { useState } from "react";
+import Image from "next/image";
 
 interface Props {
   min: number;
@@ -9,14 +10,10 @@ interface Props {
 
 const EditInput = ({ min, minvalue, onChange }: Props) => {
   const [isInputVisible, setIsInputVisible] = useState(false);
-  const [inputValue, setInputValue] = useState('');
   const [inputValue2, setInputValue2] = useState(String(min));
 
   const editInput = () => {
-    if (isInputVisible) {
-      setInputValue('');
-    }
-    setIsInputVisible((prev) => !prev);
+      setIsInputVisible((prev) => !prev);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,14 +28,16 @@ const EditInput = ({ min, minvalue, onChange }: Props) => {
       {isInputVisible ? (
         <div className="flex ">
           <input type="text" className="h-6 border rounded w-11 bg-transparent text-white border-white mt-12 " value={inputValue2} onChange={handleInputChange} />
-          <img className="mt-12 " src="/Vector.svg" alt="Editar" onClick={editInput} />
+          <div className="mt-12 " onClick={editInput}>
+            <Image  src="/Vector.svg" alt="Editar" height={22} width={22} />
+          </div>
         </div>
       ) :
         (
           <div className="flex">
             <div className="flex mt-12 text-right text-white justify-between px-8" >{minvalue}</div>
             <button className='mt-12' onClick={editInput} >
-              <img src="/Vector.svg" alt="Editar" />
+              <Image src="/Vector.svg" alt="Editar" height={22} width={22} />
             </button>
           </div>
         )
