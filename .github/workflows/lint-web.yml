@@ -2,11 +2,11 @@ name: Lint Web
 on:
   push:
     paths:
-      - web/*
+      - web/**
     branches: [ dev ]
   pull_request:
     paths:
-      - web/*
+      - web/**
     branches: [ dev ]
 
 jobs:
@@ -22,6 +22,22 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+
+      - name: Cache node modules
+        id: cache-npm
+        uses: actions/cache@v4
+        env:
+          cache-name: cache-web-node-modules
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ env.cache-name }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ env.cache-name }}-
+
+      - if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
+        name: List the state of node modules
+        continue-on-error: true
+        run: npm list
 
       - name: Install dependencies
         run: npm install
