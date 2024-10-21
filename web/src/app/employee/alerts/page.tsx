@@ -1,4 +1,3 @@
-
 import { AlertCollapseReciver } from "@/components/AlertCollapseReciver";
 import { Navbar } from "@/components/Navbar";
 

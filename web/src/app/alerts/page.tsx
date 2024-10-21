@@ -25,7 +25,7 @@ export default function Alerts() {
         </div>
         <div className="py-12">
           <h2 className="text-2xl font-semibold">
-            Alerts send:
+            Alerts sent:
           </h2>
         </div>
 
