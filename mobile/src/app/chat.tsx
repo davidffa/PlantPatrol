@@ -1,8 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Text, View, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Keyboard } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 
 export default function Chat() {
+  const router = useRouter();
+
   const [messages, setMessages] = useState([
     {
       id: 1,
@@ -44,7 +47,7 @@ export default function Chat() {
       <View className="flex-1 bg-slate-200">
         {/* Header */}
         <View className="flex flex-row items-center mt-8 p-8">
-          <Ionicons name="arrow-back" size={24} color="black" />
+          <Ionicons name="arrow-back" size={24} color="black" onPress={() => router.back()} />
           <Text className="text-3xl font-bold text-green ml-8">PlantPatrol</Text>
         </View>
 
