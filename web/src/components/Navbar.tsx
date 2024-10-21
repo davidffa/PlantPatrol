@@ -13,12 +13,12 @@ export function Navbar({ showUser = true }: Props) {
         <Image src="/logo.png" height={38} width={38} alt="PlantPatrol logo" />
         <span className="text-white text-xl font-bold font-alt">PlantPatrol</span>
       </Link>
-      <Drawer></Drawer>
+      <Drawer/>
 
       {
         showUser && (
           <div className="flex items-center justify-center">
-            <div className="dropdown dropdown-end me-8">
+            <div className="dropdown dropdown-end me-8  w-12 h-12 ">
               <div tabIndex={0} role="button" className="btn rounded-full p-2">
                 <Image
                   src="/user.svg"
