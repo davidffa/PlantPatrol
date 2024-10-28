@@ -3,6 +3,7 @@ package pt.ua.deti.ies.plantpatrol.backend.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pt.ua.deti.ies.plantpatrol.backend.dto.LoginEmployeeDTO;
+import pt.ua.deti.ies.plantpatrol.backend.dto.LoginResponseDTO;
 import pt.ua.deti.ies.plantpatrol.backend.entity.Employee;
 import pt.ua.deti.ies.plantpatrol.backend.service.AuthService;
 import pt.ua.deti.ies.plantpatrol.backend.service.JWTService;
@@ -19,10 +20,12 @@ public class LoginController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginEmployeeDTO dto) {
+    public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginEmployeeDTO dto) {
         Employee e = authService.authenticate(dto);
         String jwtToken = jwtService.generateToken(e);
 
-        return ResponseEntity.ok(jwtToken);
+        LoginResponseDTO response = LoginResponseDTO.builder().jwtToken(jwtToken).build();
+
+        return ResponseEntity.ok(response);
     }
 }
