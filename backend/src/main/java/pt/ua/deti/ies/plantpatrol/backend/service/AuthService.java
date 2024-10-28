@@ -1,9 +1,12 @@
 package pt.ua.deti.ies.plantpatrol.backend.service;
 
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import pt.ua.deti.ies.plantpatrol.backend.dto.CreateEmployeeDTO;
 import pt.ua.deti.ies.plantpatrol.backend.dto.CreateEmployeeResponseDTO;
+import pt.ua.deti.ies.plantpatrol.backend.dto.LoginEmployeeDTO;
 import pt.ua.deti.ies.plantpatrol.backend.entity.Employee;
 import pt.ua.deti.ies.plantpatrol.backend.repository.EmployeeRepository;
 
@@ -11,10 +14,12 @@ import pt.ua.deti.ies.plantpatrol.backend.repository.EmployeeRepository;
 public class AuthService {
     private final EmployeeRepository employeeRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
 
-    public AuthService(EmployeeRepository employeeRepository, BCryptPasswordEncoder passwordEncoder) {
+    public AuthService(EmployeeRepository employeeRepository, BCryptPasswordEncoder passwordEncoder, AuthenticationManager authenticationManager) {
         this.employeeRepository = employeeRepository;
         this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
     }
 
     public CreateEmployeeResponseDTO createEmployee(CreateEmployeeDTO dto) throws Exception {
@@ -44,7 +49,13 @@ public class AuthService {
                 .build();
     }
 
-    public Employee authenticate() {
-        throw new UnsupportedOperationException("NOT IMPLEMENTED YET");
+    public Employee authenticate(LoginEmployeeDTO dto) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        dto.getUsername(),
+                        dto.getPassword()
+                )
+        );
+        return employeeRepository.findByUsername(dto.getUsername()).orElseThrow();
     }
 }
