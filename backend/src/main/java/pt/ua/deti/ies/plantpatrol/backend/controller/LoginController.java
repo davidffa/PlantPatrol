@@ -9,7 +9,7 @@ import pt.ua.deti.ies.plantpatrol.backend.service.AuthService;
 import pt.ua.deti.ies.plantpatrol.backend.service.JWTService;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/v1")
 public class LoginController {
     private final AuthService authService;
     private final JWTService jwtService;
