@@ -1,0 +1,9 @@
+package pt.ua.deti.ies.plantpatrol.backend.repository;
+
+import org.springframework.data.mongodb.repository.MongoRepository;
+import pt.ua.deti.ies.plantpatrol.backend.entity.rules.GreenHouse;
+
+public interface GreenHouseRepository extends MongoRepository<GreenHouse,String> {
+
+    public GreenHouse findGreenHouseByName(String name);
+}

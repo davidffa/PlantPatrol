@@ -1,12 +1,13 @@
-package pt.ua.deti.ies.plantpatrol.backend.entity;
+package pt.ua.deti.ies.plantpatrol.backend.entity.rules;
 
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
 import java.util.List;
 
-@Document("Sections")
+@Document
 public class Section {
 
     @Id
@@ -18,6 +19,6 @@ public class Section {
     @NotBlank
     private List<Sensor> sensors;
 
-    @NotBlank
+    @DocumentReference
     private List<Rule> rules;
 }

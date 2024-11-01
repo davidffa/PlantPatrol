@@ -1,4 +1,4 @@
-package pt.ua.deti.ies.plantpatrol.backend.entity;
+package pt.ua.deti.ies.plantpatrol.backend.entity.rules;
 
 
 import jakarta.validation.constraints.NotBlank;

@@ -1,10 +1,9 @@
-package pt.ua.deti.ies.plantpatrol.backend.entity;
+package pt.ua.deti.ies.plantpatrol.backend.entity.rules;
 
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import pt.ua.deti.ies.plantpatrol.backend.enums.ActuatorType;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document
 public class Actuator {
