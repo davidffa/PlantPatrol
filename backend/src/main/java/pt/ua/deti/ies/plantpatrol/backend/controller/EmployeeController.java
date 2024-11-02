@@ -98,6 +98,10 @@ public class EmployeeController {
             return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
         }
 
+        if (!employeeService.employeeExists(id)) {
+            return ResponseEntity.notFound().build();
+        }
+
         employeeService.updateEmployeeNotes(id, dto.getNotes());
 
         return ResponseEntity.noContent().build();
@@ -126,6 +130,10 @@ public class EmployeeController {
             ErrorResponse response = ErrorResponse.builder().message("You're not a manager").build();
 
             return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+        }
+
+        if (!employeeService.employeeExists(id)) {
+            return ResponseEntity.notFound().build();
         }
 
         return ResponseEntity.ok(employeeService.resetCredentials(id));
