@@ -1,6 +1,8 @@
 package pt.ua.deti.ies.plantpatrol.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,8 +14,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 @Document(collection = "employees")
@@ -30,6 +32,7 @@ public class Employee implements UserDetails {
     private String username;
 
     @NotBlank
+    @JsonIgnore
     private String password;
 
     private boolean isManager = false;
@@ -46,7 +49,8 @@ public class Employee implements UserDetails {
 
     private String address;
 
-    private Date birthDate;
+    @NotNull
+    private LocalDate birthDate;
 
     private String notes;
 

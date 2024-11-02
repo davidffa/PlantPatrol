@@ -9,6 +9,7 @@ import pt.ua.deti.ies.plantpatrol.backend.dto.CreateEmployeeResponseDTO;
 import pt.ua.deti.ies.plantpatrol.backend.dto.LoginEmployeeDTO;
 import pt.ua.deti.ies.plantpatrol.backend.entity.Employee;
 import pt.ua.deti.ies.plantpatrol.backend.repository.EmployeeRepository;
+import pt.ua.deti.ies.plantpatrol.backend.utils.StringUtils;
 
 @Service
 public class AuthService {
@@ -26,7 +27,7 @@ public class AuthService {
         if (employeeRepository.findByUsername(dto.getUsername()).isPresent())
             throw new Exception("Username already exists!");
 
-        String password = "123";
+        String password = StringUtils.generateRandomString(16);
 
         Employee employee = Employee
                 .builder()
@@ -40,10 +41,11 @@ public class AuthService {
                 .notes(dto.getNotes())
                 .build();
 
-        employeeRepository.save(employee);
+        employee = employeeRepository.save(employee);
 
         return CreateEmployeeResponseDTO
                 .builder()
+                .id(employee.getId())
                 .username(dto.getUsername())
                 .password(password)
                 .build();
