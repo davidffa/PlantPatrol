@@ -9,7 +9,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import pt.ua.deti.ies.plantpatrol.backend.entity.Employee;
 import pt.ua.deti.ies.plantpatrol.backend.entity.rules.Rule;
-import pt.ua.deti.ies.plantpatrol.backend.entity.rules.Rule;
 import pt.ua.deti.ies.plantpatrol.backend.response.ErrorResponse;
 import pt.ua.deti.ies.plantpatrol.backend.service.RuleService;
 
@@ -24,7 +23,7 @@ public class RuleController{
         this.ruleService = ruleService;
     }
 
-    @PostMapping
+    @PostMapping("/rule")
     public ResponseEntity<Object> createRule(@RequestBody Rule rule) {
 //        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 //
@@ -36,7 +35,7 @@ public class RuleController{
         ruleService.createRule(rule);
         return new ResponseEntity<>(rule, HttpStatus.CREATED);
     }
-    @PostMapping
+    @PostMapping("/rules")
     public ResponseEntity<Object> createRules(@RequestBody List<Rule> rules) {
 //        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 //

@@ -1,7 +1,6 @@
 package pt.ua.deti.ies.plantpatrol.backend.controller;
 
 
-import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -15,14 +14,17 @@ import pt.ua.deti.ies.plantpatrol.backend.service.GreenHouseService;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v1/greenhouse")
+@RequestMapping("/api")
 public class GreenHouseController {
 
-    private GreenHouseService greenHouseService;
+    private final GreenHouseService greenHouseService;
+
+    public GreenHouseController(GreenHouseService greenHouseService) {
+        this.greenHouseService = greenHouseService;
+    }
 
 
-
-    @PostMapping
+    @PostMapping("/greenhouse")
     public ResponseEntity<Object> createGreenHouse(@RequestBody GreenHouse greenHouse) {
 //        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 //
@@ -34,8 +36,8 @@ public class GreenHouseController {
         greenHouseService.createGreenHouse(greenHouse);
         return new ResponseEntity<>(greenHouse, HttpStatus.CREATED);
     }
-    @PostMapping
-    public ResponseEntity<Object> createGreenHouse(@RequestBody List<GreenHouse> greenHouse) {
+    @PostMapping("/greenhouses")
+    public ResponseEntity<Object> createGreenHouses(@RequestBody List<GreenHouse> greenHouse) {
 //        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 //
 //        Employee issuer = (Employee) auth.getPrincipal();
