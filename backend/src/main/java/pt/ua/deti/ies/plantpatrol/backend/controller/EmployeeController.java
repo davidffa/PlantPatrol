@@ -28,6 +28,7 @@ public class EmployeeController {
         this.employeeService = employeeService;
     }
 
+    @Operation(summary = "List all employees")
     @GetMapping("/employees")
     public ResponseEntity<Object> listEmployees() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -42,6 +43,7 @@ public class EmployeeController {
         return ResponseEntity.ok(employeeService.listAllEmployees());
     }
 
+    @Operation(summary = "Get employee details")
     @GetMapping("/employees/{id}")
     public ResponseEntity<Object> employeeDetails(@PathVariable String id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -62,6 +64,7 @@ public class EmployeeController {
         return ResponseEntity.ok(employee.get());
     }
 
+    @Operation(summary = "Get the details of the currently logged employee")
     @GetMapping("/employees/@me")
     public ResponseEntity<Employee> employeeSelfDetails() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -89,7 +92,8 @@ public class EmployeeController {
         }
     }
 
-    @PatchMapping("/employees/{id}")
+    @Operation(summary = "Change employee notes")
+    @PatchMapping("/employees/{id}/notes")
     public ResponseEntity<Object> modifyEmployee(@PathVariable String id, @RequestBody ModifyEmployeeDTO dto) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Employee issuer = (Employee) auth.getPrincipal();
@@ -109,6 +113,7 @@ public class EmployeeController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Change logged employee password")
     @PatchMapping("/employees/@me/change-password")
     public ResponseEntity<Object> changeSelfPassword(@RequestBody ChangePasswordDTO dto) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -123,6 +128,7 @@ public class EmployeeController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Resets credentials for an employee")
     @PatchMapping("/employees/{id}/reset")
     public ResponseEntity<Object> resetCredentials(@PathVariable String id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -141,6 +147,7 @@ public class EmployeeController {
         return ResponseEntity.ok(employeeService.resetCredentials(id));
     }
 
+    @Operation(summary = "Deletes an employee")
     @DeleteMapping("/employees/{id}")
     public ResponseEntity<Object> deleteEmployee(@PathVariable String id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
