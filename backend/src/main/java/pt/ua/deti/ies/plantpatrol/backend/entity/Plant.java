@@ -29,7 +29,7 @@ public class Plant {
     private int minimum = 0;
 
     @NotNull
-    private int quantity;
+    private int amount;
 
     private String family;
     private int maxHeight;

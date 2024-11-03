@@ -1,5 +1,6 @@
 package pt.ua.deti.ies.plantpatrol.backend.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,7 @@ public class InventoryController {
 
     private final InventoryService inventoryService;
 
+    @Operation(summary = "Add a new plant to the inventory")
     @PostMapping("/inventory")
     public ResponseEntity<Object> createPlant(@RequestBody CreatePlantDTO dto) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -39,6 +41,7 @@ public class InventoryController {
         }
     }
 
+    @Operation(summary = "Delete a plant from the inventory")
     @DeleteMapping("/inventory/{id}")
     public ResponseEntity<Object> deletePlant(@PathVariable String id) {
         if (!inventoryService.plantExists(id)) {
@@ -49,6 +52,7 @@ public class InventoryController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Edit plant details")
     @PutMapping("/inventory/{id}")
     public ResponseEntity<Object> editPlantDetails(@PathVariable String id, @RequestBody Plant plt) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -68,6 +72,7 @@ public class InventoryController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Edit plant minimum amount or plant amount")
     @PatchMapping("/inventory/{id}")
     public ResponseEntity<Object> editPlant(@PathVariable String id, @RequestBody Plant plant) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -80,12 +85,13 @@ public class InventoryController {
         if (issuer.isManager()) {
             inventoryService.editMinimumPlant(id, plant.getMinimum());
         } else {
-            inventoryService.editAvailablePlant(id, plant.getQuantity());
+            inventoryService.editAvailablePlant(id, plant.getAmount());
         }
 
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Search plants by name, or list all plants with pagination")
     @GetMapping("/inventory")
     public ResponseEntity<List<Plant>> searchByPlant(
             @RequestParam(required = false) String name,

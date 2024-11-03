@@ -26,7 +26,7 @@ public class InventoryService {
         return inventoryRepository.existsById(id);
     }
 
-    public void createPlant(String plantName, int quantity) throws Exception {
+    public void createPlant(String plantName, int amount) throws Exception {
         if (inventoryRepository.findByName(plantName).isPresent())
             throw new Exception("Name already exists!");
 
@@ -38,7 +38,7 @@ public class InventoryService {
                     Plant plant = Plant
                             .builder()
                             .name(plantName)
-                            .quantity(quantity)
+                            .amount(amount)
                             .family(results.getT1().getFamily())
                             .maxHeight(results.getT1().getMaxHeight())
                             .about(results.getT1().getDescription())
@@ -47,9 +47,7 @@ public class InventoryService {
                             .build();
                     inventoryRepository.save(plant);
                 },
-                error -> {
-                    logger.error("An error occurred when fetching Gemini or Google Search API", error);
-                }
+                error -> logger.error("An error occurred when fetching Gemini or Google Search API", error)
         );
     }
 
