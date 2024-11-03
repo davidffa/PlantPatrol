@@ -21,7 +21,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Plant {
 
     @Id
-    private long id;
+    private String id;
 
     @NotBlank
     @Indexed(unique = true)
@@ -37,4 +37,6 @@ public class Plant {
     private int maxHeight;
     private String about;
     private String curiosities;
+
+    private String imageUrl;
 }

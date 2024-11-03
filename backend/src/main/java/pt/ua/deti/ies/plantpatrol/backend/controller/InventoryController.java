@@ -75,16 +75,16 @@ public class InventoryController {
     public ResponseEntity<Object> editPlant(@RequestBody Plant plt) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Employee issuer = (Employee) auth.getPrincipal();
-        Long id = plt.getId();
+        String id = plt.getId();
 
-        if (!inventoryService.plantExists(id.toString())) {
+        if (!inventoryService.plantExists(id)) {
             return ResponseEntity.notFound().build();
         }
         if (issuer.isManager()) {
-            inventoryService.editMinimumPlant(id.toString(), plt.getMinimum());
+            inventoryService.editMinimumPlant(id, plt.getMinimum());
         }
         else {
-            inventoryService.editAvailablePlant(id.toString(), plt.getQuantity());
+            inventoryService.editAvailablePlant(id, plt.getQuantity());
         }
         return ResponseEntity.noContent().build();
     }

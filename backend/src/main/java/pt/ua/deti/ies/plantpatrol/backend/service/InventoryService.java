@@ -4,8 +4,10 @@ import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import pt.ua.deti.ies.plantpatrol.backend.dto.inventory.GeminiResponseDTO;
 import pt.ua.deti.ies.plantpatrol.backend.entity.Plant;
 import pt.ua.deti.ies.plantpatrol.backend.repository.InventoryRepository;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +19,7 @@ public class InventoryService {
 
     private final InventoryRepository inventoryRepository;
     private final GeminiService geminiService;
+    private final GoogleSearchService googleSearchService;
 
     public boolean plantExists(String id) {
         return inventoryRepository.existsById(id);
@@ -26,21 +29,25 @@ public class InventoryService {
         if (inventoryRepository.findByName(plantName).isPresent())
             throw new Exception("Name already exists!");
 
-        geminiService.getPlantDetails(plantName).subscribe(
-                response -> {
+        Mono<GeminiResponseDTO> geminiResponse = geminiService.getPlantDetails(plantName);
+        Mono<String> googleSearchResponse = googleSearchService.searchImage(plantName);
+
+        Mono.zip(geminiResponse, googleSearchResponse).subscribe(
+                results -> {
                     Plant plant = Plant
                             .builder()
                             .name(plantName)
                             .quantity(quantity)
-                            .family(response.getFamily())
-                            .maxHeight(response.getMaxHeight())
-                            .about(response.getDescription())
-                            .curiosities(response.getCuriosities())
+                            .family(results.getT1().getFamily())
+                            .maxHeight(results.getT1().getMaxHeight())
+                            .about(results.getT1().getDescription())
+                            .curiosities(results.getT1().getCuriosities())
+                            .imageUrl(results.getT2())
                             .build();
                     inventoryRepository.save(plant);
                 },
                 error -> {
-                    logger.error("An error occurred when fetching Gemini API", error);
+                    logger.error("An error occurred when fetching Gemini or Google Search API", error);
                 }
         );
     }
