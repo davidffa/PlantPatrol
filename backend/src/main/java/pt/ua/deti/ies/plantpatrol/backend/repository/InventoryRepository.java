@@ -19,11 +19,11 @@ public interface InventoryRepository extends MongoRepository<Plant, String> {
     void updateMinimumById(String id, int minimum);
 
     @Query("{_id: ?0}")
-    @Update("{ $set:  { available: ?1 }}")
-    void updateAvailableById(String id, int available);
+    @Update("{ $set:  { amount: ?1 }}")
+    void updateAvailableById(String id, int amout);
 
     @Query("{_id: ?0}")
-    @Update("{ $set:  { family: ?1 , size:  ?2, about:  ?3, curiosities:  ?4}}")
+    @Update("{ $set:  { family: ?1 , maxHeight:  ?2, about:  ?3, curiosities:  ?4}}")
     void updateDetailsById(String id, String family, int maxHeight, String about, String curiosities);
 
 }
