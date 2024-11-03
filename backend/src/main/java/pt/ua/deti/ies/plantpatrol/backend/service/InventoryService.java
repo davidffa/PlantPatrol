@@ -3,13 +3,14 @@ package pt.ua.deti.ies.plantpatrol.backend.service;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import pt.ua.deti.ies.plantpatrol.backend.dto.inventory.GeminiResponseDTO;
 import pt.ua.deti.ies.plantpatrol.backend.entity.Plant;
 import pt.ua.deti.ies.plantpatrol.backend.repository.InventoryRepository;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -70,5 +71,11 @@ public class InventoryService {
 
     public List<Plant> searchByPlant(String name) {
         return inventoryRepository.searchPlantsByName(name);
+    }
+
+    public List<Plant> getPlants(int pageNo, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNo, pageSize);
+
+        return inventoryRepository.findAll(pageable).toList();
     }
 }
