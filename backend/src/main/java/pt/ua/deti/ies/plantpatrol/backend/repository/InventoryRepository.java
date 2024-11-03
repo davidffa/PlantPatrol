@@ -20,6 +20,6 @@ public interface InventoryRepository extends MongoRepository<Plant, String> {
 
     @Query("{_id: ?0}")
     @Update("{ $set:  { family: ?1 , size:  ?2, about:  ?3, curiosities:  ?4}}")
-    void updateDetailsById(String id, String family, String size, String about, String curiosities);
+    void updateDetailsById(String id, String family, int maxHeight, String about, String curiosities);
 
 }

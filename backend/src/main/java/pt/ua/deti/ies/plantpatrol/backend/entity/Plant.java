@@ -31,11 +31,10 @@ public class Plant {
     private int minimum;
 
     @NotNull
-    private int available;
+    private int quantity;
 
     private String family;
-    private String size;
+    private int maxHeight;
     private String about;
     private String curiosities;
-
 }

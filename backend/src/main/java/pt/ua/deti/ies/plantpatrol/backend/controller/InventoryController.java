@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import pt.ua.deti.ies.plantpatrol.backend.dto.inventory.CreatePlantDTO;
 import pt.ua.deti.ies.plantpatrol.backend.entity.Employee;
 import pt.ua.deti.ies.plantpatrol.backend.entity.Plant;
 import pt.ua.deti.ies.plantpatrol.backend.response.ErrorResponse;
@@ -21,7 +22,7 @@ public class InventoryController {
     private final InventoryService inventoryService;
 
     @PostMapping("/inventory")
-    public ResponseEntity<Object> createPlant(@RequestBody Plant plant) {
+    public ResponseEntity<Object> createPlant(@RequestBody CreatePlantDTO dto) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Employee issuer = (Employee) auth.getPrincipal();
 
@@ -31,9 +32,10 @@ public class InventoryController {
         }
 
         try {
-            return new ResponseEntity<>(inventoryService.createPlant(plant), HttpStatus.CREATED);
+            inventoryService.createPlant(dto.getName(), dto.getQuantity());
+            return ResponseEntity.accepted().build();
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }
     }
 
@@ -64,7 +66,7 @@ public class InventoryController {
             return ResponseEntity.notFound().build();
         }
 
-        inventoryService.editPlantDetails(id, plt.getFamily(), plt.getSize(), plt.getAbout(), plt.getCuriosities());
+        inventoryService.editPlantDetails(id, plt.getFamily(), plt.getMaxHeight(), plt.getAbout(), plt.getCuriosities());
 
         return ResponseEntity.noContent().build();
     }
@@ -82,7 +84,7 @@ public class InventoryController {
             inventoryService.editMinimumPlant(id.toString(), plt.getMinimum());
         }
         else {
-            inventoryService.editAvailablePlant(id.toString(), plt.getAvailable());
+            inventoryService.editAvailablePlant(id.toString(), plt.getQuantity());
         }
         return ResponseEntity.noContent().build();
     }
