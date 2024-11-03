@@ -41,9 +41,6 @@ public class InventoryController {
 
     @DeleteMapping("/inventory/{id}")
     public ResponseEntity<Object> deletePlant(@PathVariable String id) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Employee issuer = (Employee) auth.getPrincipal();
-
         if (!inventoryService.plantExists(id)) {
             return ResponseEntity.notFound().build();
         }
@@ -52,7 +49,7 @@ public class InventoryController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/inventory/{id}")
+    @PutMapping("/inventory/{id}")
     public ResponseEntity<Object> editPlantDetails(@PathVariable String id, @RequestBody Plant plt) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Employee issuer = (Employee) auth.getPrincipal();
@@ -71,28 +68,27 @@ public class InventoryController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/inventory")
-    public ResponseEntity<Object> editPlant(@RequestBody Plant plt) {
+    @PatchMapping("/inventory/{id}")
+    public ResponseEntity<Object> editPlant(@PathVariable String id, @RequestBody Plant plant) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Employee issuer = (Employee) auth.getPrincipal();
-        String id = plt.getId();
 
         if (!inventoryService.plantExists(id)) {
             return ResponseEntity.notFound().build();
         }
+
         if (issuer.isManager()) {
-            inventoryService.editMinimumPlant(id, plt.getMinimum());
+            inventoryService.editMinimumPlant(id, plant.getMinimum());
+        } else {
+            inventoryService.editAvailablePlant(id, plant.getQuantity());
         }
-        else {
-            inventoryService.editAvailablePlant(id, plt.getQuantity());
-        }
+
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/inventory")
-    public ResponseEntity<List<Plant>> searchByPlant(String name) {
+    public ResponseEntity<List<Plant>> searchByPlant(@RequestParam String name) {
         List<Plant> plants = inventoryService.searchByPlant(name);
         return new ResponseEntity<>(plants, HttpStatus.OK);
     }
-
 }

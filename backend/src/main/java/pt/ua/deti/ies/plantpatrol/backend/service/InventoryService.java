@@ -69,12 +69,6 @@ public class InventoryService {
     }
 
     public List<Plant> searchByPlant(String name) {
-        List<Plant> plants = new ArrayList<>();
-        for (Plant plant : inventoryRepository.findAll()) {
-            if (plant.getName().contains(name)) {
-                plants.add(plant);
-            }
-        }
-        return plants;
+        return inventoryRepository.searchPlantsByName(name);
     }
 }

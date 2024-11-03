@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -27,8 +26,7 @@ public class Plant {
     @Indexed(unique = true)
     private String name;
 
-    @Value("${some.key:3}")
-    private int minimum;
+    private int minimum = 0;
 
     @NotNull
     private int quantity;

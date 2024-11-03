@@ -5,10 +5,14 @@ import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.mongodb.repository.Update;
 import pt.ua.deti.ies.plantpatrol.backend.entity.Plant;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface InventoryRepository extends MongoRepository<Plant, String> {
     Optional<Plant> findByName(String name);
+
+    @Query("{ name: { $regex: ?0, $options: 'i' } }")
+    List<Plant> searchPlantsByName(String name);
 
     @Query("{ _id: ?0 }")
     @Update("{ $set: { minimum: ?1 } }")
