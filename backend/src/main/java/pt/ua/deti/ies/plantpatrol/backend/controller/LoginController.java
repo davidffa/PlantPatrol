@@ -1,5 +1,6 @@
 package pt.ua.deti.ies.plantpatrol.backend.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pt.ua.deti.ies.plantpatrol.backend.dto.LoginEmployeeDTO;
@@ -19,6 +20,7 @@ public class LoginController {
         this.jwtService = jwtService;
     }
 
+    @Operation(summary = "Authenticate with username/password")
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginEmployeeDTO dto) {
         Employee e = authService.authenticate(dto);
