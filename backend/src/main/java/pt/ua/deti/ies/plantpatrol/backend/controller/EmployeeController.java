@@ -1,5 +1,6 @@
 package pt.ua.deti.ies.plantpatrol.backend.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -23,6 +24,7 @@ public class EmployeeController {
         this.authService = employeeService;
     }
 
+    @Operation(summary = "Creates a new employee, returning his credentials")
     @PostMapping("/employees")
     public ResponseEntity<Object> createEmployee(@RequestBody CreateEmployeeDTO dto) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
