@@ -1,53 +1,53 @@
 package pt.ua.deti.ies.plantpatrol.backend.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import pt.ua.deti.ies.plantpatrol.backend.dto.chat.CreateMessageDTO;
 import pt.ua.deti.ies.plantpatrol.backend.dto.chat.CreateRoomDTO;
 import pt.ua.deti.ies.plantpatrol.backend.entity.ChatRoom;
+import pt.ua.deti.ies.plantpatrol.backend.entity.Employee;
 import pt.ua.deti.ies.plantpatrol.backend.entity.Message;
-import pt.ua.deti.ies.plantpatrol.backend.repository.MessageRepository;
 import pt.ua.deti.ies.plantpatrol.backend.service.ChatRoomService;
-
-import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/api/v1")
 public class ChatController {
     @Autowired
-    private SimpMessagingTemplate messagingTemplate;
-    @Autowired
     private ChatRoomService chatRoomService;
-    @Autowired
-    private MessageRepository messageRepository;
 
+    @Operation(summary = "Creat a new message in a specified chatRoom")
     @PostMapping("/chat/{chatRoomId}")
-    public ResponseEntity<?> processMessage(@PathVariable String clientId, @RequestBody Message message) {
+    public ResponseEntity<?> processMessage(@RequestHeader(required = false) String senderId, @PathVariable String chatRoomId, @RequestBody CreateMessageDTO dto) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        message.setSenderId(auth.getPrincipal().toString());
-        var chatId = chatRoomService.getChatRoom(clientId);
+        Message msg = Message.builder().content(dto.getContent()).build();
 
-        Message saved = messageRepository.save(message);
-        messagingTemplate.convertAndSend("/chat/" + chatId, saved);
+        if (auth.getPrincipal() instanceof Employee issuer) {
+            msg.setSenderId(issuer.getId());
+        } else {
+            if (senderId == null) {
+                return ResponseEntity.badRequest().build();
+            }
 
-        return new ResponseEntity<>(saved, HttpStatus.OK);
+            msg.setSenderId(senderId);
+        }
+
+        return new ResponseEntity<>(chatRoomService.createMessage(chatRoomId, msg), HttpStatus.OK);
 
     }
-
+    @Operation(summary = "Have all the messages in a specified chatRoom")
     @GetMapping("/chat/{chatRoomId}")
     public ResponseEntity<?> findChatMessages (@PathVariable String chatRoomId) {
         ChatRoom chatRoom = chatRoomService.getChatRoomByID(chatRoomId);
         return new ResponseEntity<>(chatRoom.getMessages(), HttpStatus.OK) ;
     }
 
+    @Operation(summary = "Create a new chatRoom")
     @PostMapping("/chat")
     public ResponseEntity<?> createChat(@RequestBody CreateRoomDTO dto) {
         ChatRoom chatRoom = chatRoomService.createChatRoom(dto.getClientId());
