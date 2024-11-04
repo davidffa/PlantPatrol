@@ -24,7 +24,7 @@ public class InventoryController {
 
     @Operation(summary = "Add a new plant to the inventory")
     @PostMapping("/inventory")
-    public ResponseEntity<Object> createPlant(@RequestBody CreatePlantDTO dto) {
+    public ResponseEntity<Object> createPlant(@RequestBody List<CreatePlantDTO> dtos) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Employee issuer = (Employee) auth.getPrincipal();
 
@@ -34,7 +34,10 @@ public class InventoryController {
         }
 
         try {
-            inventoryService.createPlant(dto.getName(), dto.getQuantity());
+            for (CreatePlantDTO dto : dtos) {
+                inventoryService.createPlant(dto.getName(), dto.getQuantity());
+            }
+
             return ResponseEntity.accepted().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
