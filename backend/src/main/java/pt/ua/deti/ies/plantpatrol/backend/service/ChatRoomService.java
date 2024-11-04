@@ -2,6 +2,7 @@ package pt.ua.deti.ies.plantpatrol.backend.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import pt.ua.deti.ies.plantpatrol.backend.dto.chat.CreateRoomDTO;
 import pt.ua.deti.ies.plantpatrol.backend.entity.ChatRoom;
 import pt.ua.deti.ies.plantpatrol.backend.repository.ChatRoomRepository;
 
@@ -13,36 +14,20 @@ public class ChatRoomService {
     @Autowired
     private ChatRoomRepository chatRoomRepository;
 
-    public Optional<String> getChatId(
-            String senderId, String recipientId, boolean createIfNotExist) {
+    public ChatRoom createChatRoom(String clientId) {
+        return chatRoomRepository.save(ChatRoom.builder().clientId(clientId).build());
+    }
 
-        return chatRoomRepository
-                .findBySenderIdAndRecipientId(senderId, recipientId)
-                .map(ChatRoom::getChatId)
-                .or(() -> {
-                    if(!createIfNotExist) {
-                        return  Optional.empty();
-                    }
-                    var chatId =
-                            String.format("%s_%s", senderId, recipientId);
+    public String getChatRoom(String clientId) {
+        for (ChatRoom chatRoom : chatRoomRepository.findAll()) {
+            if (chatRoom.getClientId().equals(clientId)) {
+                return chatRoom.getId();
+            }
+        }
+        return null;
+    }
 
-                    ChatRoom senderRecipient = ChatRoom
-                            .builder()
-                            .chatId(chatId)
-                            .senderId(senderId)
-                            .recipientId(recipientId)
-                            .build();
-
-                    ChatRoom recipientSender = ChatRoom
-                            .builder()
-                            .chatId(chatId)
-                            .senderId(recipientId)
-                            .recipientId(senderId)
-                            .build();
-                    chatRoomRepository.save(senderRecipient);
-                    chatRoomRepository.save(recipientSender);
-
-                    return Optional.of(chatId);
-                });
+    public ChatRoom getChatRoomByID(String chatRoomId) {
+        return chatRoomRepository.findById(chatRoomId).orElse(null);
     }
 }

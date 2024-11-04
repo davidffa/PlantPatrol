@@ -10,7 +10,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 
-@Document(collection = "message")
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -19,10 +18,8 @@ public class Message
 {
     @Id
     private String id;
+    @NotBlank
     private String content;
     @NotBlank
     private String senderId;
-    @NotBlank
-    private String receiverId;
-    private String recipientId;
 }
