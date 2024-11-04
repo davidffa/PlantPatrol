@@ -8,6 +8,7 @@ import lombok.Data;
 @Data
 @Builder
 public class CreateEmployeeResponseDTO {
+    private String id;
     private String username;
     private String password;
 }

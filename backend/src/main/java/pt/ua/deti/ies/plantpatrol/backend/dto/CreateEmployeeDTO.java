@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,7 +17,7 @@ public class CreateEmployeeDTO {
 
     private String address;
 
-    private Date birthDate;
+    private LocalDate birthDate;
 
     private String notes;
 }
