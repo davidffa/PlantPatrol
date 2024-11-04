@@ -2,56 +2,35 @@ package pt.ua.deti.ies.plantpatrol.backend.entity;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.Instant;
 import java.util.Date;
 
 @Document(collection = "alerts")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Alert {
     @Id
     private String id;
-
+    @NotBlank
+    private String title;
     @NotBlank
     private String message;
 
-    @NotNull
-    private Boolean fromSystem;
+    private String sendto;
 
     @NotNull
-    private Date timestamp;
+    private boolean fromSystem = false;
 
-    public Alert() {
-        this.timestamp = new Date();
-    }
+    @NotNull
+    private Date timestamp = Date.from(Instant.now());
 
-    public Alert(String message, Boolean fromSystem) {
-        this.message = message;
-        this.fromSystem = fromSystem;
-        this.timestamp = new Date();
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public Boolean getFromSystem() {
-        return fromSystem;
-    }
-
-    public void setFromSystem(Boolean fromSystem) {
-        this.fromSystem = fromSystem;
-    }
-
-    public Date getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
-    }
 }
