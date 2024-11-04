@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import pt.ua.deti.ies.plantpatrol.backend.entity.Employee;
 import pt.ua.deti.ies.plantpatrol.backend.entity.rules.GreenHouse;
 import pt.ua.deti.ies.plantpatrol.backend.entity.rules.Rule;
+import pt.ua.deti.ies.plantpatrol.backend.repository.RulesRepository;
 import pt.ua.deti.ies.plantpatrol.backend.response.ErrorResponse;
 import pt.ua.deti.ies.plantpatrol.backend.service.GreenHouseService;
 
@@ -19,9 +20,11 @@ import java.util.List;
 public class GreenHouseController {
 
     private final GreenHouseService greenHouseService;
+    private final RulesRepository rulesRepository;
 
-    public GreenHouseController(GreenHouseService greenHouseService) {
+    public GreenHouseController(GreenHouseService greenHouseService, RulesRepository rulesRepository) {
         this.greenHouseService = greenHouseService;
+        this.rulesRepository = rulesRepository;
     }
 
 
@@ -88,17 +91,17 @@ public class GreenHouseController {
         }
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
-    @PutMapping("/rule/{id}")
-    public ResponseEntity<Object> updateRuleById(@PathVariable String id,@RequestBody Rule rule) {
-
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Employee issuer = (Employee) auth.getPrincipal();
-        if(issuer.isAccountNonExpired()){
-            greenHouseService.updateRuleFromGreenHouse(id,rule);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-    }
+//    @PutMapping("/rule")
+//    public ResponseEntity<Object> updateRuleById(@RequestBody Rule rule) {
+//
+//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+//        Employee issuer = (Employee) auth.getPrincipal();
+//        if(issuer.isAccountNonExpired()){
+//            greenHouseService.updateRuleFromGreenHouse(rule);
+//            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+//        }
+//        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+//    }
 
     @PostMapping("/rule/{id}")
     public ResponseEntity<Object> addRule(@PathVariable String id,@RequestBody Rule rule) {
@@ -109,5 +112,17 @@ public class GreenHouseController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    }
+    @GetMapping("/rule/{id}")
+    public ResponseEntity<?> getRules(@PathVariable String id){
+        List<Rule> rules = greenHouseService.getRules(id);
+        if (rules == null)
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(rules,HttpStatus.OK );
+    }
+    @GetMapping("/rule")
+    public ResponseEntity<?> getRules(){
+        List<Rule> rules = rulesRepository.findAll();
+        return new ResponseEntity<>(rules,HttpStatus.OK );
     }
 }

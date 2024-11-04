@@ -10,13 +10,12 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Map;
 
-@Document
+@Document(collection= "rules")
 @NoArgsConstructor
 @Data
 @AllArgsConstructor
 public class Rule {
     @Id
-    @Gere
     private String id;
 
     @NotBlank

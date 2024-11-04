@@ -28,6 +28,6 @@ public class GreenHouse {
     @NotBlank
     private String location;
 
-    @NotBlank
-    private List<Rule> rules;
+    @Field("rules")
+    private List<String> ruleIds = new ArrayList<>();
 }
