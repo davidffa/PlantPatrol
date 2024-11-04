@@ -34,7 +34,8 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.GET, "/api/v1/inventory/**")
                                 .permitAll()
                                 .anyRequest()
-                                .authenticated())
+                                .authenticated()
+                )
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

@@ -28,6 +28,6 @@ public class GreenHouse {
     @NotBlank
     private String location;
 
-    @DocumentReference
-    private List<Section> sections = new ArrayList<>();
+    @NotBlank
+    private List<Rule> rules;
 }
