@@ -7,7 +7,6 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pt.ua.deti.ies.plantpatrol.backend.dto.LoginEmployeeDTO;
-import pt.ua.deti.ies.plantpatrol.backend.dto.LoginResponseDTO;
 import pt.ua.deti.ies.plantpatrol.backend.entity.Employee;
 import pt.ua.deti.ies.plantpatrol.backend.service.AuthService;
 import pt.ua.deti.ies.plantpatrol.backend.service.JWTService;
@@ -25,11 +24,9 @@ public class LoginController {
 
     @Operation(summary = "Authenticate with username/password")
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginEmployeeDTO dto, HttpServletResponse response) {
-        Employee e = authService.authenticate(dto);
-        String jwtToken = jwtService.generateToken(e);
-
-        LoginResponseDTO responseBody = LoginResponseDTO.builder().passwordChanged(e.isPasswordChanged()).build();
+    public ResponseEntity<Employee> login(@RequestBody LoginEmployeeDTO dto, HttpServletResponse response) {
+        Employee employee = authService.authenticate(dto);
+        String jwtToken = jwtService.generateToken(employee);
 
         ResponseCookie cookie = ResponseCookie.from("accessToken", jwtToken)
                 .httpOnly(true)
@@ -41,6 +38,6 @@ public class LoginController {
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-        return ResponseEntity.ok(responseBody);
+        return ResponseEntity.ok(employee);
     }
 }
