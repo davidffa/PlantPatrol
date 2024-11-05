@@ -1,18 +1,26 @@
 "use client"
 
 import { UnderlineInput } from "@/components/UnderlineInput";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Image from "next/image";
 import { Navbar } from "@/components/Navbar";
 import { useAuth } from "@/contexts/auth";
-
+import { useRouter } from "next/navigation";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const { login } = useAuth();
+  const router = useRouter();
+
+  const { login, isLogged } = useAuth();
+
+  useEffect(() => {
+    // TODO: Change the redirect route... (at the moment the greenhouses page is at /manager ...)
+    if (isLogged)
+      router.replace("/greenhouse/1");
+  }, [isLogged, router]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
