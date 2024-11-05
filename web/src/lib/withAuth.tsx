@@ -1,13 +1,9 @@
 import { useAuth } from "@/contexts/auth";
 import { useRouter } from "next/navigation";
-import { ComponentType, ReactNode, useEffect } from "react"
+import { ComponentType, useEffect } from "react"
 
-type Props = {
-  children: ReactNode;
-};
-
-export default function withAuth<T extends Props>(Component: ComponentType<T>) {
-  const WithAuthComponent = (props: T) => {
+export default function withAuth(Component: ComponentType) {
+  const WithAuthComponent: React.FC = (props) => {
     const { isLogged } = useAuth();
     const router = useRouter();
 
