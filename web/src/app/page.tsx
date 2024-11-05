@@ -4,20 +4,20 @@ import { UnderlineInput } from "@/components/UnderlineInput";
 import { FormEvent, useState } from "react";
 import Image from "next/image";
 import { Navbar } from "@/components/Navbar";
-import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/auth";
 
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
-  const router = useRouter();
+  const { login } = useAuth();
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    alert("Form submitted!");
-
-    router.push("/change-password");
+    await login(username, password);
   }
 
   return (
@@ -35,6 +35,9 @@ export default function Login() {
               type="text"
               placeholder="Username"
               maxLength={32}
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              required
             />
 
             <div className="flex border-b border-b-slate-300 w-full">
@@ -43,6 +46,9 @@ export default function Login() {
                 type={showPassword ? "text" : "password"}
                 placeholder="Password"
                 maxLength={128}
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
               />
               <Image
                 src={showPassword ? "/eye-off.svg" : "/eye.svg"}

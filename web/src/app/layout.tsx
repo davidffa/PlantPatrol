@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Inter, Roboto_Flex } from "next/font/google";
+import { AuthProvider } from "@/contexts/auth";
 
 export const metadata: Metadata = {
   title: "PlantPatrol",
@@ -27,7 +28,9 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${roboto} font-sans`}
       >
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

@@ -4,8 +4,9 @@ import { UnderlineInput } from "@/components/UnderlineInput";
 import { FormEvent } from "react";
 import { Navbar } from "@/components/Navbar";
 import { useState } from "react";
+import withAuth from "@/lib/withAuth";
 
-export default function ChangePassword() {
+function ChangePassword() {
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -61,3 +62,5 @@ export default function ChangePassword() {
     </div>
   );
 }
+
+export default withAuth(ChangePassword);
