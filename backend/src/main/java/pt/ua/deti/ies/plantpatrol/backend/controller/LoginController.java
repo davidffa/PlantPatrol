@@ -29,7 +29,7 @@ public class LoginController {
         Employee e = authService.authenticate(dto);
         String jwtToken = jwtService.generateToken(e);
 
-        LoginResponseDTO responseBody = LoginResponseDTO.builder().jwtToken(jwtToken).build();
+        LoginResponseDTO responseBody = LoginResponseDTO.builder().passwordChanged(e.isPasswordChanged()).build();
 
         ResponseCookie cookie = ResponseCookie.from("accessToken", jwtToken)
                 .httpOnly(true)

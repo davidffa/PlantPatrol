@@ -16,6 +16,6 @@ public interface EmployeeRepository extends MongoRepository<Employee, String> {
 
 
     @Query("{_id: ?0}")
-    @Update("{ $set:  { password: ?1 }}")
+    @Update("{ $set:  { password: ?1, passwordChanged: true }}")
     void updatePasswordById(String id, String password);
 }

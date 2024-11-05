@@ -8,5 +8,5 @@ import lombok.Data;
 @Data
 @Builder
 public class LoginResponseDTO {
-    private String jwtToken;
+    private boolean passwordChanged;
 }
