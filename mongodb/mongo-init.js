@@ -5,6 +5,7 @@ db.employees.insertOne({
   "firstName": "João",
   "lastName": "Ramalho",
   "phoneNumber": "123456789",
+  "passwordChanged": false,
   "_class": "pt.ua.deti.ies.plantpatrol.backend.entity.Employee",
   "birthDate": new Date("2004-01-06T00:00:00.000Z")
 })
