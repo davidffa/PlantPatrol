@@ -67,7 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!data.passwordChanged) {
         router.push("/change-password");
       } else {
-        router.push("/greenhouse");
+        router.push("/greenhouse/1");
       }
     } catch {
       Swal.fire({
