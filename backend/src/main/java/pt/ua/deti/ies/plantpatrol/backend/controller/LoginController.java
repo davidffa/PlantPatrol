@@ -1,6 +1,9 @@
 package pt.ua.deti.ies.plantpatrol.backend.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pt.ua.deti.ies.plantpatrol.backend.dto.LoginEmployeeDTO;
@@ -22,12 +25,22 @@ public class LoginController {
 
     @Operation(summary = "Authenticate with username/password")
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginEmployeeDTO dto) {
+    public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginEmployeeDTO dto, HttpServletResponse response) {
         Employee e = authService.authenticate(dto);
         String jwtToken = jwtService.generateToken(e);
 
-        LoginResponseDTO response = LoginResponseDTO.builder().jwtToken(jwtToken).build();
+        LoginResponseDTO responseBody = LoginResponseDTO.builder().jwtToken(jwtToken).build();
 
-        return ResponseEntity.ok(response);
+        ResponseCookie cookie = ResponseCookie.from("accessToken", jwtToken)
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(jwtService.getExpirationTime())
+                .sameSite("Strict")
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+        return ResponseEntity.ok(responseBody);
     }
 }
