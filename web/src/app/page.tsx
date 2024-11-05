@@ -20,7 +20,9 @@ export default function Login() {
     // TODO: Change the redirect route... (at the moment the greenhouses page is at /manager ...)
     if (isLogged)
       router.replace("/greenhouse/1");
-  }, [isLogged, router]);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
