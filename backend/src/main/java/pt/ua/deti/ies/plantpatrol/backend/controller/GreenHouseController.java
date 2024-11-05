@@ -1,6 +1,8 @@
 package pt.ua.deti.ies.plantpatrol.backend.controller;
 
 
+import io.swagger.v3.oas.annotations.Operation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -9,9 +11,9 @@ import org.springframework.web.bind.annotation.*;
 import pt.ua.deti.ies.plantpatrol.backend.entity.Employee;
 import pt.ua.deti.ies.plantpatrol.backend.entity.rules.GreenHouse;
 import pt.ua.deti.ies.plantpatrol.backend.entity.rules.Rule;
-import pt.ua.deti.ies.plantpatrol.backend.repository.RulesRepository;
 import pt.ua.deti.ies.plantpatrol.backend.response.ErrorResponse;
 import pt.ua.deti.ies.plantpatrol.backend.service.GreenHouseService;
+import pt.ua.deti.ies.plantpatrol.backend.service.RuleService;
 
 import java.util.List;
 
@@ -20,14 +22,15 @@ import java.util.List;
 public class GreenHouseController {
 
     private final GreenHouseService greenHouseService;
-    private final RulesRepository rulesRepository;
+    private final RuleService ruleService;
 
-    public GreenHouseController(GreenHouseService greenHouseService, RulesRepository rulesRepository) {
+    public GreenHouseController(GreenHouseService greenHouseService, RuleService ruleService) {
         this.greenHouseService = greenHouseService;
-        this.rulesRepository = rulesRepository;
+        this.ruleService = ruleService;
     }
 
 
+    @Operation(summary = "Creates a new greenHouse, returning his credentials")
     @PostMapping("/greenhouse")
     public ResponseEntity<Object> createGreenHouse(@RequestBody GreenHouse greenHouse) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -41,19 +44,7 @@ public class GreenHouseController {
         return new ResponseEntity<>(greenHouse, HttpStatus.CREATED);
     }
 
-    @PostMapping("/greenhouses")
-    public ResponseEntity<Object> createGreenHouses(@RequestBody List<GreenHouse> greenHouse) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        Employee issuer = (Employee) auth.getPrincipal();
-        if (!issuer.isManager()) {
-            ErrorResponse response = ErrorResponse.builder().message("You're not a manager").build();
-            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
-        }
-        greenHouseService.createGreenHouses(greenHouse);
-        return new ResponseEntity<>(greenHouse, HttpStatus.CREATED);
-    }
-
+    @Operation(summary = "Reads a greenhouse by the name, name is parameter passed on the url.")
     @GetMapping("/greenhouse")
     public ResponseEntity<?> getGreenHouse(@RequestParam(required = false) String name) {
         if (name == null) {
@@ -62,6 +53,7 @@ public class GreenHouseController {
         return new ResponseEntity<>(greenHouseService.getGreenHouseByName(name), HttpStatus.OK);
     }
 
+    @Operation(summary = "Reads a greenhouse by id, and returns the greenhouse")
     @GetMapping("/greenhouse/{id}")
     public ResponseEntity<GreenHouse> getGreenHouseById(@PathVariable String id) {
         GreenHouse gh = greenHouseService.getGreenHouseById(id);
@@ -70,6 +62,8 @@ public class GreenHouseController {
         }
         return new ResponseEntity<>(gh, HttpStatus.OK);
     }
+
+    @Operation(summary = "Deletes the greenhouse by the id, and the rules associated with it")
     @DeleteMapping("/greenhouse/{id}")
     public ResponseEntity<Object> deleteGreenHouseById(@PathVariable String id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -81,28 +75,12 @@ public class GreenHouseController {
         greenHouseService.deleteGreenHouse(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-    @DeleteMapping("/rule/{id}/{id_rule}")
-    public ResponseEntity<Object> deleteRuleById(@PathVariable String id,@PathVariable String id_rule) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Employee issuer = (Employee) auth.getPrincipal();
-        if(issuer.isAccountNonExpired()){
-            greenHouseService.removeRuleToGreenHouse(id,id_rule);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-    }
-//    @PutMapping("/rule")
-//    public ResponseEntity<Object> updateRuleById(@RequestBody Rule rule) {
-//
-//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//        Employee issuer = (Employee) auth.getPrincipal();
-//        if(issuer.isAccountNonExpired()){
-//            greenHouseService.updateRuleFromGreenHouse(rule);
-//            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-//        }
-//        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-//    }
 
+//**********************
+//        RULES
+//**********************
+
+    @Operation(summary = "Creates a new rule and adds it to a specified greenhouse since a rule has to be associated to a greenhouse.")
     @PostMapping("/rule/{id}")
     public ResponseEntity<Object> addRule(@PathVariable String id,@RequestBody Rule rule) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -113,16 +91,43 @@ public class GreenHouseController {
         }
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
-    @GetMapping("/rule/{id}")
-    public ResponseEntity<?> getRules(@PathVariable String id){
+    @Operation(summary = "Updates a rule by Id")
+    @PutMapping("/rule")
+    public ResponseEntity<?> updateRuleById(@RequestBody Rule rule) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Employee issuer = (Employee) auth.getPrincipal();
+        if(issuer.isAccountNonExpired()){
+            ruleService.updateRule(rule);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Operation(summary = "Reads all the rules from a greenhouse.")
+    @GetMapping("/greenhouse/rule/{id}")
+    public ResponseEntity<?> getRule(@PathVariable String id){
         List<Rule> rules = greenHouseService.getRules(id);
         if (rules == null)
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         return new ResponseEntity<>(rules,HttpStatus.OK );
     }
-    @GetMapping("/rule")
+    @Operation(summary = "Reads all the rules from all the greenhouses.")
+    @GetMapping("/rule/all")
     public ResponseEntity<?> getRules(){
-        List<Rule> rules = rulesRepository.findAll();
+        List<Rule> rules = ruleService.getRules();
         return new ResponseEntity<>(rules,HttpStatus.OK );
+    }
+
+    @Operation(summary = "Deletes a specific rule from a specific greenhouse")
+    @DeleteMapping("/rule/{id}/{id_rule}")
+    public ResponseEntity<Object> deleteRuleById(@PathVariable String id,@PathVariable String id_rule) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Employee issuer = (Employee) auth.getPrincipal();
+        if(issuer.isAccountNonExpired()){
+            greenHouseService.removeRuleToGreenHouse(id,id_rule);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 }
