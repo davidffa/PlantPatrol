@@ -64,6 +64,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       Cookies.set("logged", "1");
 
+      setUser(data);
+
       if (!data.passwordChanged) {
         router.push("/change-password");
       } else {
@@ -81,6 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function logout() {
     Cookies.remove("logged");
     setUser(null);
+    router.replace("/");
   }
 
   if (loading) return <div />;

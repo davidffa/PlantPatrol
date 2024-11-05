@@ -30,9 +30,7 @@ export default function Login() {
 
   return (
     <div className="h-screen flex flex-col">
-      <Navbar
-        showUser={false}
-      />
+      <Navbar />
 
       <main className="flex h-full items-center justify-center bg-slate-100">
         <form className="bg-white p-20 rounded-md flex flex-col gap-8 shadow-md shadow-slate-300" onSubmit={handleSubmit}>
