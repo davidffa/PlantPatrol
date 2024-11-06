@@ -21,11 +21,10 @@ public class GreenHouseService {
 
     private final GreenHouseRepository greenHouseRepository;
     private final RulesRepository rulesRepository;
-    private final MongoTemplate mongoTemplate;
-    public GreenHouseService(GreenHouseRepository greenHouseRepository, RulesRepository rulesRepository, MongoTemplate mongoTemplate) {
+
+    public GreenHouseService(GreenHouseRepository greenHouseRepository, RulesRepository rulesRepository) {
         this.greenHouseRepository = greenHouseRepository;
         this.rulesRepository = rulesRepository;
-        this.mongoTemplate = mongoTemplate;
     }
 
     public List<GreenHouse> getGreenHouses() {
@@ -40,14 +39,11 @@ public class GreenHouseService {
         return greenHouseRepository.findById(id).orElse(null);
     }
 
-    //    public Rule updateRuleFromGreenHouse(Rule rule){
-//        rulesRepository.updateById(rule.getId(),rule);
-//        return rule;
-//    }
-//
-    public void addRuleToGreenHouse(String greenhouseId, Rule rule) {
+    public Rule addRuleToGreenHouse(String greenhouseId, Rule rule) {
         Rule r = rulesRepository.save(rule);
         greenHouseRepository.addRule(greenhouseId, r.getId());
+
+        return r;
     }
 
     public void removeRuleToGreenHouse(String greenhouseId, String rule) {
@@ -55,16 +51,17 @@ public class GreenHouseService {
         rulesRepository.deleteById(rule);
     }
 
-    public void createGreenHouses(List<GreenHouse> greenHouse) {
-        greenHouseRepository.saveAll(greenHouse);
-    }
-
     public void createGreenHouse(GreenHouse greenHouse) {
         greenHouseRepository.save(greenHouse);
     }
 
     public void deleteGreenHouse(String id) {
-        greenHouseRepository.deleteById(id);
+        GreenHouse gh = this.getGreenHouseById(id);
+        if(gh != null) {
+            //gets all the rules from the greenhouse and deletes them
+            gh.getRuleIds().forEach(rulesRepository::deleteById);
+            greenHouseRepository.delete(gh);
+        }
     }
 
 
