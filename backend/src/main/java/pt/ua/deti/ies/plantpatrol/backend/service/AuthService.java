@@ -23,15 +23,33 @@ public class AuthService {
         this.authenticationManager = authenticationManager;
     }
 
-    public CreateEmployeeResponseDTO createEmployee(CreateEmployeeDTO dto) throws Exception {
-        if (employeeRepository.findByUsername(dto.getUsername()).isPresent())
-            throw new Exception("Username already exists!");
+    private String generateUsername(String firstName, String lastName) {
+        if (employeeRepository.findByUsername(firstName).isEmpty()) {
+            return firstName;
+        }
 
+        if (employeeRepository.findByUsername(firstName + lastName).isEmpty()) {
+            return firstName + lastName;
+        }
+
+        for (int i = 0; i < 1000; ++i) {
+            if (employeeRepository.findByUsername(firstName + lastName + i).isEmpty())
+                return firstName + lastName + i;
+        }
+
+        return null;
+    }
+
+    public CreateEmployeeResponseDTO createEmployee(CreateEmployeeDTO dto) throws Exception {
+        String username = generateUsername(dto.getFirstName(), dto.getLastName());
         String password = StringUtils.generateRandomString(16);
+
+        if (username == null)
+            throw new Exception("Could not generate an username");
 
         Employee employee = Employee
                 .builder()
-                .username(dto.getUsername())
+                .username(username)
                 .password(passwordEncoder.encode(password))
                 .firstName(dto.getFirstName())
                 .lastName(dto.getLastName())
@@ -46,7 +64,7 @@ public class AuthService {
         return CreateEmployeeResponseDTO
                 .builder()
                 .id(employee.getId())
-                .username(dto.getUsername())
+                .username(username)
                 .password(password)
                 .build();
     }
