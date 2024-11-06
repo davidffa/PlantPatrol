@@ -2,7 +2,6 @@ package pt.ua.deti.ies.plantpatrol.backend.controller;
 
 
 import io.swagger.v3.oas.annotations.Operation;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -120,14 +119,9 @@ public class GreenHouseController {
     }
 
     @Operation(summary = "Deletes a specific rule from a specific greenhouse")
-    @DeleteMapping("/rule/{id}/{id_rule}")
-    public ResponseEntity<Object> deleteRuleById(@PathVariable String id,@PathVariable String id_rule) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Employee issuer = (Employee) auth.getPrincipal();
-        if(issuer.isAccountNonExpired()){
-            greenHouseService.removeRuleToGreenHouse(id,id_rule);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    @DeleteMapping("/rule/{id}/{ruleId}")
+    public ResponseEntity<Object> deleteRuleById(@PathVariable String id,@PathVariable String ruleId) {
+        greenHouseService.removeRuleToGreenHouse(id,ruleId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
