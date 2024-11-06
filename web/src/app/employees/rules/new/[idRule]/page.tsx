@@ -2,7 +2,8 @@
 import React from 'react'
 import { useState } from 'react'
 import { Slider } from '@mui/material'
-import {Navbar} from '../../../../../components/Navbar'
+import {Navbar} from '@/components/Navbar'
+import api from '@/services/api'
 
 type Props = {
   params: { idRule: string }
@@ -89,15 +90,17 @@ export default function NewRule({ params }: Props) {
   })
   const minDistance = 10;
   if (idRule == '0'){
-    
+    //get the id rule 
+    // create new endpoint ?
   }
   
-  function toggleAirPurifier(prevState: Rule) {
+  const  toggleAirPurifier = (prevState: Rule)=> {
     if (prevState && typeof prevState.airPurifier === 'boolean') {
       return { ...prevState, airPurifier: !prevState.airPurifier };
     }
     return prevState;
   }
+
   const slideAIQ = (event: Event,
     newValue: number | number[],
     activeThumb: number) => {
@@ -204,7 +207,23 @@ export default function NewRule({ params }: Props) {
       })
     }
   }
-
+  const handleSave = ()=>{
+    if (idRule !== '0'){
+      api.put(`rules/${idRule}`,{data:{_id:idRule,...rule}}).then((response)=>{
+        if(response.status == 204 )
+        {
+          //message of success
+        }
+      })
+    }
+    let greenhouseId = 0
+    api.post(`rules/${greenhouseId}`,{data:rule}).then((response)=>{
+      if(response.status == 200 )
+      {
+        //message of success
+      }
+    })
+  }
   return (
     <>
       <Navbar />
@@ -215,7 +234,7 @@ export default function NewRule({ params }: Props) {
 
         <div className="flex flex-col w-full p-3 h-full mx-auto my-auto">
           <div className='p-3 flex-row gap-2'>
-            <input type="text" name='name' aria-label='Name' placeholder="Rule" className="input input-bordered w-full " required />
+            <input type="text" value={rule.name} onChange={(e) => setRule({...rule,name:e.target.value})} name='name' aria-label='Name' placeholder="Rule" className="input input-bordered w-full "  />
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
             <div className="w-full p-3 text-center flex-col flex h-full bg-green my-3 rounded-md text-white">
@@ -313,7 +332,7 @@ export default function NewRule({ params }: Props) {
                       type="checkbox"
                       onChange={() => setRule((prev) => toggleAirPurifier(prev))}
                       className="toggle toggle-lg color-blue bg-blue"
-                      defaultChecked
+                      checked={rule.airPurifier}
                     />
                   </div>
                 </div>
@@ -324,7 +343,7 @@ export default function NewRule({ params }: Props) {
             <a className="w-1/6 bg-beje text-xl text-center p-3 rounded-lg text-black" href="/greenhouses/rules">
               Cancel
             </a>
-            <button className="w-1/6 bg-green text-xl text-center p-3 rounded-lg text-white">
+            <button onClick={handleSave} className="w-1/6 bg-green text-xl text-center p-3 rounded-lg text-white">
               Save
             </button>
           </div>

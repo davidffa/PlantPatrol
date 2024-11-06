@@ -1,15 +1,32 @@
 "use client"
 import { Navbar } from '@/components/Navbar'
 import React from 'react'
+import {useState} from 'react'
 import AddIcon from '@mui/icons-material/Add';
+import api from '@/services/api'
+
 import Swal from 'sweetalert2'
 type Props = {
     params: { id: string }
 }
+type Rule = {
+    _id?:String,
+    name: string,
+    minTemp: number,
+    maxTemp: number,
+    minHumidity: number,
+    maxHumidity: number,
+    minAIQ: number,
+    maxAIQ: number,
+    waterSystemFlow: number,
+    ventilationRPM: number,
+    airPurifier: boolean,
+  }
 
 export default function Rules({ params }: Props) {
     const { id } = params
-    async function handleDeleteRule() {
+    const [rules,setRules] = useState<Rule[]>([])
+    async function handleDeleteRule(id_rule:String | undefined) {
         const result = await Swal.fire({
             title: "Delete employee rule?",
             showConfirmButton: true,
@@ -19,13 +36,29 @@ export default function Rules({ params }: Props) {
         });
 
         if (result.isConfirmed) {
-            Swal.fire({
-                icon: "success",
-                title: "Success",
-                text: "Rule deleted!"
+            api.delete(`rules/${id}/${id_rule}`).then((response)=>{
+                if(response.status == 204){
+                    Swal.fire({
+                        icon: "success",
+                        title: "Success",
+                        text: "Rule deleted!"
+                    })
+                    return
+                }
+                Swal.fire({
+                        icon: "error",
+                        title: "Unexpected Error",
+                        text: `There was an unexpected error. ${response.data}`
+                    })
             })
         }
     }
+    api.get(`rules/${id}`).then((response)=>{
+        if(response.status == 200)
+        {
+            setRules(response.data)
+        }
+    })
     return (
         <>
             <Navbar />
@@ -66,17 +99,23 @@ export default function Rules({ params }: Props) {
                         <div className="divider"></div>
                         <div className='w-full flex flex-col gap-3 p-3'>
                             <div className='w-full bg-gray-300 text-black grid grid-cols-2 rounded-lg '>
-                                <div className='text-xl text-black flex font-semibold text-left p-3 justify-start my-auto'>
-                                    Rule Name 1
-                                </div>
-                                <div className='flex flex-row gap-2 p-3 justify-end '>
-                                    <a href={`new/${id}`} className="w-[150px] rounded-lg p-3 bg-green text-white text-center">
-                                        EDIT
-                                    </a>
-                                    <button onClick={handleDeleteRule} className="w-[150px] rounded-lg p-3 bg-red-700 text-white">
-                                        DELETE
-                                    </button>
-                                </div>
+                                {
+                                    rules?.map((rule,idx)=>(
+                                        <>
+                                        <div className='text-xl text-black flex font-semibold text-left p-3 justify-start my-auto'>
+                                            {rule.name}
+                                        </div>
+                                        <div className='flex flex-row gap-2 p-3 justify-end '>
+                                            <a href={`new/${rule._id}`} className="w-[150px] rounded-lg p-3 bg-green text-white text-center">
+                                                edit
+                                            </a>
+                                            <button onClick={()=>handleDeleteRule(rule._id)} className="w-[150px] rounded-lg p-3 bg-red-700 text-white">
+                                                delete
+                                            </button>
+                                        </div>
+                                        </>
+                                    ))
+                                }
                             </div>
                         </div>
                     </div>
