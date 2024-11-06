@@ -4,12 +4,21 @@ import { Navbar } from "@/components/Navbar";
 import Image from "next/image";
 import Link from "next/link";
 import { FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function Create() {
+  const router = useRouter();
+
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [sendTo, setSendTo] = useState("");
+
   function handleCreateAlert(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     alert("Form sent!")
+    router.replace("/alerts");
   }
 
   return (
