@@ -81,11 +81,11 @@ public class GreenHouseController {
     @Operation(summary = "Creates a new rule and adds it to a specified greenhouse.")
     @PostMapping("/rules/{id}")
     public ResponseEntity<Object> addRule(@PathVariable String id, @RequestBody Rule rule) {
-        greenHouseService.addRuleToGreenHouse(id, rule);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        Rule createdRule = greenHouseService.addRuleToGreenHouse(id, rule);
+        return new ResponseEntity<>(createdRule, HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Updates a rule ")
+    @Operation(summary = "Updates a rule")
     @PutMapping("/rules")
     public ResponseEntity<?> updateRule(@RequestBody Rule rule) {
         ruleService.updateRule(rule);

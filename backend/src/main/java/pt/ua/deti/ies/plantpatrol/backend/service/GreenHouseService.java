@@ -39,9 +39,11 @@ public class GreenHouseService {
         return greenHouseRepository.findById(id).orElse(null);
     }
 
-    public void addRuleToGreenHouse(String greenhouseId, Rule rule) {
+    public Rule addRuleToGreenHouse(String greenhouseId, Rule rule) {
         Rule r = rulesRepository.save(rule);
         greenHouseRepository.addRule(greenhouseId, r.getId());
+
+        return r;
     }
 
     public void removeRuleToGreenHouse(String greenhouseId, String rule) {

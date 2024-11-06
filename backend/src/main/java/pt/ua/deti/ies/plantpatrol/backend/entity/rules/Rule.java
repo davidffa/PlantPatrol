@@ -29,8 +29,8 @@ public class Rule {
 
     @NotBlank
     //key-> actuator , value-> Array[minLimit,MaxLimit] of doubles
-    private double WaterSystemFlow;
-    private int VentilationRPM;
+    private double waterSystemFlow;
+    private int ventilationRPM;
     //Air purifier on/off
-    private boolean AIP;
+    private boolean airPurifier;
 }
