@@ -7,13 +7,13 @@ import { Navbar } from "@/components/Navbar";
 import { activities } from "@/utils/recent-activities";
 
 import Swal from "sweetalert2";
+import withManagerAuth from "@/lib/withManagerAuth";
 
 type Props = {
   params: { id: string }
 }
 
-
-export default function ManageEmployee({ params }: Props) {
+function ManageEmployee({ params }: Props) {
   const { id } = params;
   const router = useRouter();
 
@@ -163,3 +163,5 @@ export default function ManageEmployee({ params }: Props) {
     </>
   )
 }
+
+export default withManagerAuth(ManageEmployee);

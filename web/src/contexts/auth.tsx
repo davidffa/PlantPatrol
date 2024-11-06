@@ -15,6 +15,7 @@ export type Employee = {
   address: string | null;
   birthDate: Date;
   passwordChanged: boolean;
+  isManager: boolean;
 };
 
 type AuthContextData = {

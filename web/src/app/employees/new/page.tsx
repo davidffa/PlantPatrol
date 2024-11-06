@@ -7,8 +7,9 @@ import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 
 import Swal from "sweetalert2";
+import withManagerAuth from "@/lib/withManagerAuth";
 
-export default function NewEmployee() {
+function NewEmployee() {
   async function handleCreateEmployee(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -99,3 +100,5 @@ export default function NewEmployee() {
     </div>
   )
 }
+
+export default withManagerAuth(NewEmployee);

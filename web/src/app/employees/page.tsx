@@ -1,9 +1,10 @@
 import { EmployeeCard } from "@/components/EmployeeCard"
 import { Navbar } from "@/components/Navbar"
+import withManagerAuth from "@/lib/withManagerAuth"
 import Image from "next/image"
 import Link from "next/link"
 
-export default function Employees() {
+function Employees() {
   return (
     <>
       <Navbar />
@@ -31,3 +32,5 @@ export default function Employees() {
     </>
   )
 }
+
+export default withManagerAuth(Employees);
