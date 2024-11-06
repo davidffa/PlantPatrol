@@ -16,38 +16,38 @@ export default function EmployeeChat() {
     {
       id: '1',
       name: 'User 283746574831',
-      avatar: '/User.svg',
+      avatar: '/blue-user.svg',
       messages: ["Good afternoon. Last month I bought two May flowers and have been watering them every day. However, they seem to me to be withered. Could you help me?"],
 
     },
     {
       id: '2',
       name: 'User 738293800283',
-      avatar: '/User.svg',
+      avatar: '/blue-user.svg',
       messages: ["Hello, I'm experiencing some issues with my plants."]
     },
     {
       id: '3',
       name: 'User 123456123248',
-      avatar: '/User.svg',
+      avatar: '/blue-user.svg',
       messages: ["Hey there! Any tips on growing May flowers?"]
     },
     {
       id: '4',
       name: 'User 348570893284',
-      avatar: '/User.svg',
+      avatar: '/blue-user.svg',
       messages: ["What should I do if my flowers wilt too quickly?"]
     },
     {
       id: '5',
       name: 'User 238497218561',
-      avatar: '/User.svg',
+      avatar: '/blue-user.svg',
       messages: ["Can you help with pest control for my greenhouse plants?"]
     },
     {
       id: '6',
       name: 'User 192837481238',
-      avatar: '/User.svg',
+      avatar: '/blue-user.svg',
       messages: ["I have an issue with the watering system in my greenhouse."]
     },
   ]);
@@ -80,7 +80,7 @@ export default function EmployeeChat() {
   };
 
   // Find the selected user to display their messages
-  const selectedUser = users.find(user => user.id === selectedUserId);
+  const selectedUser = users.find(user => user.id === selectedUserId)!;
 
   return (
     <div className="h-screen flex flex-col">
@@ -107,7 +107,7 @@ export default function EmployeeChat() {
           {/* Header with avatar and user name */}
           <div className="flex items-center p-4 border-b bg-slate-200 rounded-t-lg">
             <div className='rounded-full bg-white mx-6 w-12 h-12 '>
-              <Image src={selectedUser?.avatar} height={38} width={38} alt="Avatar" className="rounded-full mt-2 ml-1" />
+              <Image src={selectedUser.avatar} height={38} width={38} alt="Avatar" className="rounded-full mt-2 ml-1" />
             </div>
             <h2 className="text-lg font-semibold">{selectedUser?.name}</h2>
           </div>
