@@ -10,6 +10,7 @@ import {
 } from "@expo-google-fonts/inter";
 
 import {
+  Roboto_300Light_Italic,
   Roboto_700Bold
 } from "@expo-google-fonts/roboto"
 
@@ -18,7 +19,8 @@ export default function Layout() {
     Inter_400Regular,
     Inter_500Medium,
     Inter_600SemiBold,
-    Roboto_700Bold
+    Roboto_700Bold,
+    Roboto_300Light_Italic
   });
 
   if (!fontsLoaded) return;
