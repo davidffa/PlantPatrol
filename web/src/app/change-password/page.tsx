@@ -19,7 +19,7 @@ function ChangePassword() {
 
   const router = useRouter();
 
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
 
   useEffect(() => {
     if (!user) {
@@ -54,6 +54,8 @@ function ChangePassword() {
         icon: "success",
         title: "Password changed!"
       });
+
+      await refreshUser();
 
       router.push("/greenhouses");
     } catch (error) {

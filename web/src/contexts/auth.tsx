@@ -22,6 +22,7 @@ type AuthContextData = {
   user: Employee | null;
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
+  refreshUser: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -54,6 +55,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loadUser();
   }, []);
 
+  async function refreshUser() {
+    setLoading(true);
+
+    try {
+      const { data } = await api.get<Employee>("/employees/@me");
+
+      setUser(data);
+    } catch (err) {
+      console.log("Invalid accessToken")
+      console.log(err)
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function login(username: string, password: string) {
     try {
@@ -82,6 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function logout() {
     Cookies.remove("logged");
+    await api.post("/logout");
     setUser(null);
     router.replace("/");
   }
@@ -89,7 +105,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   if (loading) return <div />;
 
   return (
-    <AuthContext.Provider value={{ isLogged: !!user, user, login, logout }}>
+    <AuthContext.Provider value={{ isLogged: !!user, user, login, refreshUser, logout }}>
       {children}
     </AuthContext.Provider>
   );
