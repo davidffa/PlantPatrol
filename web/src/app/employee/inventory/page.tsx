@@ -2,7 +2,7 @@
 import AddInventory from "@/components/AddInventory";
 import InventoryCard from "@/components/InventoryCard";
 import { Navbar } from "@/components/Navbar";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image"
 
 export default function Inventory() {
@@ -12,6 +12,7 @@ export default function Inventory() {
     setComponents(prev => [...prev, prev.length]); // Adiciona um novo componente à lista
   };
 
+  const modalRef = useRef<HTMLDialogElement>(null);
 
   return (
     <div>
@@ -33,11 +34,11 @@ export default function Inventory() {
           </div>
           <div className="mr-4">
             {/* Open the modal using document.getElementById('ID').showModal() method */}
-            <button className="bg-green  hover:bg-dark-green hover:duration-200 rounded-full flex py-1 px-6 justify-center items-center gap-2 " onClick={() => document.getElementById('modal').showModal()}>
+            <button className="bg-green  hover:bg-dark-green hover:duration-200 rounded-full flex py-1 px-6 justify-center items-center gap-2 " onClick={() => modalRef.current?.showModal()}>
               <Image src="/plus.svg" alt="Adicionar" height={42} width={42} />
               <p className="text-2xl font-semibold text-white">New</p>
             </button>
-            <dialog id="modal" className="modal modal-middle ">
+            <dialog ref={modalRef} className="modal modal-middle ">
               <form method="dialog" className="modal-backdrop">
                 <button>close</button>
               </form>
@@ -56,7 +57,7 @@ export default function Inventory() {
                   ))}
                 </div>
                 <div className="mt-3 justify-between flex ">
-                  <button className=" bg-green rounded-full hover:bg-dark-green hover:duration-200 rounded-full flex justify-center items-center  " onClick={addInventory}>
+                  <button className=" bg-green rounded-full hover:bg-dark-green hover:duration-200 flex justify-center items-center  " onClick={addInventory}>
                     <Image src="/plus.svg" alt="Adicionar" height={42} width={42} />
                   </button>
                   <form method="dialog">
