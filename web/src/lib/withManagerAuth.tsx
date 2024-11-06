@@ -10,12 +10,12 @@ export default function withManagerAuth<P extends object>(Component: React.FC<P>
     const router = useRouter();
 
     useEffect(() => {
-      if (!isLogged || !user?.isManager) {
+      if (!isLogged || !user?.manager) {
         router.replace("/");
       }
     }, [isLogged, router, user]);
 
-    if (!isLogged) return null;
+    if (!isLogged || !user?.manager) return null;
 
     return <Component {...props} />
   }
