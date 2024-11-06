@@ -56,7 +56,7 @@ export default function Rules({ params }: Props) {
                                 Action
                             </div>
                             <div className='w-1/2 flex justify-end'>
-                                <a href={`/rules/new/${id}`} className='flex flex-row gap-2 text-green '>
+                                <a href={`/employees/rules/new/${id}`} className='flex flex-row gap-2 text-green '>
                                     Add New
                                     <AddIcon />
                                 </a>
