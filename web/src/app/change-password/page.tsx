@@ -55,7 +55,7 @@ function ChangePassword() {
         title: "Password changed!"
       });
 
-      router.push("/greenhouse/1");
+      router.push("/greenhouses");
     } catch (error) {
       const err = error as AxiosError;
 

@@ -17,9 +17,8 @@ export default function Login() {
   const { login, isLogged } = useAuth();
 
   useEffect(() => {
-    // TODO: Change the redirect route... (at the moment the greenhouses page is at /manager ...)
     if (isLogged)
-      router.replace("/greenhouse/1");
+      router.replace("/greenhouses");
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
