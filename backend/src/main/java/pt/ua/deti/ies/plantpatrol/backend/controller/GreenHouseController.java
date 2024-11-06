@@ -28,7 +28,6 @@ public class GreenHouseController {
         this.ruleService = ruleService;
     }
 
-
     @Operation(summary = "Creates a new greenHouse, returning his credentials")
     @PostMapping("/greenhouse")
     public ResponseEntity<Object> createGreenHouse(@RequestBody GreenHouse greenHouse) {
@@ -56,8 +55,8 @@ public class GreenHouseController {
     @GetMapping("/greenhouse/{id}")
     public ResponseEntity<GreenHouse> getGreenHouseById(@PathVariable String id) {
         GreenHouse gh = greenHouseService.getGreenHouseById(id);
-        if (gh==null){
-           return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        if (gh == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(gh, HttpStatus.OK);
     }
@@ -79,49 +78,40 @@ public class GreenHouseController {
 //        RULES
 //**********************
 
-    @Operation(summary = "Creates a new rule and adds it to a specified greenhouse since a rule has to be associated to a greenhouse.")
-    @PostMapping("/rule/{id}")
-    public ResponseEntity<Object> addRule(@PathVariable String id,@RequestBody Rule rule) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Employee issuer = (Employee) auth.getPrincipal();
-        if(issuer.isAccountNonExpired()){
-            greenHouseService.addRuleToGreenHouse(id,rule);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    @Operation(summary = "Creates a new rule and adds it to a specified greenhouse.")
+    @PostMapping("/rules/{id}")
+    public ResponseEntity<Object> addRule(@PathVariable String id, @RequestBody Rule rule) {
+        greenHouseService.addRuleToGreenHouse(id, rule);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-    @Operation(summary = "Updates a rule by Id")
-    @PutMapping("/rule")
-    public ResponseEntity<?> updateRuleById(@RequestBody Rule rule) {
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Employee issuer = (Employee) auth.getPrincipal();
-        if(issuer.isAccountNonExpired()){
-            ruleService.updateRule(rule);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    @Operation(summary = "Updates a rule ")
+    @PutMapping("/rules")
+    public ResponseEntity<?> updateRule(@RequestBody Rule rule) {
+        ruleService.updateRule(rule);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @Operation(summary = "Reads all the rules from a greenhouse.")
-    @GetMapping("/greenhouse/rule/{id}")
-    public ResponseEntity<?> getRule(@PathVariable String id){
+    @GetMapping("/rules/{id}")
+    public ResponseEntity<?> getRule(@PathVariable String id) {
         List<Rule> rules = greenHouseService.getRules(id);
         if (rules == null)
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        return new ResponseEntity<>(rules,HttpStatus.OK );
-    }
-    @Operation(summary = "Reads all the rules from all the greenhouses.")
-    @GetMapping("/rule/all")
-    public ResponseEntity<?> getRules(){
-        List<Rule> rules = ruleService.getRules();
-        return new ResponseEntity<>(rules,HttpStatus.OK );
+        return new ResponseEntity<>(rules, HttpStatus.OK);
     }
 
-    @Operation(summary = "Deletes a specific rule from a specific greenhouse")
-    @DeleteMapping("/rule/{id}/{ruleId}")
-    public ResponseEntity<Object> deleteRuleById(@PathVariable String id,@PathVariable String ruleId) {
-        greenHouseService.removeRuleToGreenHouse(id,ruleId);
+    @Operation(summary = "Reads all the rules from all the greenhouses.")
+    @GetMapping("/rules")
+    public ResponseEntity<?> getRules() {
+        List<Rule> rules = ruleService.getRules();
+        return new ResponseEntity<>(rules, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Deletes a specific rule from a specific greenhouse.")
+    @DeleteMapping("/rules/{id}/{ruleId}")
+    public ResponseEntity<Object> deleteRuleById(@PathVariable String id, @PathVariable String ruleId) {
+        greenHouseService.removeRuleToGreenHouse(id, ruleId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
