@@ -1,21 +1,23 @@
 "use client"
 import React from 'react'
-import  {useState} from 'react'
-import {Slider } from '@mui/material'
+import { useState } from 'react'
+import { Slider } from '@mui/material'
+import {Navbar} from '../../../../../components/Navbar'
+
 type Props = {
   params: { idRule: string }
 }
-type Rule = { 
-  name:string,
-  minTemp:number,
-  maxTemp:number,
-  minHumidity:number,
-  maxHumidity:number,
-  minAIQ:number,
-  maxAIQ:number,
-  waterSystemFlow:number,
-  ventilationRPM:number,
-  airPurifier:boolean,
+type Rule = {
+  name: string,
+  minTemp: number,
+  maxTemp: number,
+  minHumidity: number,
+  maxHumidity: number,
+  minAIQ: number,
+  maxAIQ: number,
+  waterSystemFlow: number,
+  ventilationRPM: number,
+  airPurifier: boolean,
 }
 
 const marks = [
@@ -33,27 +35,148 @@ const marks = [
   },
 ];
 
-function valuetext(value: number) {
+const marksPercentage = (value: number) => [
+  {
+    value: 0,
+    label: '0%',
+  },
+  {
+    value: value / 5,
+    label: '20%',
+  },
+  {
+    value: (value / 5) * 2,
+    label: '40%',
+  },
+  {
+    value: (value / 5) * 3,
+    label: '60%',
+  },
+  {
+    value: (value / 5) * 4,
+    label: '80%',
+  },
+  {
+    value: value,
+    label: '100%',
+  },
+];
+function valuetextTemp(value: number) {
   return `${value}°C`;
 }
-export default function newRule({ params }: Props) {
+function valuetextHumidity(value: number) {
+  return `${value}%`;
+}
+function valuetextVentilation(value: number) {
+  return `${value} RPM`;
+}
+function valuetextAIQ(value: number) {
+  return `${value}°C`;
+}
+export default function NewRule({ params }: Props) {
   const { idRule } = params
-  const [rule,setRule] = useState<Rule>({
-  name:"",
-  minTemp:0,
-  maxTemp:10,
-  minHumidity:0,
-  maxHumidity:10,
-  minAIQ:0,
-  maxAIQ:10,
-  waterSystemFlow:0,
-  ventilationRPM:1000,
-  airPurifier:true,
+  const [rule, setRule] = useState<Rule>({
+    name: "",
+    minTemp: 0,
+    maxTemp: 10,
+    minHumidity: 0,
+    maxHumidity: 10,
+    minAIQ: 0,
+    maxAIQ: 10,
+    waterSystemFlow: 0,
+    ventilationRPM: 1000,
+    airPurifier: true,
   })
   const minDistance = 10;
-  const slideTemperature=(    event: Event,
+  if (idRule == '0'){
+    
+  }
+  
+  function toggleAirPurifier(prevState: Rule) {
+    if (prevState && typeof prevState.airPurifier === 'boolean') {
+      return { ...prevState, airPurifier: !prevState.airPurifier };
+    }
+    return prevState;
+  }
+  const slideAIQ = (event: Event,
     newValue: number | number[],
-    activeThumb: number)=>{
+    activeThumb: number) => {
+    if (!Array.isArray(newValue)) {
+      return;
+    }
+    if (newValue[1] - newValue[0] < minDistance) {
+      if (activeThumb === 0) {
+        const clamped = Math.min(newValue[0], 70 - minDistance);
+        setRule({
+          ...rule,
+          minAIQ: clamped,
+          maxAIQ: clamped + minDistance,
+        })
+      } else {
+        const clamped = Math.max(newValue[1], minDistance);
+        setRule({
+          ...rule,
+          minAIQ: clamped - minDistance,
+          maxAIQ: clamped,
+        })
+      }
+    } else {
+      setRule({
+        ...rule,
+        minAIQ: newValue[0],
+        maxAIQ: newValue[1],
+      })
+    }
+  }
+
+  const slideVentilation = (event: Event,
+    newValue: number | number[] ) => {
+    setRule({
+      ...rule,
+      ventilationRPM: typeof newValue === 'number' ? newValue : 0,
+    })
+  }
+  const slideWater = (event: Event,
+    newValue: number | number[]) => {
+    setRule({
+      ...rule,
+      waterSystemFlow: typeof newValue === 'number' ? newValue : 0,
+    })
+  }
+  const slideHumidity = (event: Event,
+    newValue: number | number[],
+    activeThumb: number) => {
+    if (!Array.isArray(newValue)) {
+      return;
+    }
+    if (newValue[1] - newValue[0] < minDistance) {
+      if (activeThumb === 0) {
+        const clamped = Math.min(newValue[0], 70 - minDistance);
+        setRule({
+          ...rule,
+          minHumidity: clamped,
+          maxHumidity: clamped + minDistance,
+        })
+      } else {
+        const clamped = Math.max(newValue[1], minDistance);
+        setRule({
+          ...rule,
+          minHumidity: clamped - minDistance,
+          maxHumidity: clamped,
+        })
+      }
+    } else {
+      setRule({
+        ...rule,
+        minHumidity: newValue[0],
+        maxHumidity: newValue[1],
+      })
+    }
+  }
+
+  const slideTemperature = (event: Event,
+    newValue: number | number[],
+    activeThumb: number) => {
     if (!Array.isArray(newValue)) {
       return;
     }
@@ -74,42 +197,43 @@ export default function newRule({ params }: Props) {
         })
       }
     } else {
-        setRule({
-          ...rule,
-          minTemp: newValue[0],
-          maxTemp: newValue[1],
-        })
+      setRule({
+        ...rule,
+        minTemp: newValue[0],
+        maxTemp: newValue[1],
+      })
     }
   }
 
   return (
     <>
+      <Navbar />
       <div className="grid grid-cols-1 w-full p-4 h-full  rounded-lg ">
         <div className='w-full text-left text-black font-bold text-4xl p-5'>
-          Rule {idRule}
+          Rule
         </div>
-      
+
         <div className="flex flex-col w-full p-3 h-full mx-auto my-auto">
-            <div className='p-3 flex-row gap-2'>
-              <input type="text" name='name' aria-label='Name' placeholder="Rule" className="input input-bordered w-4/5 " required />
-            </div>
-            <div className="grid grid-cols-2">
-            <div className="w-full p-3 text-center flex-col flex h-full">
-              <div className="text-3xl text-black text-center w-full my-6">
+          <div className='p-3 flex-row gap-2'>
+            <input type="text" name='name' aria-label='Name' placeholder="Rule" className="input input-bordered w-full " required />
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <div className="w-full p-3 text-center flex-col flex h-full bg-green my-3 rounded-md text-white">
+              <div className="text-3xl text-center w-full my-6">
                 Sensors
               </div>
               <div className="text-center grid grid-cols-1 gap-y-6 w-full p-3 ">
                 <div className="rounded-md grid grid-cols-2 w-full p-3 border border-1 border-gray align-middle">
                   <div className="text-center text-xl h-full ">Temperature</div>
-                  <div>
+                  <div className="px-5">
                     <Slider
-                      value={[rule.minTemp,rule.maxTemp]}
+                      className="text-white"
+                      value={[rule.minTemp, rule.maxTemp]}
                       onChange={slideTemperature}
                       valueLabelDisplay="auto"
-                      getAriaValueText={valuetext}
+                      getAriaValueText={valuetextTemp}
                       max={70}
                       step={1}
-                      valueLabelDisplay="auto"
                       marks={marks}
                     />
                   </div>
@@ -117,88 +241,92 @@ export default function newRule({ params }: Props) {
 
                 <div className="rounded-md grid grid-cols-2 w-full p-3 border border-1 border-gray align-middle">
                   <div className="text-center text-xl h-full ">Humidity</div>
-                  <div>
+                  <div className="px-5">
                     <Slider
-                      value={[rule.minHumidity,rule.maxHumidity]}
+                      className="text-white"
+                      value={[rule.minHumidity, rule.maxHumidity]}
                       onChange={slideHumidity}
                       valueLabelDisplay="auto"
-                      getAriaValueText={valuetext}
+                      getAriaValueText={valuetextHumidity}
                       max={100}
                       step={1}
-                      valueLabelDisplay="auto"
-                      marks={marks}
+                      marks={marksPercentage(100)}
                     />
                   </div>
                 </div>
                 <div className="rounded-md grid grid-cols-2 w-full p-3 border border-1 border-gray align-middle">
-                  <div className="text-center text-xl h-full ">Temperature</div>
-                  <div>
+                  <div className="text-center text-xl h-full ">Air Quality</div>
+                  <div className="px-5">
                     <Slider
-                      value={[rule.minAIQ,rule.maxAIQ]}
+                      className="text-white"
+                      value={[rule.minAIQ, rule.maxAIQ]}
                       onChange={slideAIQ}
                       valueLabelDisplay="auto"
-                      getAriaValueText={valuetext}
+                      getAriaValueText={valuetextAIQ}
+                      marks={marksPercentage(500)}
                       max={500}
                       step={20}
-                      valueLabelDisplay="auto"
                     />
                   </div>
                 </div>
               </div>
             </div>
-            <div className="w-full p-3 text-center flex-col flex h-full">
-              <div className="text-3xl text-black text-center w-full my-6">
-                Actuators 
+            <div className="w-full p-3 text-center flex-col flex h-full bg-brown my-3 rounded-md text-white">
+              <div className="text-3xl text-center w-full my-6">
+                Actuators
               </div>
               <div className="text-center grid grid-cols-1 gap-y-6 w-full p-3 ">
                 <div className="rounded-md grid grid-cols-2 w-full p-3 border border-1 border-gray align-middle">
-                  <div className="text-center text-xl h-full ">Temperature</div>
-                  <div>
+                  <div className="text-center text-xl h-full ">Water System Flow</div>
+                  <div className="px-5">
                     <Slider
-                      value={[rule.minTemp,rule.maxTemp]}
-                      onChange={slideTemperature}
+                      className="text-white"
+                      value={rule.waterSystemFlow}
+                      onChange={slideWater}
                       valueLabelDisplay="auto"
-                      getAriaValueText={valuetext}
-                      max={70}
-                      step={1}
-                      valueLabelDisplay="auto"
-                      marks={marks}
+                      max={100}
+                      step={0.1}
+                      marks={marksPercentage(100)}
                     />
                   </div>
                 </div>
 
                 <div className="rounded-md grid grid-cols-2 w-full p-3 border border-1 border-gray align-middle">
-                  <div className="text-center text-xl h-full ">Temperature</div>
-                  <div>
+                  <div className="text-center text-xl h-full ">Ventilation Speed</div>
+                  <div className="px-5">
                     <Slider
-                      value={[rule.minTemp,rule.maxTemp]}
-                      onChange={slideTemperature}
+                      className="text-white"
+                      value={rule.ventilationRPM}
+                      onChange={slideVentilation}
                       valueLabelDisplay="auto"
-                      getAriaValueText={valuetext}
-                      max={70}
-                      step={1}
-                      valueLabelDisplay="auto"
-                      marks={marks}
+                      getAriaValueText={valuetextVentilation}
+                      max={2000}
+                      step={50}
+                      marks={marksPercentage(2000)}
                     />
                   </div>
                 </div>
                 <div className="rounded-md grid grid-cols-2 w-full p-3 border border-1 border-gray align-middle">
-                  <div className="text-center text-xl h-full ">Temperature</div>
-                  <div>
-                    <Slider
-                      value={[rule.minTemp,rule.maxTemp]}
-                      onChange={slideTemperature}
-                      valueLabelDisplay="auto"
-                      getAriaValueText={valuetext}
-                      max={70}
-                      step={1}
-                      valueLabelDisplay="auto"
-                      marks={marks}
+                  <div className="text-center text-xl h-full ">Air Purifier</div>
+                  <div className="px-5">
+                    <input
+                      type="checkbox"
+                      onChange={() => setRule((prev) => toggleAirPurifier(prev))}
+                      className="toggle toggle-lg color-blue bg-blue"
+                      defaultChecked
                     />
                   </div>
                 </div>
               </div>
             </div>
+          </div>
+          <div className="w-full flex justify-around my-3 p-5">
+            <a className="w-1/6 bg-beje text-xl text-center p-3 rounded-lg text-black" href="/greenhouses/rules">
+              Cancel
+            </a>
+            <button className="w-1/6 bg-green text-xl text-center p-3 rounded-lg text-white">
+              Save
+            </button>
           </div>
         </div>
       </div>
