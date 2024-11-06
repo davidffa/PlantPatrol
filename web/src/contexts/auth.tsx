@@ -13,9 +13,11 @@ export type Employee = {
   lastName: string;
   phoneNumber: string;
   address: string | null;
-  birthDate: Date;
+  birthDate: string;
   passwordChanged: boolean;
   manager: boolean;
+  createdAt: string;
+  notes: string;
 };
 
 type AuthContextData = {
