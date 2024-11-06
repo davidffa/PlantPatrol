@@ -1,24 +1,83 @@
 "use client"
 
 import { UnderlineInput } from "@/components/UnderlineInput";
-import { FormEvent } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Navbar } from "@/components/Navbar";
-import { useState } from "react";
 
-export default function ChangePassword() {
+import withAuth from "@/lib/withAuth";
+import { useAuth } from "@/contexts/auth";
+
+import Swal from "sweetalert2";
+import api from "@/services/api";
+import { useRouter } from "next/navigation";
+import { AxiosError } from "axios";
+
+function ChangePassword() {
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  const router = useRouter();
 
-    if (newPassword !== confirmPassword) {
-      alert("Password mismatch!");
+  const { user, refreshUser } = useAuth();
+
+  useEffect(() => {
+    if (!user) {
+      console.log("No user found.");
       return;
     }
 
-    alert("Form submitted!");
+    if (!user?.passwordChanged) {
+      Swal.fire({
+        icon: "warning",
+        title: "Please, change your password",
+        text: "Its the first time you log in into the system, please change the password that was provided by the manager"
+      });
+    }
+  }, [user]);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (newPassword !== confirmPassword) {
+      alert("Passwords mismatch!");
+      return;
+    }
+
+    try {
+      await api.patch("/employees/@me/change-password", {
+        oldPassword,
+        newPassword
+      });
+
+      await Swal.fire({
+        icon: "success",
+        title: "Password changed!"
+      });
+
+      await refreshUser();
+
+      router.push("/greenhouses");
+    } catch (error) {
+      const err = error as AxiosError;
+
+      if (err.response?.status === 400) {
+        Swal.fire({
+          icon: "error",
+          title: "Could not change the password",
+          text: "The old password that you provided is wrong"
+        });
+        return;
+      }
+
+      Swal.fire({
+        icon: "error",
+        title: "Oops, something went wrong!",
+        text: "Could not change the password, try again later..."
+      });
+
+      console.log(err);
+    }
   }
 
   return (
@@ -61,3 +120,5 @@ export default function ChangePassword() {
     </div>
   );
 }
+
+export default withAuth(ChangePassword);

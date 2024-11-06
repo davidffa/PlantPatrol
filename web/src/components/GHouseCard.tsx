@@ -6,7 +6,7 @@ import Co2Icon from '@mui/icons-material/Co2';
 
 type Props = {
   greenhouse: string,
-  id:number | string,
+  id: number | string,
   image: string,
   humidity: number,
   temperature: number,
@@ -14,10 +14,10 @@ type Props = {
   uv: number,
 }
 
-export default function GHouseCards({id, greenhouse, image, humidity, temperature, aiq, uv }: Props) {
+export default function GHouseCards({ id, greenhouse, image, humidity, temperature, aiq, uv }: Props) {
   return (
     <>
-      <a href={`/greenhouse/${id}`} >
+      <a href={`/greenhouses/${id}`} >
         <div className="card cursor-pointer shadow-md  hover:shadow-green hover:translate-y-[-4px]  transition-all ease-in-out image-full w-full " >
           <figure>
             <Image

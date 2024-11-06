@@ -1,30 +1,37 @@
 "use client"
 
 import { UnderlineInput } from "@/components/UnderlineInput";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Image from "next/image";
 import { Navbar } from "@/components/Navbar";
+import { useAuth } from "@/contexts/auth";
 import { useRouter } from "next/navigation";
-
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
   const router = useRouter();
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  const { login, isLogged } = useAuth();
+
+  useEffect(() => {
+    if (isLogged)
+      router.replace("/greenhouses");
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    alert("Form submitted!");
-
-    router.push("/change-password");
+    await login(username, password);
   }
 
   return (
     <div className="h-screen flex flex-col">
-      <Navbar
-        showUser={false}
-      />
+      <Navbar />
 
       <main className="flex h-full items-center justify-center bg-slate-100">
         <form className="bg-white p-20 rounded-md flex flex-col gap-8 shadow-md shadow-slate-300" onSubmit={handleSubmit}>
@@ -35,6 +42,9 @@ export default function Login() {
               type="text"
               placeholder="Username"
               maxLength={32}
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              required
             />
 
             <div className="flex border-b border-b-slate-300 w-full">
@@ -43,6 +53,9 @@ export default function Login() {
                 type={showPassword ? "text" : "password"}
                 placeholder="Password"
                 maxLength={128}
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
               />
               <Image
                 src={showPassword ? "/eye-off.svg" : "/eye.svg"}
