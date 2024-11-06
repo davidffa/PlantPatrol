@@ -65,7 +65,7 @@ export default function Home() {
             gap: 8
           }}
           numColumns={2}
-          renderItem={({ item }) => <PlantCard name={item.name} image={item.imageUrl} alert={alertPlantIds.includes(item.id)} onToggleAlert={() => toggleAlert(item.id)} onClick={() => router.push("details")} />}
+          renderItem={({ item }) => <PlantCard name={item.name} image={item.imageUrl} alert={alertPlantIds.includes(item.id)} onToggleAlert={() => toggleAlert(item.id)} onClick={() => router.push({ pathname: 'details', params: { id: item.id } })} />}
           keyExtractor={item => item.id}
         />
       </View>

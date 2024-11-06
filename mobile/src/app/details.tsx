@@ -1,16 +1,15 @@
 import { useState } from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { plants as staticPlants } from "@/utils/plants";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 
-type Props = {
-  id: string;
-}
-export default function Details({ id = "1" }: Props) {
+export default function Details() {
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const id = params.id[0];
 
   const [plants, setPlants] = useState(staticPlants);
   const [alertPlantIds, setAlertPlantIds] = useState(["1", "4", "6"]);
@@ -38,7 +37,7 @@ export default function Details({ id = "1" }: Props) {
         </TouchableOpacity>
       </View>
       <View className="items-center justify-center h-1/3">
-        <Image source={getPlant(id).imageUrl} className="w-4/5 h-full" />
+        <Image source={getPlant(id).imageUrl} className="h-full" />
       </View>
       <View className=" bg-gray-200 rounded-3xl h-1/2 mx-4 mt-12 ">
         <View className="flex-row justify-between mt-6">
