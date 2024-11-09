@@ -1,13 +1,13 @@
 "use client"
 import React, { useEffect } from 'react'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Slider } from '@mui/material'
 import { Navbar } from '@/components/Navbar'
 import api from '@/services/api'
 import Swal from 'sweetalert2'
-
 type Props = {
-  params: { idRule: string }
+  params: { id: string[] }
 }
 type Rule = {
   name: string,
@@ -76,7 +76,12 @@ function valuetextAIQ(value: number) {
   return `${value}°C`;
 }
 export default function NewRule({ params }: Props) {
-  const { idRule } = params
+  const { id } = params
+  const idRule = id[1]
+  const idGH = id[0]
+
+  const router = useRouter()
+
   const [rule, setRule] = useState<Rule>({
     name: "",
     minTemp: 0,
@@ -93,14 +98,16 @@ export default function NewRule({ params }: Props) {
   const getRule = () => {
     try {
 
-      if (idRule !== "0") {
+      if (idRule !== '0') {
+        console.log("UPDATING")
         //updating
-        api.get(`/rules/${idRule}`).then((response) => {
+        // change the endnpoit 
+        api.get(`/rules/${idGH}`).then((response) => {
           if (response.status == 200) {
+            console.log(response.data)
             setRule(response.data)
-            return
+
           }
-          console.log(response.status)
         })
       }
     } catch (erro) {
@@ -227,7 +234,8 @@ export default function NewRule({ params }: Props) {
   }
   const handleSave = () => {
     if (idRule !== '0') {
-      api.put(`rules/${idRule}`, { data: { _id: idRule, ...rule } }).then((response) => {
+      //update
+      api.put(`/rules/`, { _id: idRule, ...rule }).then((response) => {
         if (response.status == 204) {
           //message of success
           Swal.fire({
@@ -242,21 +250,27 @@ export default function NewRule({ params }: Props) {
         });
       })
     }
-    let greenhouseId = 0
-    api.post(`rules/${greenhouseId}`, { data: rule }).then((response) => {
-      if (response.status == 200) {
-        //message of success
+    else {
+      console.log(rule)
+      //create a new rule 
+      api.post(`/rules/${idGH}`, { ...rule }).then(async (response) => {
+        if (response.status == 201) {
+          //message of success
+          await Swal.fire({
+            icon: "success",
+            title: "Rule Created!"
+          }).then(() => {
+            router.push(`/employees/rules/${idGH}`)
+          })
+        }
+      }).catch((erro) => {
         Swal.fire({
-          icon: "success",
-          title: "Rule Created!"
+          icon: "error",
+          title: `There was an unexpected error with the creation of the rule! Erro:${erro.detail}`
         });
-      }
-    }).catch((erro) => {
-      Swal.fire({
-        icon: "error",
-        title: `There was an unexpected error with the creation of the rule! Erro:${erro}`
-      });
-    })
+      })
+    }
+
   }
   return (
     <>

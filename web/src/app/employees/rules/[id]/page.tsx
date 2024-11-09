@@ -1,7 +1,7 @@
 "use client"
 import { Navbar } from '@/components/Navbar'
-import React from 'react'
-import {useState} from 'react'
+import React, { useEffect } from 'react'
+import { useState } from 'react'
 import AddIcon from '@mui/icons-material/Add';
 import api from '@/services/api'
 
@@ -10,7 +10,7 @@ type Props = {
     params: { id: string }
 }
 type Rule = {
-    _id?:String,
+    id?: string,
     name: string,
     minTemp: number,
     maxTemp: number,
@@ -21,12 +21,12 @@ type Rule = {
     waterSystemFlow: number,
     ventilationRPM: number,
     airPurifier: boolean,
-  }
+}
 
 export default function Rules({ params }: Props) {
     const { id } = params
-    const [rules,setRules] = useState<Rule[]>([])
-    async function handleDeleteRule(id_rule:String | undefined) {
+    const [rules, setRules] = useState<Rule[]>([])
+    async function handleDeleteRule(id_rule: string | undefined) {
         const result = await Swal.fire({
             title: "Delete employee rule?",
             showConfirmButton: true,
@@ -36,8 +36,8 @@ export default function Rules({ params }: Props) {
         });
 
         if (result.isConfirmed) {
-            api.delete(`rules/${id}/${id_rule}`).then((response)=>{
-                if(response.status == 204){
+            api.delete(`rules/${id}/${id_rule}`).then((response) => {
+                if (response.status == 204) {
                     Swal.fire({
                         icon: "success",
                         title: "Success",
@@ -46,19 +46,28 @@ export default function Rules({ params }: Props) {
                     return
                 }
                 Swal.fire({
-                        icon: "error",
-                        title: "Unexpected Error",
-                        text: `There was an unexpected error. ${response.data}`
-                    })
+                    icon: "error",
+                    title: "Unexpected Error",
+                    text: `There was an unexpected error. ${response.data}`
+                })
             })
         }
     }
-    api.get(`rules/${id}`).then((response)=>{
-        if(response.status == 200)
-        {
-            setRules(response.data)
+    useEffect(() => {
+        getRules()
+    }, [])
+    const getRules = () => {
+        try {
+            api.get(`rules/${id}`).then((response) => {
+                if (response.status == 200) {
+                    setRules(response.data)
+                }
+            })
+
+        } catch (error) {
+            console.log(error)
         }
-    })
+    }
     return (
         <>
             <Navbar />
@@ -89,7 +98,7 @@ export default function Rules({ params }: Props) {
                                 Action
                             </div>
                             <div className='w-1/2 flex justify-end'>
-                                <a href={`/employees/rules/new/${id}`} className='flex flex-row gap-2 text-green '>
+                                <a href={`/employees/rules/new/${id}/0`} className='flex flex-row gap-2 text-green '>
                                     Add New
                                     <AddIcon />
                                 </a>
@@ -98,25 +107,24 @@ export default function Rules({ params }: Props) {
 
                         <div className="divider"></div>
                         <div className='w-full flex flex-col gap-3 p-3'>
-                            <div className='w-full bg-gray-300 text-black grid grid-cols-2 rounded-lg '>
                                 {
-                                    rules?.map((rule,idx)=>(
-                                        <>
-                                        <div className='text-xl text-black flex font-semibold text-left p-3 justify-start my-auto'>
-                                            {rule.name}
-                                        </div>
-                                        <div className='flex flex-row gap-2 p-3 justify-end '>
-                                            <a href={`new/${rule._id}`} className="w-[150px] rounded-lg p-3 bg-green text-white text-center">
-                                                edit
-                                            </a>
-                                            <button onClick={()=>handleDeleteRule(rule._id)} className="w-[150px] rounded-lg p-3 bg-red-700 text-white">
-                                                delete
-                                            </button>
-                                        </div>
-                                        </>
+                                    rules?.map((rule) => (
+                                        
+                                        <div className='w-full bg-gray-300 text-black grid grid-cols-2 rounded-lg gap-y-3'>
+                                            <div className='text-xl text-black flex font-semibold text-left p-3 justify-start my-auto'>
+                                                {rule.name}
+                                            </div>
+                                            <div className='flex flex-row gap-2 p-3 justify-end '>
+                                                <a href={`new/${id}/${rule.id}`} className="w-[150px] rounded-lg p-3 bg-green text-white text-center">
+                                                    edit
+                                                </a>
+                                                <button onClick={() => handleDeleteRule(rule.id)} className="w-[150px] rounded-lg p-3 bg-red-700 text-white">
+                                                    delete
+                                                </button>
+                                            </div>
+                                         </div>  
                                     ))
                                 }
-                            </div>
                         </div>
                     </div>
                 </div>
