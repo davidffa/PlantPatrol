@@ -23,4 +23,13 @@ public class RuleService {
         return rulesRepository.findAll();
     }
 
+    public Rule getRuleById(String id){
+        try{
+            return rulesRepository.findById(Integer.parseInt(id));
+        }
+        catch (Exception e){
+            return null;
+        }
+    }
+
 }
