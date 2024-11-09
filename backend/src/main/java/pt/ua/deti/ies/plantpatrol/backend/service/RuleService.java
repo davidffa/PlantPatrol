@@ -1,6 +1,5 @@
 package pt.ua.deti.ies.plantpatrol.backend.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pt.ua.deti.ies.plantpatrol.backend.entity.rules.Rule;
 import pt.ua.deti.ies.plantpatrol.backend.repository.RulesRepository;
@@ -21,6 +20,15 @@ public class RuleService {
     }
     public List<Rule> getRules(){
         return rulesRepository.findAll();
+    }
+
+    public Rule getRuleById(String id){
+        try{
+            return rulesRepository.findById(id).orElse(null);
+        }
+        catch (Exception e){
+            return null;
+        }
     }
 
 }

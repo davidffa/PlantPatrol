@@ -93,12 +93,20 @@ public class GreenHouseController {
     }
 
     @Operation(summary = "Reads all the rules from a greenhouse.")
-    @GetMapping("/rules/{id}")
+    @GetMapping("/greenhouse/{id}/rules")
     public ResponseEntity<?> getRule(@PathVariable String id) {
         List<Rule> rules = greenHouseService.getRules(id);
         if (rules == null)
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         return new ResponseEntity<>(rules, HttpStatus.OK);
+    }
+    @Operation(summary = "Reads a rule from a specific id.")
+    @GetMapping("/rule/{id}")
+    public ResponseEntity<?> getRuleById(@PathVariable String id) {
+        Rule rule = ruleService.getRuleById(id);
+        if (rule == null)
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(rule, HttpStatus.OK);
     }
 
     @Operation(summary = "Reads all the rules from all the greenhouses.")
@@ -107,6 +115,7 @@ public class GreenHouseController {
         List<Rule> rules = ruleService.getRules();
         return new ResponseEntity<>(rules, HttpStatus.OK);
     }
+
 
     @Operation(summary = "Deletes a specific rule from a specific greenhouse.")
     @DeleteMapping("/rules/{id}/{ruleId}")
