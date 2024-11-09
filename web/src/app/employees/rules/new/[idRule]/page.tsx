@@ -1,9 +1,10 @@
 "use client"
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useState } from 'react'
 import { Slider } from '@mui/material'
-import {Navbar} from '@/components/Navbar'
+import { Navbar } from '@/components/Navbar'
 import api from '@/services/api'
+import Swal from 'sweetalert2'
 
 type Props = {
   params: { idRule: string }
@@ -89,12 +90,29 @@ export default function NewRule({ params }: Props) {
     airPurifier: true,
   })
   const minDistance = 10;
-  if (idRule == '0'){
-    //get the id rule 
-    // create new endpoint ?
+  const getRule = () => {
+    try {
+
+      if (idRule !== "0") {
+        //updating
+        api.get(`/rules/${idRule}`).then((response) => {
+          if (response.status == 200) {
+            setRule(response.data)
+            return
+          }
+          console.log(response.status)
+        })
+      }
+    } catch (erro) {
+      console.log(erro)
+    }
   }
-  
-  const  toggleAirPurifier = (prevState: Rule)=> {
+
+  useEffect(() => {
+    getRule()
+  }, [])
+
+  const toggleAirPurifier = (prevState: Rule) => {
     if (prevState && typeof prevState.airPurifier === 'boolean') {
       return { ...prevState, airPurifier: !prevState.airPurifier };
     }
@@ -133,7 +151,7 @@ export default function NewRule({ params }: Props) {
   }
 
   const slideVentilation = (event: Event,
-    newValue: number | number[] ) => {
+    newValue: number | number[]) => {
     setRule({
       ...rule,
       ventilationRPM: typeof newValue === 'number' ? newValue : 0,
@@ -207,21 +225,37 @@ export default function NewRule({ params }: Props) {
       })
     }
   }
-  const handleSave = ()=>{
-    if (idRule !== '0'){
-      api.put(`rules/${idRule}`,{data:{_id:idRule,...rule}}).then((response)=>{
-        if(response.status == 204 )
-        {
+  const handleSave = () => {
+    if (idRule !== '0') {
+      api.put(`rules/${idRule}`, { data: { _id: idRule, ...rule } }).then((response) => {
+        if (response.status == 204) {
           //message of success
+          Swal.fire({
+            icon: "success",
+            title: "Rule Updated!"
+          });
         }
+      }).catch((erro) => {
+        Swal.fire({
+          icon: "error",
+          title: `There was an unexpected error with the update of the rule! Erro:${erro}`
+        });
       })
     }
     let greenhouseId = 0
-    api.post(`rules/${greenhouseId}`,{data:rule}).then((response)=>{
-      if(response.status == 200 )
-      {
+    api.post(`rules/${greenhouseId}`, { data: rule }).then((response) => {
+      if (response.status == 200) {
         //message of success
+        Swal.fire({
+          icon: "success",
+          title: "Rule Created!"
+        });
       }
+    }).catch((erro) => {
+      Swal.fire({
+        icon: "error",
+        title: `There was an unexpected error with the creation of the rule! Erro:${erro}`
+      });
     })
   }
   return (
@@ -234,7 +268,7 @@ export default function NewRule({ params }: Props) {
 
         <div className="flex flex-col w-full p-3 h-full mx-auto my-auto">
           <div className='p-3 flex-row gap-2'>
-            <input type="text" value={rule.name} onChange={(e) => setRule({...rule,name:e.target.value})} name='name' aria-label='Name' placeholder="Rule" className="input input-bordered w-full "  />
+            <input type="text" value={rule.name} onChange={(e) => setRule({ ...rule, name: e.target.value })} name='name' aria-label='Name' placeholder="Rule" className="input input-bordered w-full " />
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
             <div className="w-full p-3 text-center flex-col flex h-full bg-green my-3 rounded-md text-white">
