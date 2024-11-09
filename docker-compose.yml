@@ -1,0 +1,70 @@
+services:
+  mongo:
+    image: mongo
+    restart: unless-stopped
+
+    environment:
+      MONGO_INITDB_DATABASE: plantpatrol
+
+    volumes:
+      - mongodb:/data/db
+      - ./mongodb/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - backend
+
+  backend:
+    depends_on:
+      - mongo
+
+    build:
+      context: ./backend
+
+    restart: on-failure
+
+    env_file: .env
+
+    environment:
+      SPRING_APPLICATION_JSON: '{
+        "spring.application.name": "backend",
+        "spring.data.mongodb.host": "mongo",
+        "spring.data.mongodb.port": "27017",
+        "spring.data.mongodb.database": "plantpatrol",
+        "security.jwt.secret-key": "$JWT_SECRET_KEY",
+        "security.jwt.expiration-time": "$JWT_EXPIRATION_TIME",
+        "springdoc.api-docs.path": "/api/v1/docs",
+        "gemini.api-key": "$GEMINI_API_KEY",
+        "google.search-api-key": "$GOOGLE_SEARCH_API_KEY",
+        "google.search-engine-id": "$GOOGLE_SEARCH_ENGINE_ID"
+      }'
+
+    networks:
+      - backend
+      - frontend
+
+    ports:
+      - "8080:8080"
+
+  web:
+    depends_on:
+      - backend
+
+    build:
+      context: ./web
+
+    restart: unless-stopped
+
+    networks:
+      - frontend
+
+    ports:
+      - "3000:3000"
+
+volumes:
+  mongodb:
+
+networks:
+  frontend:
+    driver: bridge
+
+  backend:
+    driver: bridge
