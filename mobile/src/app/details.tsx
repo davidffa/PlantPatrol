@@ -42,9 +42,15 @@ export default function Details() {
       <View className=" bg-gray-200 rounded-3xl h-1/2 mx-4 mt-12 ">
         <View className="flex-row justify-between mt-6">
           <Text className="text-lg ml-6 py-2 font-bold">___ Best choice</Text>
-          <View className=" bg-green rounded-l-3xl items-center justify-center py-2 px-3 ">
-            <Text className="text-xl color-white gap-2">Avialable</Text>
-          </View>
+          {alert ?
+            <View className=" bg-red-500 rounded-l-3xl items-center justify-center py-2 px-3 ">
+              <Text className="text-xl color-white gap-2">Not Avialable</Text>
+            </View>
+            :
+            <View className=" bg-green rounded-l-3xl items-center justify-center py-2 px-3 ">
+              <Text className="text-xl color-white gap-2">Avialable</Text>
+            </View>
+          }
         </View>
         <Text className="text-3xl ml-6 py-4 font-bold">{getPlant(id).name}</Text>
         <Text className="text-lg ml-6 py-2 font-italic">Asphodelaceae</Text>
