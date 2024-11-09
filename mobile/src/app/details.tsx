@@ -44,11 +44,11 @@ export default function Details() {
           <Text className="text-lg ml-6 py-2 font-bold">___ Best choice</Text>
           {alert ?
             <View className=" bg-red-500 rounded-l-3xl items-center justify-center py-2 px-3 ">
-              <Text className="text-xl color-white gap-2">Not Avialable</Text>
+              <Text className="text-xl color-white gap-2">Not Available</Text>
             </View>
             :
             <View className=" bg-green rounded-l-3xl items-center justify-center py-2 px-3 ">
-              <Text className="text-xl color-white gap-2">Avialable</Text>
+              <Text className="text-xl color-white gap-2">Available</Text>
             </View>
           }
         </View>
