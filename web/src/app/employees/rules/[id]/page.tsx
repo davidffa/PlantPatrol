@@ -53,9 +53,6 @@ export default function Rules({ params }: Props) {
             })
         }
     }
-    useEffect(() => {
-        getRules()
-    }, [])
     const getRules = () => {
         try {
             api.get(`rules/${id}`).then((response) => {
@@ -68,6 +65,9 @@ export default function Rules({ params }: Props) {
             console.log(error)
         }
     }
+    useEffect(() => {
+        getRules()
+    }, [])
     return (
         <>
             <Navbar />
@@ -108,9 +108,9 @@ export default function Rules({ params }: Props) {
                         <div className="divider"></div>
                         <div className='w-full flex flex-col gap-3 p-3'>
                                 {
-                                    rules?.map((rule) => (
+                                    rules?.map((rule,idx) => (
                                         
-                                        <div className='w-full bg-gray-300 text-black grid grid-cols-2 rounded-lg gap-y-3'>
+                                        <div key={idx} className='w-full bg-gray-300 text-black grid grid-cols-2 rounded-lg gap-y-3'>
                                             <div className='text-xl text-black flex font-semibold text-left p-3 justify-start my-auto'>
                                                 {rule.name}
                                             </div>
