@@ -24,9 +24,6 @@ export default function ManagerPage() {
   const [newName, setNewName] = useState<string>("")
   const [location, setLocation] = useState<string>("")
 
-  const closeModal = () => {
-    modalRef.current?.close();
-  };
   useEffect(() => {
     try {
       api.get("/greenhouse").then((response) => {
@@ -38,7 +35,7 @@ export default function ManagerPage() {
       Swal.fire({
         icon: "error",
         title: "API Error",
-        text: "There was an unexpected error with the request."
+        text: `There was an unexpected error with the request. Error ${error} `
       });
     }
   }, [])
@@ -63,7 +60,7 @@ export default function ManagerPage() {
       Swal.fire({
         icon: "error",
         title: "API Error",
-        text: "There was an unexpected error with the request."
+        text: `There was an unexpected error with the request. Error ${error} `
       });
     }
 
