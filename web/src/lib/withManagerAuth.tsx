@@ -1,19 +1,21 @@
+"use client"
+
 import { useAuth } from "@/contexts/auth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react"
 
-export default function withAuth<P extends object>(Component: React.FC<P>) {
+export default function withManagerAuth<P extends object>(Component: React.FC<P>) {
   const WithAuthComponent: React.FC<P> = (props) => {
-    const { isLogged } = useAuth();
+    const { isLogged, user } = useAuth();
     const router = useRouter();
 
     useEffect(() => {
-      if (!isLogged) {
+      if (!isLogged || !user?.manager) {
         router.replace("/");
       }
-    }, [isLogged, router]);
+    }, [isLogged, router, user]);
 
-    if (!isLogged) return null;
+    if (!isLogged || !user?.manager) return null;
 
     return <Component {...props} />
   }

@@ -1,24 +1,62 @@
 "use client"
 
-import { FormEvent } from "react";
+import { FormEvent, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
 import { Navbar } from "@/components/Navbar";
 
 import Swal from "sweetalert2";
+import withManagerAuth from "@/lib/withManagerAuth";
+import api from "@/services/api";
+import { useRouter } from "next/navigation";
 
-export default function NewEmployee() {
+type CreateEmployeeResponse = {
+  username: string;
+  password: string;
+}
+
+function NewEmployee() {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [birthDate, setBirthDate] = useState("");
+  const [address, setAddress] = useState("");
+  const [notes, setNotes] = useState("");
+
+  const router = useRouter();
+
   async function handleCreateEmployee(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    Swal.fire({
-      icon: "success",
-      title: "Success",
-      text: "Employee's credentials copied to clipboard!"
-    });
+    try {
 
-    await navigator.clipboard.writeText("Username: test123 ; Password: pass")
+      const { data } = await api.post<CreateEmployeeResponse>("/employees", {
+        firstName,
+        lastName,
+        phoneNumber,
+        birthDate,
+        address,
+        notes
+      });
+
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Employee's credentials copied to clipboard!"
+      });
+
+      await navigator.clipboard.writeText(`Username: ${data.username} ; Password: ${data.password}`)
+
+      router.replace("/employees");
+    } catch (err) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Error when creating an employee. Try again later."
+      });
+      console.error(err);
+    }
   }
 
   return (
@@ -47,42 +85,82 @@ export default function NewEmployee() {
                 <span className="label-text">First name: <span className="text-red-400">*</span></span>
               </div>
 
-              <input type="text" placeholder="John" className="input input-bordered w-full max-w-xs" required />
+              <input
+                type="text"
+                placeholder="John"
+                className="input input-bordered w-full max-w-xs"
+                value={firstName}
+                onChange={e => setFirstName(e.target.value)}
+                required
+              />
             </label>
             <label className="form-control w-full max-w-xs">
               <div className="label">
                 <span className="label-text">Last name: <span className="text-red-400">*</span></span>
               </div>
 
-              <input type="text" placeholder="Doe" className="input input-bordered w-full max-w-xs" required />
+              <input
+                type="text"
+                placeholder="Doe"
+                className="input input-bordered w-full max-w-xs"
+                value={lastName}
+                onChange={e => setLastName(e.target.value)}
+                required
+              />
             </label>
             <label className="form-control w-full max-w-xs justify-self-end">
               <div className="label">
                 <span className="label-text">Phone Number: <span className="text-red-400">*</span></span>
               </div>
 
-              <input type="tel" placeholder="963931124" minLength={9} maxLength={9} className="input input-bordered w-full max-w-xs" required />
+              <input
+                type="tel"
+                placeholder="963931124"
+                minLength={9}
+                maxLength={9}
+                className="input input-bordered w-full max-w-xs"
+                value={phoneNumber}
+                onChange={e => setPhoneNumber(e.target.value)}
+                required
+              />
             </label>
             <label className="form-control w-full max-w-xs">
               <div className="label">
                 <span className="label-text">Birth date: <span className="text-red-400">*</span></span>
               </div>
 
-              <input type="date" className="input input-bordered w-full max-w-xs" required />
+              <input
+                type="date"
+                className="input input-bordered w-full max-w-xs"
+                value={birthDate}
+                onChange={e => setBirthDate(e.target.value)}
+                required
+              />
             </label>
             <label className="form-control w-full max-w-xs justify-self-end">
               <div className="label">
                 <span className="label-text">Address:</span>
               </div>
 
-              <input type="text" placeholder="New York Street, 204, NY" className="input input-bordered w-full max-w-xs" />
+              <input
+                type="text"
+                placeholder="New York Street, 204, NY"
+                className="input input-bordered w-full max-w-xs"
+                value={address}
+                onChange={e => setAddress(e.target.value)}
+              />
             </label>
             <label className="form-control w-full max-w-xs">
               <div className="label">
                 <span className="label-text">Additional notes: </span>
               </div>
 
-              <textarea placeholder="Internship employee" className="textarea textarea-bordered w-full max-w-xs min-h-32 max-h-32 resize-none" />
+              <textarea
+                placeholder="Internship employee"
+                className="textarea textarea-bordered w-full max-w-xs min-h-32 max-h-32 resize-none"
+                value={notes}
+                onChange={e => setNotes(e.target.value)}
+              />
             </label>
 
             { /* Skip a cell */}
@@ -99,3 +177,5 @@ export default function NewEmployee() {
     </div>
   )
 }
+
+export default withManagerAuth(NewEmployee);

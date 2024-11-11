@@ -32,7 +32,7 @@ public class LoginController {
                 .httpOnly(true)
                 .secure(false)
                 .path("/")
-                .maxAge(jwtService.getExpirationTime())
+                .maxAge(jwtService.getExpirationTime() / 1000)
                 .sameSite("Strict")
                 .build();
 
