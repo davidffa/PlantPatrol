@@ -2,12 +2,13 @@
 import React, { useEffect } from 'react'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import withAuth from '@/lib/withAuth'
 import { Slider } from '@mui/material'
 import { Navbar } from '@/components/Navbar'
 import api from '@/services/api'
 import Swal from 'sweetalert2'
 type Props = {
-  params: { id: string[] }
+  params: { idRule: string,greenhouseId:string }
 }
 type Rule = {
   name: string,
@@ -75,10 +76,9 @@ function valuetextVentilation(value: number) {
 function valuetextAIQ(value: number) {
   return `${value}°C`;
 }
-export default function NewRule({ params }: Props) {
-  const { id } = params
-  const idRule = id[1]
-  const idGH = id[0]
+ function NewRule({ params }: Props) {
+  const { idRule,greenhouseId } = params
+
 
   const router = useRouter()
 
@@ -99,12 +99,10 @@ export default function NewRule({ params }: Props) {
     try {
 
       if (idRule !== '0') {
-        console.log("UPDATING")
         //updating
         // change the endnpoit 
-        api.get(`/rules/${idGH}`).then((response) => {
+        api.get(`/rule/${idRule}`).then((response) => {
           if (response.status == 200) {
-            console.log(response.data)
             setRule(response.data)
 
           }
@@ -117,7 +115,7 @@ export default function NewRule({ params }: Props) {
 
   useEffect(() => {
     getRule()
-  }, [])
+  },[])
 
   const toggleAirPurifier = (prevState: Rule) => {
     if (prevState && typeof prevState.airPurifier === 'boolean') {
@@ -235,13 +233,15 @@ export default function NewRule({ params }: Props) {
   const handleSave = () => {
     if (idRule !== '0') {
       //update
-      api.put(`/rules/`, { _id: idRule, ...rule }).then((response) => {
+      api.put(`/rules`, { id: idRule, ...rule }).then(async(response) => {
         if (response.status == 204) {
           //message of success
-          Swal.fire({
+          await Swal.fire({
             icon: "success",
             title: "Rule Updated!"
-          });
+          }).then(() => {
+            router.push(`/greenhouses/${greenhouseId}`)
+          })
         }
       }).catch((erro) => {
         Swal.fire({
@@ -253,14 +253,14 @@ export default function NewRule({ params }: Props) {
     else {
       console.log(rule)
       //create a new rule 
-      api.post(`/rules/${idGH}`, { ...rule }).then(async (response) => {
+      api.post(`/rules/${greenhouseId}`, { ...rule }).then(async (response) => {
         if (response.status == 201) {
           //message of success
           await Swal.fire({
             icon: "success",
             title: "Rule Created!"
           }).then(() => {
-            router.push(`/employees/rules/${idGH}`)
+            router.push(`/greenhouses/${greenhouseId}`)
           })
         }
       }).catch((erro) => {
@@ -400,3 +400,5 @@ export default function NewRule({ params }: Props) {
     </>
   )
 }
+
+export default withAuth(NewRule)

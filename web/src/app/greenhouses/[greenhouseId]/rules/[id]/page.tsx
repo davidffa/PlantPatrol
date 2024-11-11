@@ -67,7 +67,7 @@ export default function Rules({ params }: Props) {
     }
     useEffect(() => {
         getRules()
-    }, [])
+    }, )
     return (
         <>
             <Navbar />

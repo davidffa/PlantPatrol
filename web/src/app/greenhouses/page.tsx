@@ -2,8 +2,10 @@
 import { Navbar } from '@/components/Navbar';
 import GHouseCard from '../../components/GHouseCard';
 import api from '@/services/api';
+
+import withAuth from '@/lib/withAuth'
 import { useEffect, useRef, useState } from 'react';
-import GreenHouse from './[id]/page';
+import GreenHouse from './[greenhouseId]/page';
 import Swal from 'sweetalert2';
 import AddHomeIcon from '@mui/icons-material/AddHome';
 
@@ -17,7 +19,7 @@ type GreenHouse = {
   temperature: number,
   aiq: number,
 }
-export default function ManagerPage() {
+ function ManagerPage() {
   const [greenhouses, setGH] = useState<GreenHouse[]>([])
   const modalRef = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -124,3 +126,5 @@ export default function ManagerPage() {
     </>
   )
 }
+
+export default withAuth(ManagerPage)
