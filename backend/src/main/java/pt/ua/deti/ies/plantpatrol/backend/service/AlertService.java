@@ -6,6 +6,8 @@ import pt.ua.deti.ies.plantpatrol.backend.dto.alert.CreateAlertDTO;
 import pt.ua.deti.ies.plantpatrol.backend.entity.Alert;
 import pt.ua.deti.ies.plantpatrol.backend.repository.AlertRepository;
 
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -23,6 +25,7 @@ public class AlertService {
                 .title(dto.getTitle())
                 .message(dto.getMessage())
                 .sendto(dto.getSendto())
+                .timestamp(Date.from(Instant.now()))
                 .build();
         return alertRepository.insert(alert);
     }
