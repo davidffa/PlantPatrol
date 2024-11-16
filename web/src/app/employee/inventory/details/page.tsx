@@ -4,9 +4,36 @@ import { Navbar } from "@/components/Navbar";
 import Link from "next/link";
 import Image from "next/image";
 import Swal from "sweetalert2";
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useEffect } from "react";
+import api from "@/services/api";
+
+type Plant = {
+  "id": string,
+  "name": string,
+  "minimum": number,
+  "amount": number,
+  "family": string,
+  "maxHeight": number,
+  "about": string;
+  "curiosities": string;
+  "imageUrl": string;
+}
 
 export default function Details() {
+  const id = "6728a43ac0dcd32aa19138a2";
+
+  const [plant, setPlant] = useState<Plant>();
+
+
+  useEffect(() => {
+    async function getPlant() {
+      const { data } = await api.get<Plant>(`/inventory/${id}`);
+
+      setPlant(data);
+    }
+    getPlant();
+  });
+
   const [notesEnabled, setNotesEnabled] = useState(false);
 
   function handleEditDetails() {
@@ -35,12 +62,12 @@ export default function Details() {
                 </button>
               </Link>
               <h1 className="text-4xl font-semibold font-alt gap-2 py-2  ">
-                Rose
+                {plant?.name}
               </h1>
             </div>
             <div className="px-20 mt-12">
-              <Image
-                src="/roseimg.svg"
+              <img
+                src={plant?.imageUrl}
                 alt="Rose"
                 height={350}
                 width={400}
@@ -74,26 +101,26 @@ export default function Details() {
                 <h2 className="text-2xl font-semibold mt-2">
                   Family:
                 </h2>
-                <input disabled={!notesEnabled} type="text" placeholder="Type here" className="input input-md input-bordered w-full" />
+                <input disabled={!notesEnabled} type="text" placeholder={plant?.family} className="input input-md input-bordered w-full" />
               </div>
               <div>
                 <h2 className="text-2xl font-semibold mt-2">
                   Size:
                 </h2>
-                <input disabled={!notesEnabled} type="text" placeholder="Type here" className="input input-md input-bordered w-full" />
+                <input disabled={!notesEnabled} type="text" placeholder={plant?.maxHeight.toString()} className="input input-md input-bordered w-full" />
               </div>
             </div>
             <div>
               <h2 className="text-2xl font-semibold mt-2">
                 About:
               </h2>
-              <textarea disabled={!notesEnabled} className="textarea textarea-bordered textarea-xl min-w-full h-40" placeholder="Type here" />
+              <textarea disabled={!notesEnabled} className="textarea textarea-bordered textarea-xl min-w-full h-40" placeholder={plant?.about} />
             </div>
             <div>
               <h2 className="text-2xl font-semibold mt-2">
                 Curiosities:
               </h2>
-              <textarea disabled={!notesEnabled} className="textarea textarea-bordered textarea-xl min-w-full h-40" placeholder="Type here" />
+              <textarea disabled={!notesEnabled} className="textarea textarea-bordered textarea-xl min-w-full h-40" placeholder={plant?.curiosities} />
             </div>
           </div>
         </div >

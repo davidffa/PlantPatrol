@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
 import EditInput from './EditInput';
-import Image from 'next/image';
 import { useRouter } from "next/navigation";
 
+
 type Props = {
+  id: string,
   title: string,
   image: string,
   available: number,
@@ -11,7 +12,7 @@ type Props = {
   manager?: boolean
 }
 
-export default function InventoryCard({ title, image, available, minimum, manager = false }: Props) {
+export default function InventoryCard({ id, title, image, available, minimum, manager = false }: Props) {
   const router = useRouter();
   const [min, setValue] = useState(minimum);
   const [ava, setValue2] = useState(available);
@@ -26,7 +27,7 @@ export default function InventoryCard({ title, image, available, minimum, manage
 
     <div className="card cursor-pointer shadow-md  hover:shadow-green hover:translate-y-[-4px]  transition-all ease-in-out image-full w-60" >
       <figure>
-        <Image
+        <img
           src={image}
           alt={title}
           height={300}
@@ -35,7 +36,7 @@ export default function InventoryCard({ title, image, available, minimum, manage
       </figure>
       <div className="card-body ">
         <div className="w-full flex flex-col ">
-          <div className='h-4/6 w-full  text-left text-2xl text-white'onClick={() => !manager && router.push("/employee/inventory/details")} >
+          <div className='h-4/6 w-full  text-left text-2xl text-white' onClick={() => !manager && router.push(`/employee/inventory/details?id=${id}`)} >
             {title}
           </div>
           {

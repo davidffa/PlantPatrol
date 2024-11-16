@@ -2,10 +2,32 @@
 import AddInventory from "@/components/AddInventory";
 import InventoryCard from "@/components/InventoryCard";
 import { Navbar } from "@/components/Navbar";
-import { useRef, useState } from "react";
-import Image from "next/image"
+import { useRef, useState, useEffect } from "react";
+import Image from "next/image";
+import api from "@/services/api";
+
+type Plant = {
+  "id": string,
+  "name": string,
+  "minimum": number,
+  "amount": number,
+  "family": string,
+  "maxHeight": number,
+  "about": string;
+  "imageUrl": string;
+}
 
 export default function Inventory() {
+  const [plants, setPlants] = useState<Plant[]>([]);
+
+  useEffect(() => {
+    async function getPlants() {
+      const { data } = await api.get<Plant[]>("/inventory");
+
+      setPlants(data);
+    }
+    getPlants();
+  });
   const [components, setComponents] = useState<number[]>([]);
 
   const addInventory = () => {
@@ -72,18 +94,9 @@ export default function Inventory() {
           </div>
         </div>
         <div className="w-full grid md:grid-cols-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5  gap-12 align-center p-4">
-          <InventoryCard image='/roseimg.svg' title='Rose' available={4} minimum={3} />
-          <InventoryCard image='/redroseimg.svg' title='Red Rose' available={4} minimum={3} />
-          <InventoryCard image='/yellowroseimg.svg' title='Yellow Rose' available={4} minimum={3} />
-          <InventoryCard image='/mayflowerimg.svg' title='May Flower' available={4} minimum={3} />
-          <InventoryCard image='/ballcactusimg.svg' title='Ball Cactus' available={4} minimum={3} />
-          <InventoryCard image='/crysanthemumimg.svg' title='Crysanthemum' available={4} minimum={3} />
-          <InventoryCard image='/roseimg.svg' title='Rose1' available={4} minimum={3} />
-          <InventoryCard image='/redroseimg.svg' title='Red Rose1' available={4} minimum={3} />
-          <InventoryCard image='/yellowroseimg.svg' title='Yellow Rose1' available={4} minimum={3} />
-          <InventoryCard image='/mayflowerimg.svg' title='May Flower1' available={4} minimum={3} />
-          <InventoryCard image='/ballcactusimg.svg' title='Ball Cactus1' available={4} minimum={3} />
-          <InventoryCard image='/crysanthemumimg.svg' title='Crysanthemum1' available={4} minimum={3} />
+          {
+            plants.map(({ id, imageUrl, name, amount, minimum }) => (<InventoryCard key={id} id={id} image={imageUrl} title={name} available={amount} minimum={minimum} />))
+          }
         </div>
       </div>
     </div>
