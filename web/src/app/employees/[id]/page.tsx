@@ -1,29 +1,67 @@
 "use client"
 
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
 import { activities } from "@/utils/recent-activities";
 
 import Swal from "sweetalert2";
+import withManagerAuth from "@/lib/withManagerAuth";
+import api from "@/services/api";
 
 type Props = {
   params: { id: string }
 }
 
+type EmployeeDetails = {
+  name: string;
+  age: number;
+  address: string | null;
+  notes: string | null;
+  phoneNumber: string;
+  employeeSince: string;
+}
 
-export default function ManageEmployee({ params }: Props) {
+type ResetCredentialsResponse = {
+  password: string;
+}
+
+function ManageEmployee({ params }: Props) {
   const { id } = params;
   const router = useRouter();
 
-  const [notesEnabled, setNotesEnabled] = useState(false);
-  const [notes, setNotes] = useState("A great employee!");
+  const [name, setName] = useState("");
+  const [age, setAge] = useState(0);
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [employeeSince, setEmployeeSince] = useState("");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [address, setAddress] = useState("");
+  const [notes, setNotes] = useState("");
 
-  function handleSaveEmployeeNotes() {
+  const [notesEnabled, setNotesEnabled] = useState(false);
+
+  useEffect(() => {
+    async function fetchEmployee() {
+      const { data } = await api.get<EmployeeDetails>(`/employees/${id}`);
+
+      setName(data.name);
+      setAge(data.age);
+      setPhoneNumber(data.phoneNumber);
+      setEmployeeSince(data.employeeSince);
+      // Set as empty string if they are null
+      setAddress(data.address ?? "");
+      setNotes(data.notes ?? "");
+    }
+
+    fetchEmployee();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function handleSaveEmployeeNotes() {
     setNotesEnabled(false);
 
-    console.log(`Save notes ${notes}`);
+    await api.patch(`/employees/${id}/notes`, { notes })
   }
 
   async function handleResetCredentials() {
@@ -36,7 +74,7 @@ export default function ManageEmployee({ params }: Props) {
     });
 
     if (result.isConfirmed) {
-      console.log(`Resetting credentials of employee id ${id}`);
+      const { data } = await api.patch<ResetCredentialsResponse>(`/employees/${id}/reset`);
 
       Swal.fire({
         icon: "success",
@@ -44,7 +82,7 @@ export default function ManageEmployee({ params }: Props) {
         text: "Employee's credentials copied to clipboard!"
       });
 
-      await navigator.clipboard.writeText("Username: test123 ; Password: pass")
+      await navigator.clipboard.writeText(`Password: ${data.password}`);
     }
   }
 
@@ -58,6 +96,8 @@ export default function ManageEmployee({ params }: Props) {
     });
 
     if (result.isConfirmed) {
+      await api.delete(`/employees/${id}`);
+
       Swal.fire({
         icon: "success",
         title: "Success",
@@ -85,10 +125,10 @@ export default function ManageEmployee({ params }: Props) {
                 />
               </div>
               <div className="flex flex-col gap-8 justify-start">
-                <span className="font-medium">Name: <span className="font-normal">Paulo Miranda</span></span>
-                <span className="font-medium">Age: <span className="font-normal">26</span></span>
-                <span className="font-medium">Phone number: <span className="font-normal">968 470 123</span></span>
-                <span className="font-medium">Employee since: <span className="font-normal">24/10/2023</span></span>
+                <span className="font-medium">Name: <span className="font-normal">{name}</span></span>
+                <span className="font-medium">Age: <span className="font-normal">{age}</span></span>
+                <span className="font-medium">Phone number: <span className="font-normal">{Number(phoneNumber).toLocaleString()}</span></span>
+                <span className="font-medium">Employee since: <span className="font-normal">{employeeSince}</span></span>
                 <div className="flex flex-col gap-2">
                   <div className="flex justify-between items-center">
                     <span className="font-medium">Additional notes:</span>
@@ -163,3 +203,5 @@ export default function ManageEmployee({ params }: Props) {
     </>
   )
 }
+
+export default withManagerAuth(ManageEmployee);

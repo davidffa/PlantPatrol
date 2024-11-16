@@ -1,4 +1,5 @@
-name: Lint Web
+name: Build Web
+
 on:
   push:
     paths:
@@ -10,8 +11,8 @@ on:
     branches: [ dev ]
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
+  build-web:
+    runs-on: [self-hosted, linux]
 
     defaults:
       run:
@@ -44,3 +45,6 @@ jobs:
 
       - name: Run eslint
         run: npm run lint
+      
+      - name: Build the nextjs project
+        run: npm run build

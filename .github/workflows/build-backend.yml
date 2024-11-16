@@ -1,4 +1,5 @@
 name: Build Backend
+
 on:
   push:
     paths:
@@ -11,7 +12,7 @@ on:
 
 jobs:
   compile:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux]
 
     defaults:
       run:

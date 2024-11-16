@@ -1,9 +1,34 @@
+"use client"
+
 import { EmployeeCard } from "@/components/EmployeeCard"
 import { Navbar } from "@/components/Navbar"
+import { useAuth } from "@/contexts/auth"
+import withManagerAuth from "@/lib/withManagerAuth"
+import api from "@/services/api"
 import Image from "next/image"
 import Link from "next/link"
+import { useEffect, useState } from "react"
 
-export default function Employees() {
+type Employee = {
+  id: string;
+  name: string;
+  age: number;
+}
+
+function Employees() {
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    async function getEmployees() {
+      const { data } = await api.get<Employee[]>("/employees");
+
+      setEmployees(data.filter(e => e.id !== user!.id));
+    }
+
+    getEmployees();
+  }, [user]);
+
   return (
     <>
       <Navbar />
@@ -24,10 +49,14 @@ export default function Employees() {
       </div>
 
       <div className="p-16 overflow-y-scroll flex flex-col gap-8">
-        <EmployeeCard id="1" name="Paulo Miranda" imageUrl="/employee.png" age={26} />
-        <EmployeeCard id="2" name="Joaquim Costa" imageUrl="/employee.png" age={56} />
-        <EmployeeCard id="3" name="Rosa Marques" imageUrl="/employee-girl.png" age={41} />
+        {
+          employees.map(({ id, name, age }) => (
+            <EmployeeCard key={id} id={id} name={name} imageUrl="/employee.png" age={age} />
+          ))
+        }
       </div>
     </>
   )
 }
+
+export default withManagerAuth(Employees);
