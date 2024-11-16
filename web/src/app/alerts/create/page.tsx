@@ -3,15 +3,15 @@
 import { Navbar } from "@/components/Navbar";
 import Image from "next/image";
 import Link from "next/link";
-import { FormEvent, useEffect } from "react";
+import { FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import api from "@/services/api";
 import { AxiosError } from "axios";
 
 
-import withAuth from "@/lib/withAuth";
-import { useAuth } from "@/contexts/auth";
+// import withAuth from "@/lib/withAuth";
+// import { useAuth } from "@/contexts/auth";
 
 export default function Create() {
   const router = useRouter();
@@ -40,10 +40,10 @@ export default function Create() {
     event.preventDefault();
 
     try {
-      await api.post("/alerts", {
+      await api.post("/alert", {
         title,
-        description,
-        sendTo
+        message: description,
+        sendto: sendTo
       });
 
       alert("Form sent!")
