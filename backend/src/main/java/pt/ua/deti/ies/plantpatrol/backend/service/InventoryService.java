@@ -76,4 +76,7 @@ public class InventoryService {
 
         return inventoryRepository.findAll(pageable).toList();
     }
+    public Plant getPlant(String id) {
+        return inventoryRepository.findById(id).orElse(null);
+    }
 }
