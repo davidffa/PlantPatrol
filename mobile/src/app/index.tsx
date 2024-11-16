@@ -42,15 +42,9 @@ export default function Home() {
         </View>
 
         <View className="mt-8">
-          <View className="flex-row w-full gap-2 justify-center">
-            <View className="flex-row items-center bg-gray-100 rounded-lg px-4 w-10/12 ">
-              <Feather name="search" size={18} />
-              <TextInput className="px-4 w-full" placeholder="Search" value={searchQuery} onChangeText={setSearchQuery} />
-            </View>
-            {/* TODO: Aplicar filtros
-            <TouchableOpacity className="bg-green rounded-lg p-4">
-              <Fontisto color="white" name="equalizer" size={18} />
-            </TouchableOpacity> */}
+          <View className="flex-row items-center bg-gray-100 rounded-lg px-4 w-full py-4 ">
+            <Feather name="search" size={18} />
+            <TextInput className="px-4 w-full" placeholder="Search" value={searchQuery} onChangeText={setSearchQuery} />
           </View>
         </View>
 
