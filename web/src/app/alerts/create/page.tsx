@@ -3,9 +3,15 @@
 import { Navbar } from "@/components/Navbar";
 import Image from "next/image";
 import Link from "next/link";
-import { FormEvent } from "react";
+import { FormEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import api from "@/services/api";
+import { AxiosError } from "axios";
+
+
+import withAuth from "@/lib/withAuth";
+import { useAuth } from "@/contexts/auth";
 
 export default function Create() {
   const router = useRouter();
@@ -13,12 +19,40 @@ export default function Create() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [sendTo, setSendTo] = useState("");
+  // const [employees, setEmployees] = useState<string[]>([]);
 
-  function handleCreateAlert(event: FormEvent<HTMLFormElement>) {
+  // useEffect(() => {
+  //   async function fetchEmployees() {
+  //     try {
+  //       const responde = await api.get("/employees");
+  //       const employees = responde.data;
+  //       setEmployees(["Everyone", ...employees])
+  //     } catch (error) {
+  //       const err = error as AxiosError;
+  //       console.log("Failed to fetch employee: " + err);
+  //     }
+  //   }
+  //   fetchEmployees();
+  // }, []);
+
+
+  async function handleCreateAlert(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    alert("Form sent!")
-    router.replace("/alerts");
+    try {
+      await api.post("/alerts", {
+        title,
+        description,
+        sendTo
+      });
+
+      alert("Form sent!")
+      router.replace("/alerts");
+    } catch (error) {
+      const err = error as AxiosError;
+
+      console.log("Failed to sent form: " + err);
+    }
   }
 
   return (
@@ -36,13 +70,29 @@ export default function Create() {
                 <h2 className="text-2xl font-semibold mb-3">
                   Title:
                 </h2>
-                <input required type="text" placeholder="Type here" className="input input-md input-bordered w-full" />
+                <input 
+                  required 
+                  type="text" 
+                  placeholder="Type here" 
+                  className="input input-md input-bordered w-full" 
+                  onChange={(e) => setTitle(e.target.value)}
+                />
               </div>
               <div className="py-8">
                 <h2 className="text-2xl font-semibold mb-3">
                   Send to:
                 </h2>
-                <select id="send" className="menu menu-dropdown bg-base-100 rounded-box z-[1] w-52 h-12 p-3 border border-gray-300 ">
+                <select 
+                  id="send" 
+                  className="menu menu-dropdown bg-base-100 rounded-box z-[1] w-52 h-12 p-3 border border-gray-300 "
+                  value={sendTo}
+                  onChange={(e) => setSendTo(e.target.value)}
+                >
+                  {/* {employees.map((employees) => (
+                    <option key={employee} value={employee}>
+                      {employee}
+                    </option>
+                  ))} */}
                   <option value="Everyone">Everyone</option>
                   <option value="Paulo">Paulo Miranda</option>
                   <option value="Joaquim">Joaquim Costa</option>
@@ -54,7 +104,13 @@ export default function Create() {
               <h2 className="text-2xl font-semibold mb-3">
                 Description:
               </h2>
-              <textarea required id="description" className="textarea textarea-bordered textarea-xl min-w-full min-h-64 resize-none" placeholder="Alert description" />
+              <textarea 
+                required 
+                id="description" 
+                className="textarea textarea-bordered textarea-xl min-w-full min-h-64 resize-none" 
+                placeholder="Alert description" 
+                onChange={(e) => setDescription(e.target.value)}
+              />
 
             </div>
           </div>
