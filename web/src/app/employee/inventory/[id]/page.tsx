@@ -6,6 +6,7 @@ import Image from "next/image";
 import Swal from "sweetalert2";
 import { FormEvent, useState, useEffect } from "react";
 import api from "@/services/api";
+import { useRouter } from "next/navigation";
 
 type Plant = {
   "id": string,
@@ -18,16 +19,31 @@ type Plant = {
   "curiosities": string;
   "imageUrl": string;
 }
+type Props = {
+  params: { id: string }
+}
 
-export default function Details() {
-  const id = "6728a43ac0dcd32aa19138a2";
+export default function Details({ params }: Props) {
+  const { id } = params;
+  const router = useRouter();
+  //const id = "6728a43ac0dcd32aa19138a2";
 
   const [plant, setPlant] = useState<Plant>();
+  const [family, setFamily] = useState("");
+  const [size, setSize] = useState("");
+  const [about, setAbout] = useState("");
+  const [curiosities, setCuriosities] = useState("");
 
 
   useEffect(() => {
     async function getPlant() {
       const { data } = await api.get<Plant>(`/inventory/${id}`);
+
+
+      setFamily(data.family ?? "");
+      setSize(data.maxHeight.toString() ?? "");
+      setAbout(data.about ?? "");
+      setCuriosities(data.curiosities ?? "");
 
       setPlant(data);
     }
@@ -40,7 +56,8 @@ export default function Details() {
     setNotesEnabled(!notesEnabled)
   }
 
-  function handleSaveDetails(event: FormEvent<HTMLFormElement>) {
+  async function handleSaveDetails(event: FormEvent<HTMLFormElement>) {
+    await api.patch(`/inventory/${id}`, { plant })
     event.preventDefault();
     Swal.fire({
       icon: "success",
@@ -89,7 +106,7 @@ export default function Details() {
                       <button type="submit" className="bg-green hover:bg-dark-green hover:duration-200 rounded-md py-2 w-28 justify-center items-center gap-2 mr-4">
                         <p className="text-2xl font-semibold text-white">Save</p>
                       </button>
-                      <button onClick={handleEditDetails} type="reset" className="bg-red-500 hover:bg-red-700 hover:duration-200 rounded-md py-2 w-28 justify-center items-center gap-2 " >
+                      <button onClick={() => router.push(`/employee/inventory/details?id=${id}`)} type="reset" className="bg-red-500 hover:bg-red-700 hover:duration-200 rounded-md py-2 w-28 justify-center items-center gap-2 " >
                         <p className="text-2xl font-semibold text-white">Cancel</p>
                       </button>
                     </div>
@@ -101,26 +118,26 @@ export default function Details() {
                 <h2 className="text-2xl font-semibold mt-2">
                   Family:
                 </h2>
-                <input disabled={!notesEnabled} type="text" placeholder={plant?.family} className="input input-md input-bordered w-full" />
+                <input disabled={!notesEnabled} type="text" value={family} className="input input-md input-bordered w-full" onChange={(e) => setFamily(e.target.value)} />
               </div>
               <div>
                 <h2 className="text-2xl font-semibold mt-2">
                   Size:
                 </h2>
-                <input disabled={!notesEnabled} type="text" placeholder={plant?.maxHeight.toString()} className="input input-md input-bordered w-full" />
+                <input disabled={!notesEnabled} type="text" value={size} className="input input-md input-bordered w-full" onChange={(e) => setSize(e.target.value)} />
               </div>
             </div>
             <div>
               <h2 className="text-2xl font-semibold mt-2">
                 About:
               </h2>
-              <textarea disabled={!notesEnabled} className="textarea textarea-bordered textarea-xl min-w-full h-40" placeholder={plant?.about} />
+              <textarea disabled={!notesEnabled} className="textarea textarea-bordered textarea-xl min-w-full h-40" value={about} onChange={(e) => setAbout(e.target.value)} />
             </div>
             <div>
               <h2 className="text-2xl font-semibold mt-2">
                 Curiosities:
               </h2>
-              <textarea disabled={!notesEnabled} className="textarea textarea-bordered textarea-xl min-w-full h-40" placeholder={plant?.curiosities} />
+              <textarea disabled={!notesEnabled} className="textarea textarea-bordered textarea-xl min-w-full h-40" value={curiosities} onChange={(e) => setCuriosities(e.target.value)} />
             </div>
           </div>
         </div >

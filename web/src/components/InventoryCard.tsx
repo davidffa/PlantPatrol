@@ -36,7 +36,7 @@ export default function InventoryCard({ id, title, image, available, minimum, ma
       </figure>
       <div className="card-body ">
         <div className="w-full flex flex-col ">
-          <div className='h-4/6 w-full  text-left text-2xl text-white' onClick={() => !manager && router.push(`/employee/inventory/details?id=${id}`)} >
+          <div className='h-4/6 w-full  text-left text-2xl text-white' onClick={() => !manager && router.push(`/employee/inventory/${id}`)} >
             {title}
           </div>
           {
