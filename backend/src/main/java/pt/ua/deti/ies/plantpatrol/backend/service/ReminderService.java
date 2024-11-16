@@ -19,6 +19,17 @@ public class ReminderService {
         this.inventoryRepository = inventoryRepository;
     }
 
+    public Set<String> getReminders(UUID clientId) {
+        Optional<Reminder> existingReminder = reminderRepository.findByClientId(clientId.toString());
+
+        if (existingReminder.isEmpty())
+            throw new IllegalArgumentException("Invalid client id");
+
+        Reminder reminder = existingReminder.get();
+
+        return reminder.getPlants();
+    }
+
     public void addPlant(UUID clientId, String plantId) {
         Optional<Reminder> existingReminder = reminderRepository.findByClientId(clientId.toString());
 

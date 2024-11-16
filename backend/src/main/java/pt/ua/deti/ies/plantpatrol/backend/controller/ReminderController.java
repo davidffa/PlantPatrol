@@ -19,6 +19,15 @@ public class ReminderController {
         this.reminderService = reminderService;
     }
 
+    @GetMapping("/reminders/{clientId}")
+    public ResponseEntity<?> getReminders(@PathVariable String clientId) {
+        try {
+            return new ResponseEntity<>(reminderService.getReminders(UUID.fromString(clientId)), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ErrorResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @PostMapping("/reminders")
     public ResponseEntity<?> addReminder(@RequestBody CreateReminderDTO dto) {
         try {
