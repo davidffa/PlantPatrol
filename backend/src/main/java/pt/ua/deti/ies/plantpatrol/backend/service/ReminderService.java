@@ -46,6 +46,7 @@ public class ReminderService {
         Reminder r = existingReminder.get();
 
         r.getPlants().add(plantId);
+        reminderRepository.save(r);
     }
 
     public void removePlant(UUID clientId, String plantId) {
@@ -57,7 +58,6 @@ public class ReminderService {
         Reminder r = existingReminder.get();
 
         r.getPlants().remove(plantId);
-
         reminderRepository.save(r);
     }
 }
