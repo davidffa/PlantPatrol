@@ -22,7 +22,16 @@ export default function Alerts() {
     async function fetchAlerts() {
       try {
         const response = await api.get("/alert");
-        setAlerts(response.data.reverse());
+
+        const alerts = response.data.map((alert: any) => ({
+          id: alert.id,
+          title: alert.title,
+          timestamp: alert.timestamp || new Date().toISOString(),
+          sendTo: alert.sendto,
+          description: alert.message || ""
+        }));
+        setAlerts(alerts.reverse());
+        console.log("Mapped Alerts fetched:", alerts);
       } catch (error) {
         console.log("Failed to fetch alerts: " + error);
       }
@@ -57,9 +66,9 @@ export default function Alerts() {
         {alerts.length > 0 ? (
           alerts.map((alert) => (
             <AlertCollapse
-              key={alert.id} 
+              key={alert.id}
               title={alert.title}
-              data={new Date(alert.timestamp).toLocaleString()} 
+              data={new Date(alert.timestamp).toLocaleString()}
               sentTo={alert.sendTo}
               description={alert.description}
               sender="Admin"

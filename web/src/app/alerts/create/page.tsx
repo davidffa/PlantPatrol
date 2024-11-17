@@ -45,6 +45,7 @@ export default function Create() {
         message: description,
         sendto: sendTo
       });
+      console.log("Alert info: " + title + " " + description + " " + sendTo);
 
       alert("Form sent!")
       router.replace("/alerts");
