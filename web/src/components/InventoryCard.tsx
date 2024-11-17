@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import EditInput from './EditInput';
 import { useRouter } from "next/navigation";
 import api from "@/services/api";
@@ -41,7 +41,6 @@ export default function InventoryCard({ id, title, image, available, minimum, ma
       await api.patch(`/inventory/${id}`, updatedPlant);
     }
   }
-
   async function handleValueChange(newValue: number) {
     setValue(newValue);
     update("minimum", min);
@@ -50,19 +49,10 @@ export default function InventoryCard({ id, title, image, available, minimum, ma
     setValue2(newValue);
     update("available", ava);
   };
-  useEffect(() => {
-    async function getPlant() {
-      const { data } = await api.get<Plant>(`/inventory/${id}`);
-
-      setPlant(data);
-    }
-    getPlant();
-  });
-
 
   return (
 
-    <div className="card cursor-pointer shadow-md  hover:shadow-green hover:translate-y-[-4px]  transition-all ease-in-out image-full w-60" >
+    <div className="card cursor-pointer shadow-md  hover:shadow-green hover:translate-y-[-4px]  transition-all ease-in-out image-full w-60 h-64" >
       <figure>
         <img
           src={image}

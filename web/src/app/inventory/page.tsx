@@ -28,7 +28,7 @@ export default function Inventory() {
       setPlants(data);
     }
     getPlants();
-  });
+  }, []);
 
   useEffect(() => {
     async function getSearchPlants() {

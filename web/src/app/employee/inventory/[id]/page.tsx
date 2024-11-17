@@ -28,7 +28,6 @@ export default function Details({ params }: Props) {
   const router = useRouter();
 
   const [plant, setPlant] = useState<Plant>();
-
   const [title, setTitle] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [family, setFamily] = useState("");
@@ -53,7 +52,7 @@ export default function Details({ params }: Props) {
       setPlant(data);
     }
     getPlant();
-  });
+  }, []);
 
 
 
@@ -62,6 +61,7 @@ export default function Details({ params }: Props) {
   }
 
   async function handleSaveDetails(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
     if (plant) {
       const updatedPlant = {
         ...plant,
@@ -73,13 +73,12 @@ export default function Details({ params }: Props) {
       setPlant(updatedPlant);
       await api.put(`/inventory/${id}`, updatedPlant);
     }
-    event.preventDefault();
     Swal.fire({
       icon: "success",
       title: "Success",
       text: "Saved with success!"
     });
-
+    handleEditDetails();
   }
   return (
     <>
