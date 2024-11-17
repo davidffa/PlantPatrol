@@ -66,7 +66,7 @@ export default function Details({ params }: Props) {
       const updatedPlant = {
         ...plant,
         family,
-        size,
+        maxHeight: parseFloat(size),
         about,
         curiosities
       };
@@ -120,7 +120,7 @@ export default function Details({ params }: Props) {
                       <button type="submit" className="bg-green hover:bg-dark-green hover:duration-200 rounded-md py-2 w-28 justify-center items-center gap-2 mr-4">
                         <p className="text-2xl font-semibold text-white">Save</p>
                       </button>
-                      <button onClick={() => router.push(`/employee/inventory/${id}`)} type="reset" className="bg-red-500 hover:bg-red-700 hover:duration-200 rounded-md py-2 w-28 justify-center items-center gap-2 " >
+                      <button onClick={() => router.push(`/employee/inventory`)} type="reset" className="bg-red-500 hover:bg-red-700 hover:duration-200 rounded-md py-2 w-28 justify-center items-center gap-2 " >
                         <p className="text-2xl font-semibold text-white">Cancel</p>
                       </button>
                     </div>
