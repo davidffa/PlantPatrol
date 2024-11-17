@@ -26,17 +26,13 @@ export default function Alerts() {
 
     async function fetchAlerts() {
       try {
-        console.log("Making API request...");
         const response = await api.get("/alert");
-        console.log("API response:", response);
-        console.log("Logged-in user:", user);
 
         if (!user) return;
         const employeeFullName = `${user.firstName} ${user.lastName}`;
         const filteredAlerts = response.data.filter(
           (alert: Alert) => alert.sendto === "Everyone" || (alert.sendto === employeeFullName)
         )
-        console.log("Filtered alerts:", filteredAlerts);
         setAlerts(filteredAlerts.reverse());
       } catch (error) {
         console.log("Failed to fetch alerts: " + error);

@@ -32,7 +32,6 @@ export default function Alerts() {
           sender: alert.fromSystem ? "System" : "Admin",
         }));
         setAlerts(alerts.reverse());
-        console.log("Mapped Alerts fetched:", alerts);
       } catch (error) {
         console.log("Failed to fetch alerts: " + error);
       }

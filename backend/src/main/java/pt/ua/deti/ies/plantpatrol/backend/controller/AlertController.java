@@ -38,13 +38,8 @@ public class AlertController {
         Employee issuer = (Employee) auth.getPrincipal();
 
         String fullName = issuer.getFirstName() + " " + issuer.getLastName();
-        System.out.println("Logged-in employee: " + issuer.getUsername() + " (ID: " + issuer.getId() + ", Full Name: " + fullName + ")");
 
         List<Alert> allAlerts = alertService.findAll(); // Fetch all alerts
-        System.out.println("All Alerts in Database:");
-        for (Alert alert : allAlerts) {
-            System.out.println("Alert: " + alert.getTitle() + ", SendTo: " + alert.getSendto());
-        }
 
         List<Alert> alerts = new ArrayList<>();
         if (issuer.isManager()){
@@ -57,13 +52,7 @@ public class AlertController {
                 }
             }
         }
-
-        System.out.println("Filtered Alert for Employee:");
-        for (Alert alert : alerts) {
-            System.out.println("Alert: " + alert.getTitle() + ", SendTo: " + alert.getSendto());
-        }
         return new ResponseEntity<>(alerts, HttpStatus.OK);
     }
-
 }
 

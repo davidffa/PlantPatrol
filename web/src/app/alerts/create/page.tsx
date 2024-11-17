@@ -45,13 +45,11 @@ export default function Create() {
         message: description,
         sendto: sendTo
       });
-      console.log("Alert info: " + title + " " + description + " " + sendTo);
 
       alert("Form sent!")
       router.replace("/alerts");
     } catch (error) {
       const err = error as AxiosError;
-
       console.log("Failed to sent form: " + err);
     }
   }
