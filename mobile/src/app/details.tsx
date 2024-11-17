@@ -36,8 +36,8 @@ export default function Details() {
         </TouchableOpacity>
       </View>
       <ScrollView>
-        <View className="items-center justify-center h-1/2">
-          <Image source={getPlant(id).imageUrl} className="h-full" />
+        <View className="items-center justify-center">
+          <Image source={getPlant(id).imageUrl} className="h-64" />
         </View>
         <View className="bg-gray-200 rounded-3xl mx-4 mt-12 py-8">
           <View className="flex-row justify-between">
