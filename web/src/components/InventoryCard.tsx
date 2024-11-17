@@ -4,18 +4,6 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import api from "@/services/api";
 
-type Plant = {
-  "id": string,
-  "name": string,
-  "minimum": number,
-  "amount": number,
-  "family": string,
-  "maxHeight": number,
-  "about": string;
-  "curiosities": string;
-  "imageUrl": string;
-}
-
 type Props = {
   id: string,
   title: string,
@@ -28,28 +16,16 @@ type Props = {
 
 export default function InventoryCard({ id, title, image, available, minimum, manager = false, onDelete }: Props) {
   const router = useRouter();
-  const [plant, setPlant] = useState<Plant>();
 
   const [min, setValue] = useState(minimum);
   const [ava, setValue2] = useState(available);
 
-  async function update(value: string, newValue: number) {
-    if (plant) {
-      const updatedPlant = {
-        ...plant,
-        value: newValue
-      };
-      setPlant(updatedPlant);
-      await api.patch(`/inventory/${id}`, updatedPlant);
-    }
-  }
+
   async function handleValueChange(newValue: number) {
     setValue(newValue);
-    update("minimum", min);
   };
   const handleValueChange2 = (newValue: number) => {
     setValue2(newValue);
-    update("available", ava);
   };
 
   async function handleDelete() {
@@ -77,6 +53,7 @@ export default function InventoryCard({ id, title, image, available, minimum, ma
           <div className='h-2/5 w-full  text-left text-2xl text-white' onClick={() => !manager && router.push(`/employee/inventory/${id}`)} >
             {title}
           </div>
+
           {
             manager ?
               (
@@ -93,7 +70,7 @@ export default function InventoryCard({ id, title, image, available, minimum, ma
                       <p>Minimum:</p>
                     </div>
                     <div >
-                      <EditInput min={minimum} minvalue={min} onChange={handleValueChange} />
+                      <EditInput id={id} min={minimum} minvalue={min} onChange={handleValueChange} />
                     </div>
                   </div>
                 </>
@@ -105,7 +82,7 @@ export default function InventoryCard({ id, title, image, available, minimum, ma
                       <p>Available:</p>
                     </div>
                     <div>
-                      <EditInput min={available} minvalue={ava} onChange={handleValueChange2} />
+                      <EditInput id={id} min={available} minvalue={ava} onChange={handleValueChange2} />
                     </div>
                   </div>
                   <div className='h-1/6 w-full grid grid-cols-2 align-bottom'>
