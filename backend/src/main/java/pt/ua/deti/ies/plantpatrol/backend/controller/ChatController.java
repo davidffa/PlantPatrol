@@ -11,7 +11,7 @@ import pt.ua.deti.ies.plantpatrol.backend.dto.chat.CreateMessageDTO;
 import pt.ua.deti.ies.plantpatrol.backend.dto.chat.CreateRoomDTO;
 import pt.ua.deti.ies.plantpatrol.backend.entity.ChatRoom;
 import pt.ua.deti.ies.plantpatrol.backend.entity.Employee;
-import pt.ua.deti.ies.plantpatrol.backend.entity.Message;
+import pt.ua.deti.ies.plantpatrol.backend.utils.MessagePayload;
 import pt.ua.deti.ies.plantpatrol.backend.service.ChatRoomService;
 
 @RestController
@@ -25,16 +25,16 @@ public class ChatController {
     public ResponseEntity<?> processMessage(@RequestHeader(required = false) String senderId, @PathVariable String chatRoomId, @RequestBody CreateMessageDTO dto) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        Message msg = Message.builder().content(dto.getContent()).build();
+        MessagePayload msg = MessagePayload.builder().content(dto.getContent()).build();
 
         if (auth.getPrincipal() instanceof Employee issuer) {
-            msg.setSenderId(issuer.getId());
+            msg.setOriginId(issuer.getId());
         } else {
             if (senderId == null) {
                 return ResponseEntity.badRequest().build();
             }
 
-            msg.setSenderId(senderId);
+            msg.setOriginId(senderId);
         }
 
         return new ResponseEntity<>(chatRoomService.createMessage(chatRoomId, msg), HttpStatus.OK);
@@ -44,7 +44,7 @@ public class ChatController {
     @GetMapping("/chat/{chatRoomId}")
     public ResponseEntity<?> findChatMessages (@PathVariable String chatRoomId) {
         ChatRoom chatRoom = chatRoomService.getChatRoomByID(chatRoomId);
-        return new ResponseEntity<>(chatRoom.getMessages(), HttpStatus.OK) ;
+        return new ResponseEntity<>(chatRoom.getMessagePayloads(), HttpStatus.OK) ;
     }
 
     @Operation(summary = "Create a new chatRoom")

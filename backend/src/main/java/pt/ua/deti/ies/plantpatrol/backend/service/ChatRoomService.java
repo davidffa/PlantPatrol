@@ -2,12 +2,9 @@ package pt.ua.deti.ies.plantpatrol.backend.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import pt.ua.deti.ies.plantpatrol.backend.dto.chat.CreateRoomDTO;
 import pt.ua.deti.ies.plantpatrol.backend.entity.ChatRoom;
-import pt.ua.deti.ies.plantpatrol.backend.entity.Message;
+import pt.ua.deti.ies.plantpatrol.backend.utils.MessagePayload;
 import pt.ua.deti.ies.plantpatrol.backend.repository.ChatRoomRepository;
-
-import java.util.Optional;
 
 @Service
 public class ChatRoomService {
@@ -15,7 +12,7 @@ public class ChatRoomService {
     @Autowired
     private ChatRoomRepository chatRoomRepository;
 
-    public Message createMessage(String chatRoomId, Message msg) {
+    public MessagePayload createMessage(String chatRoomId, MessagePayload msg) {
         chatRoomRepository.createMessage(chatRoomId, msg);
 
         return msg;
