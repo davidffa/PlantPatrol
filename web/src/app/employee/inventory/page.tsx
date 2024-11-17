@@ -44,6 +44,10 @@ export default function Inventory() {
 
   const [components, setComponents] = useState<number[]>([]);
 
+  const reloadPage = () => {
+    window.location.reload();
+  };
+
   const addInventory = () => {
     setComponents(prev => [...prev, prev.length]); // Adiciona um novo componente à lista
   };
@@ -76,6 +80,7 @@ export default function Inventory() {
     //   console.error(err);
     // }
   }
+
   return (
     <div>
       <Navbar />
@@ -136,9 +141,9 @@ export default function Inventory() {
         </div>
         <div className="w-full grid md:grid-cols-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5  gap-12 align-center p-4">
           {searchQuery === "" ?
-            plants.map(({ id, imageUrl, name, amount, minimum }) => (<InventoryCard key={id} id={id} image={imageUrl} title={name} available={amount} minimum={minimum} />))
+            plants.map(({ id, imageUrl, name, amount, minimum }) => (<InventoryCard key={id} id={id} image={imageUrl} title={name} available={amount} minimum={minimum} onDelete={reloadPage} />))
             :
-            searchPlants.map(({ id, imageUrl, name, amount, minimum }) => (<InventoryCard key={id} id={id} image={imageUrl} title={name} available={amount} minimum={minimum} />))
+            searchPlants.map(({ id, imageUrl, name, amount, minimum }) => (<InventoryCard key={id} id={id} image={imageUrl} title={name} available={amount} minimum={minimum} onDelete={reloadPage} />))
           }
         </div>
       </div>

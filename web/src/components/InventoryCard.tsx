@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import EditInput from './EditInput';
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import api from "@/services/api";
 
 type Plant = {
@@ -21,10 +22,11 @@ type Props = {
   image: string,
   available: number,
   minimum: number,
-  manager?: boolean
+  manager?: boolean,
+  onDelete: () => void
 }
 
-export default function InventoryCard({ id, title, image, available, minimum, manager = false }: Props) {
+export default function InventoryCard({ id, title, image, available, minimum, manager = false, onDelete }: Props) {
   const router = useRouter();
   const [plant, setPlant] = useState<Plant>();
 
@@ -50,9 +52,15 @@ export default function InventoryCard({ id, title, image, available, minimum, ma
     update("available", ava);
   };
 
+  async function handleDelete() {
+    await api.delete(`/inventory/${id}`);
+    onDelete();
+  }
+
+
   return (
 
-    <div className="card cursor-pointer shadow-md  hover:shadow-green hover:translate-y-[-4px]  transition-all ease-in-out image-full w-60 h-64" >
+    <div className="card cursor-pointer shadow-md  hover:shadow-green hover:translate-y-[-4px]  transition-all ease-in-out image-full w-60 h-64">
       <figure>
         <img
           src={image}
@@ -63,7 +71,10 @@ export default function InventoryCard({ id, title, image, available, minimum, ma
       </figure>
       <div className="card-body ">
         <div className="w-full flex flex-col ">
-          <div className='h-4/6 w-full  text-left text-2xl text-white' onClick={() => !manager && router.push(`/employee/inventory/${id}`)} >
+          <div className='flex justify-end'>
+            <Image src="/trash-2.svg" alt="Remove" height={20} width={20} onClick={handleDelete} />
+          </div>
+          <div className='h-2/5 w-full  text-left text-2xl text-white' onClick={() => !manager && router.push(`/employee/inventory/${id}`)} >
             {title}
           </div>
           {

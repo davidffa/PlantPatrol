@@ -41,6 +41,10 @@ export default function Inventory() {
     } getSearchPlants();
   }, [searchQuery]);
 
+  const reloadPage = () => {
+    window.location.reload();
+  };
+
   return (
     <div>
       <Navbar />
@@ -62,9 +66,9 @@ export default function Inventory() {
       </div>
       <div className="w-full grid md:grid-cols-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5  gap-12 align-center p-4">
         {searchQuery === "" ?
-          plants.map(({ id, imageUrl, name, amount, minimum }) => (<InventoryCard key={id} id={id} image={imageUrl} title={name} available={amount} minimum={minimum} manager />))
+          plants.map(({ id, imageUrl, name, amount, minimum }) => (<InventoryCard key={id} id={id} image={imageUrl} title={name} available={amount} minimum={minimum} manager onDelete={reloadPage} />))
           :
-          searchPlants.map(({ id, imageUrl, name, amount, minimum }) => (<InventoryCard key={id} id={id} image={imageUrl} title={name} available={amount} minimum={minimum} manager />))
+          searchPlants.map(({ id, imageUrl, name, amount, minimum }) => (<InventoryCard key={id} id={id} image={imageUrl} title={name} available={amount} minimum={minimum} manager onDelete={reloadPage} />))
         }
       </div>
     </div>
