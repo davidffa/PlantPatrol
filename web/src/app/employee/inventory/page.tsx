@@ -2,9 +2,10 @@
 import AddInventory from "@/components/AddInventory";
 import InventoryCard from "@/components/InventoryCard";
 import { Navbar } from "@/components/Navbar";
-import { useRef, useState, useEffect } from "react";
+import { FormEvent, useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import api from "@/services/api";
+import Swal from "sweetalert2";
 
 type Plant = {
   "id": string,
@@ -36,6 +37,34 @@ export default function Inventory() {
 
   const modalRef = useRef<HTMLDialogElement>(null);
 
+
+  // const [name, setName] = useState("");
+  // const [quantity, setQuantity] = useState("");
+
+
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    // try {
+    //   components.forEach(async (element) => {
+    //     const { data } = await api.post("/inventory", {
+    //       element.name,
+    //       element.quantity
+    //     });
+    //   });
+
+
+
+    // } catch (err) {
+    //   Swal.fire({
+    //     icon: "error",
+    //     title: "Error",
+    //     text: "Error when adding to the inventory. Try again later."
+    //   });
+    //   console.error(err);
+    // }
+  }
   return (
     <div>
       <Navbar />
@@ -82,7 +111,7 @@ export default function Inventory() {
                   <button className=" bg-green rounded-full hover:bg-dark-green hover:duration-200 flex justify-center items-center  " onClick={addInventory}>
                     <Image src="/plus.svg" alt="Adicionar" height={42} width={42} />
                   </button>
-                  <form method="dialog">
+                  <form method="dialog" onSubmit={handleSubmit}>
                     {/* if there is a button in form, it will close the modal */}
                     <button className="bg-green text-white text-xl  hover:bg-dark-green hover:duration-200 rounded-full flex py-2 px-6 justify-center items-center gap-4">
                       <b>Save</b>

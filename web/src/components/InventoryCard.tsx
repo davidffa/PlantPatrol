@@ -1,7 +1,19 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import EditInput from './EditInput';
 import { useRouter } from "next/navigation";
+import api from "@/services/api";
 
+type Plant = {
+  "id": string,
+  "name": string,
+  "minimum": number,
+  "amount": number,
+  "family": string,
+  "maxHeight": number,
+  "about": string;
+  "curiosities": string;
+  "imageUrl": string;
+}
 
 type Props = {
   id: string,
@@ -14,14 +26,39 @@ type Props = {
 
 export default function InventoryCard({ id, title, image, available, minimum, manager = false }: Props) {
   const router = useRouter();
+  const [plant, setPlant] = useState<Plant>();
+
   const [min, setValue] = useState(minimum);
   const [ava, setValue2] = useState(available);
-  const handleValueChange = (newValue: number) => {
+
+  async function update(value: string, newValue: number) {
+    if (plant) {
+      const updatedPlant = {
+        ...plant,
+        value: newValue
+      };
+      setPlant(updatedPlant);
+      await api.patch(`/inventory/${id}`, updatedPlant);
+    }
+  }
+
+  async function handleValueChange(newValue: number) {
     setValue(newValue);
+    update("minimum", min);
   };
   const handleValueChange2 = (newValue: number) => {
     setValue2(newValue);
+    update("available", ava);
   };
+  useEffect(() => {
+    async function getPlant() {
+      const { data } = await api.get<Plant>(`/inventory/${id}`);
+
+      setPlant(data);
+    }
+    getPlant();
+  });
+
 
   return (
 
