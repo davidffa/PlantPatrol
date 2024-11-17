@@ -36,16 +36,31 @@ public class AlertController {
     public ResponseEntity<List<Alert>> getAlerts() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Employee issuer = (Employee) auth.getPrincipal();
+
+        String fullName = issuer.getFirstName() + " " + issuer.getLastName();
+        System.out.println("Logged-in employee: " + issuer.getUsername() + " (ID: " + issuer.getId() + ", Full Name: " + fullName + ")");
+
+        List<Alert> allAlerts = alertService.findAll(); // Fetch all alerts
+        System.out.println("All Alerts in Database:");
+        for (Alert alert : allAlerts) {
+            System.out.println("Alert: " + alert.getTitle() + ", SendTo: " + alert.getSendto());
+        }
+
         List<Alert> alerts = new ArrayList<>();
         if (issuer.isManager()){
-            alerts = alertService.findAll();
+            alerts = allAlerts;
         }
         else {
-            for (Alert alert : alertService.findAll()) {
-                if (alert.getSendto().equals("everyone") || alert.getSendto().equals(issuer.getId())) {
+            for (Alert alert : allAlerts) {
+                if ("Everyone".equalsIgnoreCase(alert.getSendto()) || alert.getSendto().equals(fullName)) {
                     alerts.add(alert);
                 }
             }
+        }
+
+        System.out.println("Filtered Alert for Employee:");
+        for (Alert alert : alerts) {
+            System.out.println("Alert: " + alert.getTitle() + ", SendTo: " + alert.getSendto());
         }
         return new ResponseEntity<>(alerts, HttpStatus.OK);
     }

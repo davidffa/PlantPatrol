@@ -28,7 +28,8 @@ export default function Alerts() {
           title: alert.title,
           timestamp: alert.timestamp || new Date().toISOString(),
           sendTo: alert.sendto,
-          description: alert.message || ""
+          description: alert.message || "",
+          sender: alert.fromSystem ? "System" : "Admin",
         }));
         setAlerts(alerts.reverse());
         console.log("Mapped Alerts fetched:", alerts);

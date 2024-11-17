@@ -1,7 +1,49 @@
+"use client"
+
 import { AlertCollapseReceiver } from "@/components/AlertCollapseReceiver";
 import { Navbar } from "@/components/Navbar";
+import { useState, useEffect } from "react";
+import api from "@/services/api";
+import { useAuth } from "@/contexts/auth";
+
 
 export default function Alerts() {
+  interface Alert {
+    id: string;
+    title: string;
+    timestamp: string;
+    message: string;
+    sendto: string;
+    fromSystem: boolean;
+  }
+
+  const { user, isLogged } = useAuth();
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+
+  useEffect(() => {
+
+    if (!isLogged || !user) return;
+
+    async function fetchAlerts() {
+      try {
+        console.log("Making API request...");
+        const response = await api.get("/alert");
+        console.log("API response:", response);
+        console.log("Logged-in user:", user);
+
+        if (!user) return;
+        const employeeFullName = `${user.firstName} ${user.lastName}`;
+        const filteredAlerts = response.data.filter(
+          (alert: Alert) => alert.sendto === "Everyone" || (alert.sendto === employeeFullName)
+        )
+        console.log("Filtered alerts:", filteredAlerts);
+        setAlerts(filteredAlerts.reverse());
+      } catch (error) {
+        console.log("Failed to fetch alerts: " + error);
+      }
+    }
+    fetchAlerts();
+  }, [isLogged, user]);
   return (
     <>
       <Navbar />
@@ -12,32 +54,18 @@ export default function Alerts() {
           </h1>
           <hr className="mb-4" />
         </div>
-
-        <AlertCollapseReceiver
-          title="SYSTEM: Check temp. sensor no. 2 at Greenhouse 2"
-          data="13/10/2024, 1:40PM"
-          description="We're running out of fertilizer, please order at least 100L until next week."
-        />
-        <AlertCollapseReceiver
-          title="Order more fertilizer"
-          data="12/10/2024, 6:20PM"
-          description="We're running out of fertilizer, please order at least 100L until next week."
-        />
-        <AlertCollapseReceiver
-          title="Urgent meeting!"
-          data="10/10/2024, 4:19PM"
-          description="We're running out of fertilizer, please order at least 100L until next week."
-        />
-        <AlertCollapseReceiver
-          title="Replace faulty sensour at greenhouse 3!"
-          data="4/10/2024, 3:35PM"
-          description="We're running out of fertilizer, please order at least 100L until next week."
-        />
-        <AlertCollapseReceiver
-          title="Improve watering rules"
-          data="3/10/2024, 10:12AM"
-          description="We're running out of fertilizer, please order at least 100L until next week."
-        />
+        {alerts.length > 0 ? (
+          alerts.map((alert) => (
+            <AlertCollapseReceiver
+              key={alert.id}
+              title={alert.title}
+              data={new Date(alert.timestamp).toLocaleString()}
+              description={alert.message}
+            />
+          ))
+        ) : (
+          <p>No alerts found for you</p>
+        )}
       </div>
     </>
   );

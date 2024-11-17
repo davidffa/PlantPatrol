@@ -4,6 +4,7 @@ type Props = {
   sentTo: string;
   description: string;
   sender: string;
+
 }
 
 export function AlertCollapse({ title, data, sentTo, description, sender}: Props) {
@@ -21,8 +22,7 @@ export function AlertCollapse({ title, data, sentTo, description, sender}: Props
           <p>Description:</p>
           <p>{description}</p>
           <br/>
-          <p>Regards,</p>
-          <p>{sender}</p>
+          <p>From {sender}</p>
         </div>
       </div>
   );
