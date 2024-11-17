@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import api from "@/services/api";
 import { AxiosError } from "axios";
 
@@ -19,21 +19,21 @@ export default function Create() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [sendTo, setSendTo] = useState("");
-  // const [employees, setEmployees] = useState<string[]>([]);
+  const [employees, setEmployees] = useState<string[]>([]);
 
-  // useEffect(() => {
-  //   async function fetchEmployees() {
-  //     try {
-  //       const responde = await api.get("/employees");
-  //       const employees = responde.data;
-  //       setEmployees(["Everyone", ...employees])
-  //     } catch (error) {
-  //       const err = error as AxiosError;
-  //       console.log("Failed to fetch employee: " + err);
-  //     }
-  //   }
-  //   fetchEmployees();
-  // }, []);
+  useEffect(() => {
+    async function fetchEmployees() {
+      try {
+        const response = await api.get("/employees");
+        const employees = response.data.map((employee: { name: string }) => employee.name);
+        setEmployees(["Everyone", ...employees])
+      } catch (error) {
+        const err = error as AxiosError;
+        console.log("Failed to fetch employee: " + err);
+      }
+    }
+    fetchEmployees();
+  }, []);
 
 
   async function handleCreateAlert(event: FormEvent<HTMLFormElement>) {
@@ -82,21 +82,17 @@ export default function Create() {
                 <h2 className="text-2xl font-semibold mb-3">
                   Send to:
                 </h2>
-                <select 
-                  id="send" 
-                  className="menu menu-dropdown bg-base-100 rounded-box z-[1] w-52 h-12 p-3 border border-gray-300 "
+                <select
+                  id="send"
+                  className="menu menu-dropdown bg-base-100 rounded-box z-[1] w-52 h-12 p-3 border border-gray-300"
                   value={sendTo}
                   onChange={(e) => setSendTo(e.target.value)}
                 >
-                  {/* {employees.map((employees) => (
+                  {employees.map((employee) => (
                     <option key={employee} value={employee}>
                       {employee}
                     </option>
-                  ))} */}
-                  <option value="Everyone">Everyone</option>
-                  <option value="Paulo">Paulo Miranda</option>
-                  <option value="Joaquim">Joaquim Costa</option>
-                  <option value="Rosa">Rosa Marques</option>
+                  ))}
                 </select>
               </div>
             </div>

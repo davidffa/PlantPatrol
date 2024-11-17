@@ -22,7 +22,7 @@ export default function Alerts() {
     async function fetchAlerts() {
       try {
         const response = await api.get("/alert");
-        setAlerts(response.data);
+        setAlerts(response.data.reverse());
       } catch (error) {
         console.log("Failed to fetch alerts: " + error);
       }
@@ -60,8 +60,9 @@ export default function Alerts() {
               key={alert.id} 
               title={alert.title}
               data={new Date(alert.timestamp).toLocaleString()} 
-              sender={alert.sendTo}
+              sentTo={alert.sendTo}
               description={alert.description}
+              sender="Admin"
             />
           ))
         ) : (
