@@ -6,6 +6,7 @@ import { FormEvent, useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import api from "@/services/api";
 import Swal from "sweetalert2";
+import withAuth from "@/lib/withAuth";
 
 type Plant = {
   "id": string,
@@ -24,7 +25,7 @@ type AddPlant = {
   quantity: number;
 }
 
-export default function Inventory() {
+function Inventory() {
   const [plants, setPlants] = useState<Plant[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchPlants, setSearchPlants] = useState<Plant[]>([]);
@@ -161,3 +162,5 @@ export default function Inventory() {
     </div>
   );
 }
+
+export default withAuth(Inventory);

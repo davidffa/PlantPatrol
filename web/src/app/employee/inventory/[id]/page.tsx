@@ -7,6 +7,7 @@ import Swal from "sweetalert2";
 import { FormEvent, useState, useEffect } from "react";
 import api from "@/services/api";
 import { useRouter } from "next/navigation";
+import withAuth from "@/lib/withAuth";
 
 type Plant = {
   "id": string,
@@ -23,7 +24,7 @@ type Props = {
   params: { id: string }
 }
 
-export default function Details({ params }: Props) {
+function Details({ params }: Props) {
   const { id } = params;
   const router = useRouter();
 
@@ -161,3 +162,5 @@ export default function Details({ params }: Props) {
     </>
   )
 }
+
+export default withAuth(Details);

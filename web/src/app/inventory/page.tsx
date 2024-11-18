@@ -4,6 +4,7 @@ import { Navbar } from "@/components/Navbar";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import api from "@/services/api";
+import withManagerAuth from "@/lib/withManagerAuth";
 
 type Plant = {
   "id": string,
@@ -17,7 +18,7 @@ type Plant = {
   "imageUrl": string;
 }
 
-export default function Inventory() {
+function Inventory() {
   const [plants, setPlants] = useState<Plant[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchPlants, setSearchPlants] = useState<Plant[]>([]);
@@ -75,3 +76,5 @@ export default function Inventory() {
     </div>
   );
 }
+
+export default withManagerAuth(Inventory);
