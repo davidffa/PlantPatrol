@@ -4,23 +4,82 @@ import { Navbar } from "@/components/Navbar";
 import Link from "next/link";
 import Image from "next/image";
 import Swal from "sweetalert2";
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useEffect } from "react";
+import api from "@/services/api";
+import { useRouter } from "next/navigation";
+import withAuth from "@/lib/withAuth";
 
-export default function Details() {
+type Plant = {
+  "id": string,
+  "name": string,
+  "minimum": number,
+  "amount": number,
+  "family": string,
+  "maxHeight": number,
+  "about": string;
+  "curiosities": string;
+  "imageUrl": string;
+}
+type Props = {
+  params: { id: string }
+}
+
+function Details({ params }: Props) {
+  const { id } = params;
+  const router = useRouter();
+
+  const [plant, setPlant] = useState<Plant>();
+  const [title, setTitle] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [family, setFamily] = useState("");
+  const [size, setSize] = useState("");
+  const [about, setAbout] = useState("");
+  const [curiosities, setCuriosities] = useState("");
+
   const [notesEnabled, setNotesEnabled] = useState(false);
+
+
+  useEffect(() => {
+    async function getPlant() {
+      const { data } = await api.get<Plant>(`/inventory/${id}`);
+
+      setTitle(data.name ?? "");
+      setImageUrl(data.imageUrl ?? "");
+      setFamily(data.family ?? "");
+      setSize("" + data.maxHeight);
+      setAbout(data.about ?? "");
+      setCuriosities(data.curiosities ?? "");
+
+      setPlant(data);
+    }
+    getPlant();
+  }, []);
+
+
 
   function handleEditDetails() {
     setNotesEnabled(!notesEnabled)
   }
 
-  function handleSaveDetails(event: FormEvent<HTMLFormElement>) {
+  async function handleSaveDetails(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (plant) {
+      const updatedPlant = {
+        ...plant,
+        family,
+        maxHeight: parseFloat(size),
+        about,
+        curiosities
+      };
+      setPlant(updatedPlant);
+      await api.put(`/inventory/${id}`, updatedPlant);
+    }
     Swal.fire({
       icon: "success",
       title: "Success",
       text: "Saved with success!"
     });
-
+    handleEditDetails();
   }
   return (
     <>
@@ -35,13 +94,13 @@ export default function Details() {
                 </button>
               </Link>
               <h1 className="text-4xl font-semibold font-alt gap-2 py-2  ">
-                Rose
+                {plant?.name}
               </h1>
             </div>
             <div className="px-20 mt-12">
-              <Image
-                src="/roseimg.svg"
-                alt="Rose"
+              <img
+                src={imageUrl}
+                alt={title}
                 height={350}
                 width={400}
               />
@@ -62,7 +121,7 @@ export default function Details() {
                       <button type="submit" className="bg-green hover:bg-dark-green hover:duration-200 rounded-md py-2 w-28 justify-center items-center gap-2 mr-4">
                         <p className="text-2xl font-semibold text-white">Save</p>
                       </button>
-                      <button onClick={handleEditDetails} type="reset" className="bg-red-500 hover:bg-red-700 hover:duration-200 rounded-md py-2 w-28 justify-center items-center gap-2 " >
+                      <button onClick={() => router.push(`/employee/inventory`)} type="reset" className="bg-red-500 hover:bg-red-700 hover:duration-200 rounded-md py-2 w-28 justify-center items-center gap-2 " >
                         <p className="text-2xl font-semibold text-white">Cancel</p>
                       </button>
                     </div>
@@ -74,26 +133,27 @@ export default function Details() {
                 <h2 className="text-2xl font-semibold mt-2">
                   Family:
                 </h2>
-                <input disabled={!notesEnabled} type="text" placeholder="Type here" className="input input-md input-bordered w-full" />
+                <input type="text" value={family} className="input input-md input-bordered w-full" onChange={(e) => (setFamily(e.target.value))
+                } disabled={!notesEnabled} />
               </div>
               <div>
                 <h2 className="text-2xl font-semibold mt-2">
                   Size:
                 </h2>
-                <input disabled={!notesEnabled} type="text" placeholder="Type here" className="input input-md input-bordered w-full" />
+                <input type="text" value={size} className="input input-md input-bordered w-full" onChange={(e) => setSize(e.target.value)} disabled={!notesEnabled} />
               </div>
             </div>
             <div>
               <h2 className="text-2xl font-semibold mt-2">
                 About:
               </h2>
-              <textarea disabled={!notesEnabled} className="textarea textarea-bordered textarea-xl min-w-full h-40" placeholder="Type here" />
+              <textarea className="textarea textarea-bordered textarea-xl min-w-full h-40" value={about} onChange={(e) => setAbout(e.target.value)} disabled={!notesEnabled} />
             </div>
             <div>
               <h2 className="text-2xl font-semibold mt-2">
                 Curiosities:
               </h2>
-              <textarea disabled={!notesEnabled} className="textarea textarea-bordered textarea-xl min-w-full h-40" placeholder="Type here" />
+              <textarea className="textarea textarea-bordered textarea-xl min-w-full h-40" value={curiosities} onChange={(e) => setCuriosities(e.target.value)} disabled={!notesEnabled} />
             </div>
           </div>
         </div >
@@ -102,3 +162,5 @@ export default function Details() {
     </>
   )
 }
+
+export default withAuth(Details);

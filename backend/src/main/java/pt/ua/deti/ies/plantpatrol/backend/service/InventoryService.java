@@ -79,5 +79,4 @@ public class InventoryService {
 
         return inventoryRepository.findAll(pageable).toList();
     }
-
 }
