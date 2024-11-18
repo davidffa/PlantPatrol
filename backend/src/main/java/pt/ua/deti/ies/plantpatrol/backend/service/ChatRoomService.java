@@ -8,10 +8,9 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import pt.ua.deti.ies.plantpatrol.backend.entity.ChatRoom;
-import pt.ua.deti.ies.plantpatrol.backend.utils.MessagePayload;
+import pt.ua.deti.ies.plantpatrol.backend.dto.chat.MessagePayload;
 import pt.ua.deti.ies.plantpatrol.backend.repository.ChatRoomRepository;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,63 +18,56 @@ import java.util.Map;
 
 @Service
 public class ChatRoomService extends TextWebSocketHandler {
-
     @Autowired
     private ChatRoomRepository chatRoomRepository;
 
-    private Map<String, List<WebSocketSession>> socketSessions = new HashMap<>();
-    private Map<String,String> sessionsId  = new HashMap<>();
+    // sessionId <-> ws session
+    private final Map<String, WebSocketSession> sessions = new HashMap<>();
+    // chatRoomId <-> session ids
+    private final Map<String, List<String>> chatRoomSessions = new HashMap<>();
 
     public MessagePayload createMessage(String chatRoomId, MessagePayload msg) {
         chatRoomRepository.createMessage(chatRoomId, msg);
 
-        socketSessions.get(chatRoomId).forEach(socketSession -> {
-            JSONObject json = new JSONObject()
-                    .put("message", msg.getContent())
-                    .put("sender", msg.getOriginId());
+        List<String> sessionIds = chatRoomSessions.get(chatRoomId);
 
-            try {
-                socketSession.sendMessage(new TextMessage(json.toString()));
-            } catch (IOException ignored) {
+        if (sessionIds != null) {
+            JSONObject json = new JSONObject(msg);
 
-            }
-        });
+            sessionIds.forEach(sId -> {
+                try {
+                    sessions.get(sId).sendMessage(new TextMessage(json.toString()));
+                } catch (Exception ignored) { }
+            });
+        }
 
         return msg;
     }
 
     public ChatRoom createChatRoom(String clientId) {
-        return chatRoomRepository.save(ChatRoom.builder().clientId(clientId).build());
-    }
-
-    public String getChatRoom(String clientId) {
-        for (ChatRoom chatRoom : chatRoomRepository.findAll()) {
-            if (chatRoom.getClientId().equals(clientId)) {
-                return chatRoom.getId();
-            }
-        }
-        return null;
+        return chatRoomRepository.save(ChatRoom.builder().chatRoomId(clientId).messages(List.of()).build());
     }
 
     public ChatRoom getChatRoomByID(String chatRoomId) {
-        return chatRoomRepository.findById(chatRoomId).orElse(null);
+        return chatRoomRepository.findChatRoomByChatRoomId(chatRoomId).orElse(null);
+    }
+
+    @Override
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+        JSONObject json = new JSONObject(message.getPayload());
+        String chatRoomId = json.getString("chatRoomId");
+
+        this.chatRoomSessions.putIfAbsent(chatRoomId, new ArrayList<>());
+        this.chatRoomSessions.get(chatRoomId).add(session.getId());
     }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        String id = session.getHandshakeHeaders().getFirst("chatRoomId");
-        if (id == null) {
-            session.close();
-            return;
-        }
-        this.socketSessions.putIfAbsent(session.getId(), new ArrayList<>());
-        this.socketSessions.get(session.getId()).add(session);
-        this.sessionsId.put(session.getId(), id);
+        sessions.put(session.getId(), session);
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        this.socketSessions.get(session.getId()).remove(session);
-        this.sessionsId.remove(session.getId());
+        sessions.remove(session.getId());
     }
 }

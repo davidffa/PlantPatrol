@@ -11,8 +11,11 @@ import pt.ua.deti.ies.plantpatrol.backend.dto.chat.CreateMessageDTO;
 import pt.ua.deti.ies.plantpatrol.backend.dto.chat.CreateRoomDTO;
 import pt.ua.deti.ies.plantpatrol.backend.entity.ChatRoom;
 import pt.ua.deti.ies.plantpatrol.backend.entity.Employee;
-import pt.ua.deti.ies.plantpatrol.backend.utils.MessagePayload;
+import pt.ua.deti.ies.plantpatrol.backend.dto.chat.MessagePayload;
 import pt.ua.deti.ies.plantpatrol.backend.service.ChatRoomService;
+
+import java.util.Date;
+import java.time.Instant;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -25,16 +28,19 @@ public class ChatController {
     public ResponseEntity<?> processMessage(@RequestHeader(required = false) String senderId, @PathVariable String chatRoomId, @RequestBody CreateMessageDTO dto) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        MessagePayload msg = MessagePayload.builder().content(dto.getContent()).build();
+        MessagePayload msg = MessagePayload.builder()
+                .content(dto.getContent())
+                .timestamp(Date.from(Instant.now()))
+                .build();
 
         if (auth.getPrincipal() instanceof Employee issuer) {
-            msg.setOriginId(issuer.getId());
+            msg.setSenderId(issuer.getId());
         } else {
             if (senderId == null) {
                 return ResponseEntity.badRequest().build();
             }
 
-            msg.setOriginId(senderId);
+            msg.setSenderId(senderId);
         }
 
         return new ResponseEntity<>(chatRoomService.createMessage(chatRoomId, msg), HttpStatus.OK);
@@ -44,14 +50,18 @@ public class ChatController {
     @GetMapping("/chat/{chatRoomId}")
     public ResponseEntity<?> findChatMessages (@PathVariable String chatRoomId) {
         ChatRoom chatRoom = chatRoomService.getChatRoomByID(chatRoomId);
-        return new ResponseEntity<>(chatRoom.getMessagePayloads(), HttpStatus.OK) ;
+
+        if (chatRoom == null)
+            return ResponseEntity.notFound().build();
+
+        return new ResponseEntity<>(chatRoom.getMessages(), HttpStatus.OK);
     }
 
     @Operation(summary = "Create a new chatRoom")
     @PostMapping("/chat")
     public ResponseEntity<?> createChat(@RequestBody CreateRoomDTO dto) {
-        ChatRoom chatRoom = chatRoomService.createChatRoom(dto.getClientId());
-        return new ResponseEntity<>(chatRoom, HttpStatus.OK) ;
+        ChatRoom chatRoom = chatRoomService.createChatRoom(dto.getChatRoomId());
+        return new ResponseEntity<>(chatRoom, HttpStatus.OK);
     }
 
 }
