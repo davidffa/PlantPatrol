@@ -72,11 +72,13 @@ export default function Home() {
 
   async function toggleAlert(id: string) {
     if (alertPlantIds.includes(id)) {
-      setAlertPlantIds(prev => prev.filter(it => it !== id));
-      await api.delete(`/reminders/${id}`)
+      await api.delete(`/reminders/${id}`);
+      const { data } = await api.get(`/reminders/${clientId}`);
+      setAlertPlantIds(data);
     } else {
-      setAlertPlantIds([...alertPlantIds, id]);
       await api.post("/reminders", { clientId, plantId: id });
+      const { data } = await api.get(`/reminders/${clientId}`);
+      setAlertPlantIds(data);
     }
   }
 
