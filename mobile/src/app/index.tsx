@@ -72,7 +72,7 @@ export default function Home() {
 
   async function toggleAlert(id: string) {
     if (alertPlantIds.includes(id)) {
-      await api.delete(`/reminders/${id}`);
+      await api.delete(`/reminders/${id}`, { headers: { clientId } });
       const { data } = await api.get(`/reminders/${clientId}`);
       setAlertPlantIds(data);
     } else {
