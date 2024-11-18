@@ -40,6 +40,8 @@ public class SecurityConfig {
                                 .permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/inventory/**")
                                 .permitAll()
+                                .requestMatchers("/api/v1/reminders/**")
+                                .permitAll()
                                 .anyRequest()
                                 .authenticated()
                 )
