@@ -5,6 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { FormEvent, useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import api from "@/services/api";
+import Swal from "sweetalert2";
 
 type Plant = {
   "id": string,
@@ -16,6 +17,11 @@ type Plant = {
   "about": string,
   "curiosities": string,
   "imageUrl": string;
+}
+
+type AddPlant = {
+  name: string;
+  quantity: number;
 }
 
 export default function Inventory() {
@@ -43,44 +49,47 @@ export default function Inventory() {
     } getSearchPlants();
   }, [searchQuery]);
 
-  const [components, setComponents] = useState<number[]>([]);
+  const [components, setComponents] = useState<number>(1);
+  const [adds, setAdds] = useState<AddPlant[]>([]);
 
   const reloadPage = () => {
     window.location.reload();
   };
 
   const addInventory = () => {
-    setComponents(prev => [...prev, prev.length]); // Adiciona um novo componente à lista
+    setComponents(prev => prev + 1); // Adiciona um novo componente à lista
   };
+
+  function addToAdds(id: number, name: string, quantity: number) {
+    setAdds(prev => {
+      prev[id] = { name, quantity };
+
+      return prev;
+    })
+  }
 
   const modalRef = useRef<HTMLDialogElement>(null);
 
-
-  // const [name, setName] = useState("");
-  // const [quantity, setQuantity] = useState("");
-
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    try {
+      await api.post("/inventory", adds.filter(it => it.name.length >= 0));
 
-    // try {
-    //   components.forEach(async (element) => {
-    //     const { data } = await api.post("/inventory", {
-    //       element.name,
-    //       element.quantity
-    //     });
-    //   });
+      modalRef.current?.close();
 
+      setComponents(1);
 
-
-    // } catch (err) {
-    //   Swal.fire({
-    //     icon: "error",
-    //     title: "Error",
-    //     text: "Error when adding to the inventory. Try again later."
-    //   });
-    //   console.error(err);
-    // }
+    } catch (err) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Error when adding to the inventory. Try again later."
+      });
+      console.error(err);
+    }
   }
+
+
 
   return (
     <div>
@@ -120,10 +129,11 @@ export default function Inventory() {
                 </div>
 
                 <div className="modal-body">
-                  <AddInventory />
-                  {components.map((_, index) => (
-                    <AddInventory key={index} />
-                  ))}
+                  {
+                    Array(components).fill(0).map((_, idx) => (
+                      <AddInventory key={idx} id={idx} onChange={addToAdds} />
+                    ))
+                  }
                 </div>
                 <div className="mt-3 justify-between flex ">
                   <button className=" bg-green rounded-full hover:bg-dark-green hover:duration-200 flex justify-center items-center  " onClick={addInventory}>

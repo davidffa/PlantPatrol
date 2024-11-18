@@ -27,7 +27,7 @@ public class GoogleSearchService {
                 .queryParam("searchType", "image")
                 .queryParam("imgSize", "medium")
                 .queryParam("num", "1")
-                .queryParam("q", query + " plant")
+                .queryParam("q", query)
                 .build()
                 .toUriString();
 
