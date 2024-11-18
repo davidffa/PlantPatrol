@@ -67,7 +67,7 @@ export default function Details() {
       await api.delete(`/reminders/${id}`)
     } else {
       setAlertPlantIds([...alertPlantIds, id.toString()]);
-      await api.post("/reminders", { clientId, id });
+      await api.post("/reminders", { clientId, plantId:id });
     }
   }
 

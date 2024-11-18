@@ -32,12 +32,12 @@ export default function Home() {
   useEffect(() => {
     async function getData() {
       try {
-        let id = await AsyncStorage.getItem('clientId');
-        if (id === null) {
-          id = uuid.v4();
-          await AsyncStorage.setItem('clientId', id);
+        let Id = await AsyncStorage.getItem('clientId');
+        if (Id === null) {
+          Id = uuid.v4();
+          await AsyncStorage.setItem('clientId', Id);
         }
-        setClientId(id);
+        setClientId(Id);
 
       } catch (e) { console.log(e) }
     }
@@ -76,7 +76,7 @@ export default function Home() {
       await api.delete(`/reminders/${id}`)
     } else {
       setAlertPlantIds([...alertPlantIds, id]);
-      await api.post("/reminders", { clientId, id });
+      await api.post("/reminders", { clientId, plantId: id });
     }
   }
 
