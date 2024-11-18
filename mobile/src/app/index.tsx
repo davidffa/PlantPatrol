@@ -1,28 +1,80 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
 import { View, Text, TouchableOpacity, TextInput, FlatList } from "react-native";
-import { Feather, Fontisto } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { plants as staticPlants } from "@/utils/plants";
+import { Feather } from "@expo/vector-icons";
 import { PlantCard } from "@/components/PlantCard";
-
 import { SafeAreaView } from "react-native-safe-area-context";
+
+import api from "@/services/api";
+import uuid from "react-native-uuid";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
+type Plant = {
+  "id": string,
+  "name": string,
+  "minimum": number,
+  "amount": number,
+  "family": string,
+  "maxHeight": number,
+  "about": string,
+  "imageUrl": string;
+}
 
 export default function Home() {
   const router = useRouter();
-
-  const [plants, setPlants] = useState(staticPlants);
+  const [clientId, setClientId] = useState("");
+  const [plants, setPlants] = useState<Plant[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [alertPlantIds, setAlertPlantIds] = useState(["1", "4", "6"]);
+  const [searchPlants, setSearchPlants] = useState<Plant[]>([]);
+  const [alertPlantIds, setAlertPlantIds] = useState<string[]>([]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      async function getData() {
+        let id;
+        try {
+          id = await AsyncStorage.getItem('clientId');
+          if (id === null) {
+            id = uuid.v4();
+            await AsyncStorage.setItem('clientId', id);
+          }
+          setClientId(id);
+
+        } catch (e) { console.log(e) }
+
+        const { data } = await api.get<Plant[]>("/inventory");
+        setPlants(data);
+        try {
+          const { data } = await api.get<string[]>(`/reminders/${id}`);
+          setAlertPlantIds(data);
+        } catch { }
+      }
+
+      getData();
+    }, [])
+  )
 
   useEffect(() => {
-    setPlants(staticPlants.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase())))
+    async function getSearchPlants() {
+      try {
+        const { data } = await api.get<Plant[]>("/inventory", { params: { name: searchQuery.toLowerCase() } });
+        setSearchPlants(data);
+      } catch (err) {
+        console.error(err);
+      }
+    } getSearchPlants();
   }, [searchQuery]);
 
-  function toggleAlert(id: string) {
+  async function toggleAlert(id: string) {
     if (alertPlantIds.includes(id)) {
-      setAlertPlantIds(prev => prev.filter(it => it !== id));
+      await api.delete(`/reminders/${id}`, { headers: { clientId } });
+      const { data } = await api.get(`/reminders/${clientId}`);
+      setAlertPlantIds(data);
     } else {
-      setAlertPlantIds([...alertPlantIds, id]);
+      await api.post("/reminders", { clientId, plantId: id });
+      const { data } = await api.get(`/reminders/${clientId}`);
+      setAlertPlantIds(data);
     }
   }
 
@@ -47,22 +99,40 @@ export default function Home() {
             <TextInput className="px-4 w-full" placeholder="Search" value={searchQuery} onChangeText={setSearchQuery} />
           </View>
         </View>
+        {searchQuery === "" ?
+          <FlatList
+            className="mt-6"
+            data={plants}
+            contentContainerStyle={{
+              paddingBottom: 20,
+              gap: 24
+            }}
+            columnWrapperStyle={{
+              paddingRight: 8,
+              gap: 8
+            }}
+            numColumns={2}
+            renderItem={({ item }) => <PlantCard name={item.name} image={{ uri: item.imageUrl }} alert={alertPlantIds.includes(item.id)} onToggleAlert={() => toggleAlert(item.id)} onClick={() => router.push({ pathname: 'details', params: { id: item.id } })} />}
+            keyExtractor={item => item.id}
+          />
+          :
+          <FlatList
+            className="mt-6"
+            data={searchPlants}
+            contentContainerStyle={{
+              paddingBottom: 20,
+              gap: 24
+            }}
+            columnWrapperStyle={{
+              paddingRight: 8,
+              gap: 8
+            }}
+            numColumns={2}
+            renderItem={({ item }) => <PlantCard name={item.name} image={{ uri: item.imageUrl }} alert={alertPlantIds.includes(item.id)} onToggleAlert={() => toggleAlert(item.id)} onClick={() => router.push({ pathname: 'details', params: { id: item.id } })} />}
+            keyExtractor={item => item.id}
+          />
 
-        <FlatList
-          className="mt-6"
-          data={plants}
-          contentContainerStyle={{
-            paddingBottom: 20,
-            gap: 24
-          }}
-          columnWrapperStyle={{
-            paddingRight: 8,
-            gap: 8
-          }}
-          numColumns={2}
-          renderItem={({ item }) => <PlantCard name={item.name} image={item.imageUrl} alert={alertPlantIds.includes(item.id)} onToggleAlert={() => toggleAlert(item.id)} onClick={() => router.push({ pathname: 'details', params: { id: item.id } })} />}
-          keyExtractor={item => item.id}
-        />
+        }
       </View>
     </SafeAreaView>
   )
