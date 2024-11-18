@@ -23,7 +23,8 @@ export default function Alerts() {
       try {
         const response = await api.get("/alert");
 
-        const alerts = response.data.map((alert: any) => ({
+        console.log(response.data)
+        const alerts = response.data.map((alert: {id:string,title:string,timestamp:string,sendto:string,message:string,fromSystem:boolean}) => ({
           id: alert.id,
           title: alert.title,
           timestamp: alert.timestamp || new Date().toISOString(),
