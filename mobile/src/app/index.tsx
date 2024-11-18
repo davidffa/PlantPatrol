@@ -31,32 +31,28 @@ export default function Home() {
 
   useEffect(() => {
     async function getData() {
+      let id;
       try {
-        let Id = await AsyncStorage.getItem('clientId');
-        if (Id === null) {
-          Id = uuid.v4();
-          await AsyncStorage.setItem('clientId', Id);
-        }
-        setClientId(Id);
+        id = await AsyncStorage.getItem('clientId');
+        if (id === null) {
+          id = uuid.v4();
+          await AsyncStorage.setItem('clientId', id);
+        }        
+        setClientId(id);
 
       } catch (e) { console.log(e) }
-    }
 
-    async function getPlants() {
       const { data } = await api.get<Plant[]>("/inventory");
       setPlants(data);
-    }
 
-    async function getToggles() {
       try {
-        const { data } = await api.get<string[]>(`/reminders/${clientId}`);
+        const { data } = await api.get<string[]>(`/reminders/${id}`);
         setAlertPlantIds(data);
+        console.log(data);
       } catch { }
     }
 
     getData();
-    getPlants();
-    getToggles();
   }, []);
 
   useEffect(() => {
