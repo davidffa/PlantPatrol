@@ -22,8 +22,6 @@ export default function Alerts() {
     async function fetchAlerts() {
       try {
         const response = await api.get("/alert");
-
-        console.log(response.data)
         const alerts = response.data.map((alert: {id:string,title:string,timestamp:string,sendto:string,message:string,fromSystem:boolean}) => ({
           id: alert.id,
           title: alert.title,
