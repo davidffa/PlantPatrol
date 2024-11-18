@@ -1,10 +1,11 @@
 "use client"
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 
 import SolarPower from '@mui/icons-material/SolarPower'
 import OpacityIcon from '@mui/icons-material/Opacity';
 import DeviceThermostatIcon from '@mui/icons-material/DeviceThermostat';
 import Co2Icon from '@mui/icons-material/Co2';
+import AddIcon from '@mui/icons-material/Add';
 
 import { SensorChart } from '../../../components/charts/SensorChart'
 import { DataCharts as data } from "../../../utils/data"
@@ -13,11 +14,28 @@ import Chart from "chart.js/auto";
 import { CategoryScale } from "chart.js";
 
 
+import withAuth from '@/lib/withAuth'
 import { Navbar } from '@/components/Navbar';
+import api from '@/services/api'
 
+import Swal from 'sweetalert2'
 
 type Props = {
-  params: { id: string }
+  params: { greenhouseId: string }
+}
+
+type Rule = {
+  id?: string,
+  name: string,
+  minTemp: number,
+  maxTemp: number,
+  minHumidity: number,
+  maxHumidity: number,
+  minAIQ: number,
+  maxAIQ: number,
+  waterSystemFlow: number,
+  ventilationRPM: number,
+  airPurifier: boolean,
 }
 
 enum SensorEnum {
@@ -35,12 +53,12 @@ enum IntervalEnum {
 
 Chart.register(CategoryScale);
 
-export default function GreenHouse({ params }: Props) {
+ function GreenHouse({ params }: Props) {
   const [sensors, setSensors] = useState({ 0: true, 1: true, 2: true, 3: true });
   const [interval, setInterval] = useState<IntervalEnum>(IntervalEnum.Day)
 
   // the id to make the request to the database it could be anything passed as the paramenter
-  const { id } = params;
+  const { greenhouseId } = params;
 
   const sensorChange = (type: SensorEnum) => {
     //changes the presented charts
@@ -53,13 +71,66 @@ export default function GreenHouse({ params }: Props) {
   const selectedStyle = "text-white bg-green"
   const nonSelectedStyle = "text-brown bg-beje"
   const selectedInterval = "text-green bg-white shadow-xl"
+  const [rules, setRules] = useState<Rule[]>([])
+
+  async function handleDeleteRule(id_rule: string | undefined) {
+      const result = await Swal.fire({
+          title: "Delete employee rule?",
+          showConfirmButton: true,
+          showCancelButton: true,
+          confirmButtonText: "Confirm",
+          confirmButtonColor: "red"
+      });
+
+      if (result.isConfirmed) {
+          api.delete(`rules/${greenhouseId}/${id_rule}`).then(async (response) => {
+              if (response.status == 204) {
+                  await Swal.fire({
+                      icon: "success",
+                      title: "Success",
+                      text: "Rule deleted!"
+                  }).then(()=>{
+                      setRules(rules.filter(r=> r.id !== id_rule))
+                    })
+
+              }
+              else{
+                Swal.fire({
+                    icon: "error",
+                    title: "Unexpected Error",
+                    text: `There was an unexpected error. ${response.data}`
+                })
+              }
+          })
+      }
+  }
+  const getRules = () => {
+      try {
+          api.get(`greenhouse/${greenhouseId}/rules`).then((response) => {
+              if (response.status == 200) {
+                  setRules(response.data)
+              }
+          }).catch((error)=>{
+            Swal.fire({
+              icon: "error",
+              title: "Unexpected Error",
+              text: `There was an unexpected error. ${error}`
+          })
+          })
+      } catch (error) {
+          console.log(error)
+      }
+  }
+  useEffect(() => {
+      getRules()
+  },[])
 
   return (
     <>
     <Navbar />
       <div className='w-full p-2 my-6 text-center flex-col justify-center'>
         <div className="text-5xl text-black p-3">
-          GreenHouse {id}
+          GreenHouse
         </div>
         {/* filters */}
         <div className='w-3/4 mx-auto flex-col my-10'>
@@ -101,7 +172,44 @@ export default function GreenHouse({ params }: Props) {
             )
           }
         </div>
+        <div className='w-5/6 mx-auto p-3 flex flex-col'>
+                        <div className='w-full flex flex-row'>
+                            <div className='w-1/2 flex justify-start text-2xl font-bold text-black'>
+                                Action
+                            </div>
+                            <div className='w-1/2 flex justify-end'>
+                                <a href={`${greenhouseId}/rules/new/0`} className='flex flex-row gap-2 text-green '>
+                                    Add New
+                                    <AddIcon />
+                                </a>
+                            </div>
+                        </div>
+
+                        <div className="divider"></div>
+                        <div className='w-full flex flex-col gap-3 p-3'>
+                                {
+                                    rules?.map((rule,idx) => (
+                                        
+                                        <div key={idx} className='w-full bg-gray-300 text-black grid grid-cols-2 rounded-lg gap-y-3'>
+                                            <div className='text-xl text-black flex font-semibold text-left p-3 justify-start my-auto'>
+                                                {rule.name}
+                                            </div>
+                                            <div className='flex flex-row gap-2 p-3 justify-end '>
+                                                <a href={`${greenhouseId}/rules/new/${rule.id}`} className="w-[150px] rounded-lg p-3 bg-green text-white text-center">
+                                                    edit
+                                                </a>
+                                                <button onClick={() => handleDeleteRule(rule.id)} className="w-[150px] rounded-lg p-3 bg-red-700 text-white">
+                                                    delete
+                                                </button>
+                                            </div>
+                                         </div>  
+                                    ))
+                                }
+                        </div>
+                    </div>
       </div>
     </>
   )
 }
+
+export default withAuth(GreenHouse)

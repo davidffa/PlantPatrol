@@ -2,9 +2,10 @@ services:
   mongo:
     image: mongo
     restart: unless-stopped
+    env_file: .env
 
     environment:
-      MONGO_INITDB_DATABASE: plantpatrol
+      MONGO_INITDB_DATABASE: $DB_NAME
 
     volumes:
       - mongodb:/data/db
@@ -20,7 +21,6 @@ services:
       context: ./backend
 
     restart: on-failure
-
     env_file: .env
 
     environment:
@@ -28,13 +28,14 @@ services:
         "spring.application.name": "backend",
         "spring.data.mongodb.host": "mongo",
         "spring.data.mongodb.port": "27017",
-        "spring.data.mongodb.database": "plantpatrol",
+        "spring.data.mongodb.database": "$DB_NAME",
         "security.jwt.secret-key": "$JWT_SECRET_KEY",
         "security.jwt.expiration-time": "$JWT_EXPIRATION_TIME",
         "springdoc.api-docs.path": "/api/v1/docs",
         "gemini.api-key": "$GEMINI_API_KEY",
         "google.search-api-key": "$GOOGLE_SEARCH_API_KEY",
-        "google.search-engine-id": "$GOOGLE_SEARCH_ENGINE_ID"
+        "google.search-engine-id": "$GOOGLE_SEARCH_ENGINE_ID",
+        "webUrl": "$WEB_URL"
       }'
 
     networks:
@@ -42,11 +43,15 @@ services:
       - frontend
 
     ports:
-      - "8080:8080"
+      - "$BACKEND_PORT:8080"
 
   web:
     depends_on:
       - backend
+
+    env_file: .env
+    environment:
+      NEXT_PUBLIC_BACKEND_URL: $NEXT_PUBLIC_BACKEND_URL
 
     build:
       context: ./web
@@ -57,7 +62,7 @@ services:
       - frontend
 
     ports:
-      - "3000:3000"
+      - "$WEB_PORT:3000"
 
 volumes:
   mongodb:

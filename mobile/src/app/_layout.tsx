@@ -1,4 +1,4 @@
-import { Slot } from "expo-router";
+import { Stack } from "expo-router";
 
 import "../styles/global.css";
 
@@ -6,19 +6,24 @@ import {
   Inter_400Regular,
   Inter_500Medium,
   Inter_600SemiBold,
-  Inter_700Bold,
   useFonts
 } from "@expo-google-fonts/inter";
+
+import {
+  Roboto_300Light_Italic,
+  Roboto_700Bold
+} from "@expo-google-fonts/roboto"
 
 export default function Layout() {
   const [fontsLoaded] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
     Inter_600SemiBold,
-    Inter_700Bold,
+    Roboto_700Bold,
+    Roboto_300Light_Italic
   });
 
   if (!fontsLoaded) return;
 
-  return <Slot />
+  return <Stack screenOptions={{ headerShown: false }} />
 }

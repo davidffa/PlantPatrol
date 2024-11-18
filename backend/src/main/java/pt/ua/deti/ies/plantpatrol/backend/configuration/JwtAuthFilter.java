@@ -1,8 +1,10 @@
 package pt.ua.deti.ies.plantpatrol.backend.configuration;
 
+import jakarta.servlet.http.Cookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.WebUtils;
 import pt.ua.deti.ies.plantpatrol.backend.service.JWTService;
 
 import jakarta.servlet.FilterChain;
@@ -43,15 +45,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
-        final String authHeader = request.getHeader("Authorization");
+        Cookie cookie = WebUtils.getCookie(request, "accessToken");
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (cookie == null) {
             filterChain.doFilter(request, response);
             return;
         }
 
         try {
-            final String jwt = authHeader.substring(7);
+            final String jwt = cookie.getValue();
             final String userEmail = jwtService.extractUsername(jwt);
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

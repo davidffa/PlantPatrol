@@ -10,7 +10,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Data
 public class CreateEmployeeDTO {
-    private String username;
     private String firstName;
     private String lastName;
     private String phoneNumber;

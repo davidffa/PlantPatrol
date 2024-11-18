@@ -108,4 +108,18 @@ public class InventoryController {
         List<Plant> plants = inventoryService.searchByPlant(name);
         return new ResponseEntity<>(plants, HttpStatus.OK);
     }
+
+    @Operation(summary = "Search plant by id")
+    @GetMapping("/inventory/{id}")
+    public ResponseEntity<Plant> getPlant(
+            @PathVariable String id
+    ) {
+        if (id == null) {
+            return new ResponseEntity<>(new Plant(), HttpStatus.BAD_REQUEST);
+        }
+
+        Plant plant = inventoryService.getPlant(id);
+        return new ResponseEntity<>(plant, HttpStatus.OK);
+    }
+
 }

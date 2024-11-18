@@ -2,6 +2,7 @@ package pt.ua.deti.ies.plantpatrol.backend.service;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import pt.ua.deti.ies.plantpatrol.backend.dto.employee.EmployeeDetailsDTO;
 import pt.ua.deti.ies.plantpatrol.backend.dto.employee.ListEmployeesDTO;
 import pt.ua.deti.ies.plantpatrol.backend.dto.employee.ResetCredentialsResponseDTO;
 import pt.ua.deti.ies.plantpatrol.backend.entity.Employee;
@@ -37,8 +38,22 @@ public class EmployeeService {
         ).toList();
     }
 
-    public Optional<Employee> employeeDetails(String id) {
-        return employeeRepository.findById(id);
+    public EmployeeDetailsDTO employeeDetails(String id) {
+        Optional<Employee> employeeOptional = employeeRepository.findById(id);
+
+        if (employeeOptional.isEmpty()) return null;
+
+        Employee employee = employeeOptional.get();
+
+        return EmployeeDetailsDTO
+                .builder()
+                .name(employee.getFirstName() + " " + employee.getLastName())
+                .age((int) ChronoUnit.YEARS.between(employee.getBirthDate(), LocalDate.now()))
+                .phoneNumber(employee.getPhoneNumber())
+                .address(employee.getAddress())
+                .notes(employee.getNotes())
+                .employeeSince(employee.getCreatedAt())
+                .build();
     }
 
     public boolean employeeExists(String id) {

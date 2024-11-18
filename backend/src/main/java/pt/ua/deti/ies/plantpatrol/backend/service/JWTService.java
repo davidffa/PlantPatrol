@@ -23,10 +23,6 @@ public class JWTService {
     @Value("${security.jwt.expiration-time}")
     private long jwtExpiration;
 
-    public String extractUserID(String token) {
-        return extractClaim(token, Claims::getSubject);
-    }
-
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }

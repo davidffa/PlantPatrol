@@ -54,6 +54,11 @@ public class Employee implements UserDetails {
 
     private String notes;
 
+    // In the first login, it'll be requested a password change
+    private boolean passwordChanged = false;
+
+    private LocalDate createdAt = LocalDate.now();
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();

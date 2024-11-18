@@ -19,6 +19,7 @@ FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
+ENV NEXT_PUBLIC_BACKEND_URL=NEXT_PUBLIC_BACKEND_URL
 
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone .

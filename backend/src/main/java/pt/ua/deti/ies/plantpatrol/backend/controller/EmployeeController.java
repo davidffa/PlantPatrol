@@ -8,13 +8,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import pt.ua.deti.ies.plantpatrol.backend.dto.employee.ChangePasswordDTO;
 import pt.ua.deti.ies.plantpatrol.backend.dto.CreateEmployeeDTO;
+import pt.ua.deti.ies.plantpatrol.backend.dto.employee.EmployeeDetailsDTO;
 import pt.ua.deti.ies.plantpatrol.backend.dto.employee.ModifyEmployeeDTO;
 import pt.ua.deti.ies.plantpatrol.backend.entity.Employee;
 import pt.ua.deti.ies.plantpatrol.backend.response.ErrorResponse;
 import pt.ua.deti.ies.plantpatrol.backend.service.AuthService;
 import pt.ua.deti.ies.plantpatrol.backend.service.EmployeeService;
-
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -45,7 +44,7 @@ public class EmployeeController {
 
     @Operation(summary = "Get employee details")
     @GetMapping("/employees/{id}")
-    public ResponseEntity<Object> employeeDetails(@PathVariable String id) {
+    public ResponseEntity<?> employeeDetails(@PathVariable String id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Employee issuer = (Employee) auth.getPrincipal();
 
@@ -55,13 +54,13 @@ public class EmployeeController {
             return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
         }
 
-        Optional<Employee> employee = employeeService.employeeDetails(id);
+        EmployeeDetailsDTO employee = employeeService.employeeDetails(id);
 
-        if (employee.isEmpty()) {
+        if (employee == null) {
             return ResponseEntity.badRequest().body(new ErrorResponse("Employee does not exist!"));
         }
 
-        return ResponseEntity.ok(employee.get());
+        return ResponseEntity.ok(employee);
     }
 
     @Operation(summary = "Get the details of the currently logged employee")
