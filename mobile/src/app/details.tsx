@@ -1,32 +1,73 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, Image, ScrollView } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { plants as staticPlants } from "@/utils/plants";
 import { SafeAreaView } from "react-native-safe-area-context";
 import api from "@/services/api";
+import uuid from "react-native-uuid";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
+
+type Plant = {
+  "id": string,
+  "name": string,
+  "minimum": number,
+  "amount": number,
+  "family": string,
+  "maxHeight": number,
+  "about": string,
+  "curiosities": string,
+  "imageUrl": string;
+}
 
 export default function Details() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const id = params.id[0];
+  const id = params.id;
 
-  const [plants, setPlants] = useState(staticPlants);
-  const [alertPlantIds, setAlertPlantIds] = useState(["1", "4", "6"]);
-  const alert = alertPlantIds.includes(id);
+  const [clientId, setClientId] = useState("");
+  const [plant, setPlant] = useState<Plant>();
+  const [alertPlantIds, setAlertPlantIds] = useState<string[]>([]);
+  const alert = alertPlantIds.includes(id.toString());
 
-  function getPlant(id: string) {
-    const item = plants[parseInt(id) - 1]
-    return item
-  }
+  useEffect(() => {
+    async function getData() {
+      try {
+        let Id = await AsyncStorage.getItem('clientId');
+        if (Id === null) {
+          Id = uuid.v4();
+          await AsyncStorage.setItem('clientId', Id);
+        }
+        setClientId(Id);
+
+      } catch (e) { console.log(e) }
+    }
+
+    async function getPlant() {
+      const { data } = await api.get<Plant>(`/inventory/${id}`);
+      setPlant(data);
+    }
+
+    async function getToggles() {
+      try {
+        const { data } = await api.get<string[]>(`/reminders/${clientId}`);
+        setAlertPlantIds(data);
+      } catch { }
+    }
+
+    getData();
+    getPlant();
+    getToggles();
+  }, []);
 
   async function toggleAlert() {
-    if (alertPlantIds.includes(id)) {
+    if (alertPlantIds.includes(id.toString())) {
       setAlertPlantIds(prev => prev.filter(it => it !== id));
       await api.delete(`/reminders/${id}`)
     } else {
-      setAlertPlantIds([...alertPlantIds, id]);
-      await api.post("/reminders", { id });
+      setAlertPlantIds([...alertPlantIds, id.toString()]);
+      await api.post("/reminders", { clientId, id });
     }
   }
 
@@ -40,12 +81,12 @@ export default function Details() {
       </View>
       <ScrollView>
         <View className="items-center justify-center">
-          <Image source={getPlant(id).imageUrl} className="h-64" />
+          <Image source={{ uri: plant?.imageUrl }} height={300} width={300} className="h-64" />
         </View>
         <View className="bg-gray-200 rounded-3xl mx-4 mt-12 py-8">
           <View className="flex-row justify-between">
             <Text className="text-lg ml-6 py-2 font-bold">___ Best choice</Text>
-            {alert ?
+            {plant?.amount === 0 ?
               <View className=" bg-red-500 rounded-l-3xl items-center justify-center py-2 px-3 ">
                 <Text className="text-xl color-white gap-2">Not Available</Text>
               </View>
@@ -55,12 +96,12 @@ export default function Details() {
               </View>
             }
           </View>
-          <Text className="text-3xl ml-6 py-4 font-bold">{getPlant(id).name}</Text>
-          <Text className="text-lg ml-6 py-2 font-italic">Asphodelaceae</Text>
+          <Text className="text-3xl ml-6 py-4 font-bold">{plant?.name}</Text>
+          <Text className="text-lg ml-6 py-2 font-italic">{plant?.family}</Text>
           <Text className="text-lg ml-6 py-2 font-bold">About</Text>
-          <Text className="text-lg ml-6">{getPlant(id).about}</Text>
+          <Text className="text-lg ml-6">{plant?.about}</Text>
           <Text className="text-lg ml-6 py-2 font-bold">Curiosities</Text>
-          <Text className="text-lg ml-6">{getPlant(id).curiosities}</Text>
+          <Text className="text-lg ml-6">{plant?.curiosities}</Text>
         </View>
       </ScrollView>
     </SafeAreaView>

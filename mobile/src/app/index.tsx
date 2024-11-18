@@ -17,7 +17,7 @@ type Plant = {
   "amount": number,
   "family": string,
   "maxHeight": number,
-  "about": string;
+  "about": string,
   "imageUrl": string;
 }
 
@@ -26,6 +26,7 @@ export default function Home() {
   const [clientId, setClientId] = useState("");
   const [plants, setPlants] = useState<Plant[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchPlants, setSearchPlants] = useState<Plant[]>([]);
   const [alertPlantIds, setAlertPlantIds] = useState<string[]>([]);
 
   useEffect(() => {
@@ -43,9 +44,7 @@ export default function Home() {
 
     async function getPlants() {
       const { data } = await api.get<Plant[]>("/inventory");
-
       setPlants(data);
-      console.log(data.map(r => r.imageUrl));
     }
 
     async function getToggles() {
@@ -61,12 +60,20 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    setPlants(plants.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase())))
+    async function getSearchPlants() {
+      try {
+        const { data } = await api.get<Plant[]>("/inventory", { params: { name: searchQuery.toLowerCase() } });
+        setSearchPlants(data);
+      } catch (err) {
+        console.error(err);
+      }
+    } getSearchPlants();
   }, [searchQuery]);
 
   async function toggleAlert(id: string) {
     if (alertPlantIds.includes(id)) {
       setAlertPlantIds(prev => prev.filter(it => it !== id));
+      await api.delete(`/reminders/${id}`)
     } else {
       setAlertPlantIds([...alertPlantIds, id]);
       await api.post("/reminders", { clientId, id });
@@ -94,22 +101,40 @@ export default function Home() {
             <TextInput className="px-4 w-full" placeholder="Search" value={searchQuery} onChangeText={setSearchQuery} />
           </View>
         </View>
+        {searchQuery === "" ?
+          <FlatList
+            className="mt-6"
+            data={plants}
+            contentContainerStyle={{
+              paddingBottom: 20,
+              gap: 24
+            }}
+            columnWrapperStyle={{
+              paddingRight: 8,
+              gap: 8
+            }}
+            numColumns={2}
+            renderItem={({ item }) => <PlantCard name={item.name} image={{ uri: item.imageUrl }} alert={alertPlantIds.includes(item.id)} onToggleAlert={() => toggleAlert(item.id)} onClick={() => router.push({ pathname: 'details', params: { id: item.id } })} />}
+            keyExtractor={item => item.id}
+          />
+          :
+          <FlatList
+            className="mt-6"
+            data={searchPlants}
+            contentContainerStyle={{
+              paddingBottom: 20,
+              gap: 24
+            }}
+            columnWrapperStyle={{
+              paddingRight: 8,
+              gap: 8
+            }}
+            numColumns={2}
+            renderItem={({ item }) => <PlantCard name={item.name} image={{ uri: item.imageUrl }} alert={alertPlantIds.includes(item.id)} onToggleAlert={() => toggleAlert(item.id)} onClick={() => router.push({ pathname: 'details', params: { id: item.id } })} />}
+            keyExtractor={item => item.id}
+          />
 
-        <FlatList
-          className="mt-6"
-          data={plants}
-          contentContainerStyle={{
-            paddingBottom: 20,
-            gap: 24
-          }}
-          columnWrapperStyle={{
-            paddingRight: 8,
-            gap: 8
-          }}
-          numColumns={2}
-          renderItem={({ item }) => <PlantCard name={item.name} image={{ uri: item.imageUrl }} alert={alertPlantIds.includes(item.id)} onToggleAlert={() => toggleAlert(item.id)} onClick={() => router.push({ pathname: 'details', params: { id: item.id } })} />}
-          keyExtractor={item => item.id}
-        />
+        }
       </View>
     </SafeAreaView>
   )

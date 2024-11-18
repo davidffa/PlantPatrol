@@ -15,6 +15,8 @@ export function PlantCard({ name, image, onToggleAlert, onClick, alert = false }
       <TouchableOpacity onPress={onClick} >
         <Image
           source={image}
+          width={100}
+          height={100}
         />
         <Text className="font-bold">{name}</Text>
       </TouchableOpacity>
