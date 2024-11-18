@@ -12,7 +12,8 @@ type Plant = {
   "amount": number,
   "family": string,
   "maxHeight": number,
-  "about": string;
+  "about": string,
+  "curiosities": string,
   "imageUrl": string;
 }
 
