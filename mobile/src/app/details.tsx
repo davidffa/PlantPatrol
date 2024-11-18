@@ -4,6 +4,7 @@ import { Feather } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { plants as staticPlants } from "@/utils/plants";
 import { SafeAreaView } from "react-native-safe-area-context";
+import api from "@/services/api";
 
 export default function Details() {
   const router = useRouter();
@@ -19,11 +20,13 @@ export default function Details() {
     return item
   }
 
-  function toggleAlert() {
+  async function toggleAlert() {
     if (alertPlantIds.includes(id)) {
       setAlertPlantIds(prev => prev.filter(it => it !== id));
+      await api.delete(`/reminders/${id}`)
     } else {
       setAlertPlantIds([...alertPlantIds, id]);
+      await api.post("/reminders", { id });
     }
   }
 

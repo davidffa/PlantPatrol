@@ -1,9 +1,9 @@
-import { View, Image, Text, ImageProps, TouchableOpacity } from "react-native";
+import { View, Image, Text, TouchableOpacity, ImageSourcePropType } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
 type Props = {
   name: string;
-  image: ImageProps;
+  image: ImageSourcePropType;
   onToggleAlert: () => void;
   alert?: boolean;
   onClick: () => void;
