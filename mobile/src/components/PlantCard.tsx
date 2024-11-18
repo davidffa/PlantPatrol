@@ -1,9 +1,9 @@
-import { View, Image, Text, ImageProps, TouchableOpacity } from "react-native";
+import { View, Image, Text, TouchableOpacity, ImageSourcePropType } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
 type Props = {
   name: string;
-  image: ImageProps;
+  image: ImageSourcePropType;
   onToggleAlert: () => void;
   alert?: boolean;
   onClick: () => void;
@@ -15,6 +15,8 @@ export function PlantCard({ name, image, onToggleAlert, onClick, alert = false }
       <TouchableOpacity onPress={onClick} >
         <Image
           source={image}
+          width={100}
+          height={100}
         />
         <Text className="font-bold">{name}</Text>
       </TouchableOpacity>

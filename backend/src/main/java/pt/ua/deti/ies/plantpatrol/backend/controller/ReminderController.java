@@ -1,5 +1,6 @@
 package pt.ua.deti.ies.plantpatrol.backend.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ public class ReminderController {
         this.reminderService = reminderService;
     }
 
+    @Operation(summary = "List the reminders of a given client")
     @GetMapping("/reminders/{clientId}")
     public ResponseEntity<?> getReminders(@PathVariable String clientId) {
         try {
@@ -27,7 +29,7 @@ public class ReminderController {
             return new ResponseEntity<>(new ErrorResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
-
+    @Operation(summary = "Add a reminder of a plant to a client")
     @PostMapping("/reminders")
     public ResponseEntity<?> addReminder(@RequestBody CreateReminderDTO dto) {
         try {
@@ -38,6 +40,7 @@ public class ReminderController {
         }
     }
 
+    @Operation(summary = "Delete a reminder of a plant")
     @DeleteMapping("/reminders/{plantId}")
     public ResponseEntity<?> removeReminder(HttpServletRequest request, @PathVariable String plantId) {
         String clientId = request.getHeader("clientId");

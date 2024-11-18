@@ -36,19 +36,23 @@ public class AlertController {
     public ResponseEntity<List<Alert>> getAlerts() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Employee issuer = (Employee) auth.getPrincipal();
+
+        String fullName = issuer.getFirstName() + " " + issuer.getLastName();
+
+        List<Alert> allAlerts = alertService.findAll(); // Fetch all alerts
+
         List<Alert> alerts = new ArrayList<>();
         if (issuer.isManager()){
-            alerts = alertService.findAll();
+            alerts = allAlerts;
         }
         else {
-            for (Alert alert : alertService.findAll()) {
-                if (alert.getSendto().equals("everyone") || alert.getSendto().equals(issuer.getId())) {
+            for (Alert alert : allAlerts) {
+                if ("Everyone".equalsIgnoreCase(alert.getSendto()) || alert.getSendto().equals(fullName)) {
                     alerts.add(alert);
                 }
             }
         }
         return new ResponseEntity<>(alerts, HttpStatus.OK);
     }
-
 }
 
