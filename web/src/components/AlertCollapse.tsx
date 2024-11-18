@@ -1,11 +1,13 @@
 type Props = {
   title: string;
   data: string;
-  sender: string;
+  sentTo: string;
   description: string;
+  sender: string;
+
 }
 
-export function AlertCollapse({ title, data,sender, description}: Props) {
+export function AlertCollapse({ title, data, sentTo, description, sender}: Props) {
   return (
     <div tabIndex={0} className="collapse collapse-arrow border-base-300 bg-base-200 border  mb-4">
       <input type="checkbox" />
@@ -15,13 +17,12 @@ export function AlertCollapse({ title, data,sender, description}: Props) {
           </div>
         <div className="collapse-content">
           <hr className="mb-4"/>
-          <p>Sent to: {sender}</p>
+          <p>Sent to: {sentTo}</p>
           <br/>
           <p>Description:</p>
           <p>{description}</p>
           <br/>
-          <p>Regards,</p>
-          <p>João Ramalho</p>
+          <p>From {sender}</p>
         </div>
       </div>
   );

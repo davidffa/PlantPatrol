@@ -1,9 +1,43 @@
+"use client"
+
 import { AlertCollapse } from "@/components/AlertCollapse";
 import Link from "next/link";
 import Image from "next/image";
 import { Navbar } from "@/components/Navbar";
+import { useState, useEffect } from "react";
+import api from "@/services/api";
 
 export default function Alerts() {
+  interface Alert {
+    id: string;
+    title: string;
+    timestamp: string;
+    sendTo: string;
+    description: string;
+  }
+
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+
+  useEffect(() => {
+    async function fetchAlerts() {
+      try {
+        const response = await api.get("/alert");
+        const alerts = response.data.map((alert: {id:string,title:string,timestamp:string,sendto:string,message:string,fromSystem:boolean}) => ({
+          id: alert.id,
+          title: alert.title,
+          timestamp: alert.timestamp || new Date().toISOString(),
+          sendTo: alert.sendto,
+          description: alert.message || "",
+          sender: alert.fromSystem ? "System" : "Admin",
+        }));
+        setAlerts(alerts.reverse());
+      } catch (error) {
+        console.log("Failed to fetch alerts: " + error);
+      }
+    }
+    fetchAlerts();
+  }, []);
+
   return (
     <>
       <Navbar />
@@ -28,32 +62,20 @@ export default function Alerts() {
             Alerts sent:
           </h2>
         </div>
-
-        <AlertCollapse
-          title="Order more fertilizer"
-          data="12/10/2024, 6:20PM"
-          sender="Everyone"
-          description="We're running out of fertilizer, please order at least 100L until next week."
-        />
-        <AlertCollapse
-          title="Urgent meeting!"
-          data="10/10/2024, 4:19PM"
-          sender="Everyone"
-          description="We're running out of fertilizer, please order at least 100L until next week."
-        />
-        <AlertCollapse
-          title="Replace faulty sensour at greenhouse 3!"
-          data="4/10/2024, 3:35PM"
-          sender="Everyone"
-          description="We're running out of fertilizer, please order at least 100L until next week."
-        />
-        <AlertCollapse
-          title="Improve watering rules"
-          data="3/10/2024, 10:12AM"
-          sender="Everyone"
-          description="We're running out of fertilizer, please order at least 100L until next week."
-        />
-
+        {alerts.length > 0 ? (
+          alerts.map((alert) => (
+            <AlertCollapse
+              key={alert.id}
+              title={alert.title}
+              data={new Date(alert.timestamp).toLocaleString()}
+              sentTo={alert.sendTo}
+              description={alert.description}
+              sender="Admin"
+            />
+          ))
+        ) : (
+          <p>No alerts have been sent yet.</p>
+        )}
       </div>
     </>
   );
