@@ -64,7 +64,7 @@ public class ChatController {
         if (auth.getPrincipal() instanceof Employee ) {
             return new ResponseEntity<>(chatRoomService.getChatRooms(), HttpStatus.OK);
         }
-        
+
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
