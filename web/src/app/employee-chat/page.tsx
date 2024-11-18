@@ -2,85 +2,85 @@
 import { Navbar } from '@/components/Navbar';
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
+import  api  from '@/services/api';
+import { useAuth } from '../../contexts/auth';
+import withAuth from '@/lib/withAuth';
 
-type User = {
+type MessagePayload={
+  content:string,
+  senderId:string,
+  timestamp:string
+}
+type Room = {
   id: string;
-  name: string;
-  avatar: string;
-  messages: string[];
+  chatRoomId: string;
+  messages: MessagePayload[];
 };
 
-export default function EmployeeChat() {
+function EmployeeChat() {
+  const {user} = useAuth()
   // List of users with chat histories
-  const [users, setUsers] = useState<User[]>([
-    {
-      id: '1',
-      name: 'User 283746574831',
-      avatar: '/blue-user.svg',
-      messages: ["Good afternoon. Last month I bought two May flowers and have been watering them every day. However, they seem to me to be withered. Could you help me?"],
+  const [chatRooms, setChatRooms] = useState<Room[]>([]);
 
-    },
-    {
-      id: '2',
-      name: 'User 738293800283',
-      avatar: '/blue-user.svg',
-      messages: ["Hello, I'm experiencing some issues with my plants."]
-    },
-    {
-      id: '3',
-      name: 'User 123456123248',
-      avatar: '/blue-user.svg',
-      messages: ["Hey there! Any tips on growing May flowers?"]
-    },
-    {
-      id: '4',
-      name: 'User 348570893284',
-      avatar: '/blue-user.svg',
-      messages: ["What should I do if my flowers wilt too quickly?"]
-    },
-    {
-      id: '5',
-      name: 'User 238497218561',
-      avatar: '/blue-user.svg',
-      messages: ["Can you help with pest control for my greenhouse plants?"]
-    },
-    {
-      id: '6',
-      name: 'User 192837481238',
-      avatar: '/blue-user.svg',
-      messages: ["I have an issue with the watering system in my greenhouse."]
-    },
-  ]);
-
-  const [selectedUserId, setSelectedUserId] = useState<string>(users[0].id);
+  const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
   const [newMessage, setNewMessage] = useState<string>("");
 
   // Create a reference for the last message
   const lastMessageRef = useRef<HTMLDivElement | null>(null);
+  const getChatRooms= async ()=>{
+    const res = await api.get("/chatRooms")
+    setChatRooms(res.data)
+  }
 
   // Automatically scroll to the last message when the messages change
   useEffect(() => {
-    if (lastMessageRef.current) {
-      lastMessageRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [selectedUserId, users]);
+    getChatRooms()
+  }, []);
 
-  // Function to add a new message for the selected user
-  const sendMessage = () => {
-    if (newMessage.trim() !== "") {
-      setUsers((prevUsers) =>
-        prevUsers.map((user) =>
-          user.id === selectedUserId
-            ? { ...user, messages: [...user.messages, newMessage] }
-            : user
-        )
-      );
-      setNewMessage("");
+  function appendMessage(ev: MessageEvent){
+    const newMessage:MessagePayload = JSON.parse(ev.data) 
+    if(newMessage.content.trim()!=="")
+    {
+      setSelectedRoom((prevRoom) => {
+        if (!prevRoom) return null; // Handle null case
+        return {
+          ...prevRoom,
+          messages: [...prevRoom.messages, newMessage], // Correctly concatenate messages
+        };
+      });
     }
+  }
+
+  async function handleSelectRoom(Room:Room){
+
+    //connection to the socket
+    try{
+        const ws = new WebSocket("ws://localhost:8080/chat")
+        setSelectedRoom(Room)
+          ws.onopen =()=>{
+            ws.send(`{"chatRoomId":"${Room.chatRoomId}"}`)
+            console.log("Socket Open")
+          }
+          ws.onclose=()=>{
+            console.log("Websocket Closed")
+          }
+          ws.onerror=()=>{
+            console.log("Websocket Error")
+          }
+          ws.onmessage = (ev)=>appendMessage(ev)
+    }
+    catch (error)
+    {
+      console.log(error)
+    }
+    //send chatRoomId 
+  }
+  // Function to add a new message for the selected user
+  const sendMessage = async () => {
+    await api.post(`/chat/${selectedRoom?.chatRoomId}`,{ content:newMessage})
   };
 
   // Find the selected user to display their messages
-  const selectedUser = users.find(user => user.id === selectedUserId)!;
 
   return (
     <div className="h-screen flex flex-col">
@@ -90,14 +90,14 @@ export default function EmployeeChat() {
 
         {/* List of clients */}
         <div className="w-1/4 flex flex-col divide-y divide-slate-300 bg-zinc-50 h-full overflow-auto">
-          {users.map((user) => (
+          {chatRooms.map((room) => (
             <div
-              key={user.id}
-              className={`w-full flex flex-row p-4 cursor-pointer ${user.id === selectedUserId ? 'bg-gray-200' : ''}`}
-              onClick={() => setSelectedUserId(user.id)}
+              key={room.id}
+              className={`w-full flex flex-row p-4 cursor-pointer ${room.id === selectedRoom?.chatRoomId ? 'bg-gray-200' : ''}`}
+              onClick={()=>handleSelectRoom(room)}
             >
-              <Image src={user.avatar} height={30} width={30} alt="User avatar" className="w-1/8 mr-6" />
-              <div className="mt-1">{user.name}</div>
+              <Image src="/blue-user.svg" height={30} width={30} alt="User avatar" className="w-1/8 mr-6" />
+              <div className="mt-1">Chat Room {room.chatRoomId}</div>
             </div>
           ))}
         </div>
@@ -107,27 +107,27 @@ export default function EmployeeChat() {
           {/* Header with avatar and user name */}
           <div className="flex items-center p-4 border-b bg-slate-200 rounded-t-lg">
             <div className='rounded-full bg-white mx-6 w-12 h-12 '>
-              <Image src={selectedUser.avatar} height={38} width={38} alt="Avatar" className="rounded-full mt-2 ml-1" />
+              <Image src='/blue-user.svg' height={38} width={38} alt="Avatar" className="rounded-full mt-2 ml-1" />
             </div>
-            <h2 className="text-lg font-semibold">{selectedUser?.name}</h2>
+            <h2 className="text-lg font-semibold">Chat Room {selectedRoom?.chatRoomId}</h2>
           </div>
 
 
           <div className="flex-grow p-4 overflow-y-auto bg-white mx-2 rounded-lg">
-            {selectedUser?.messages.map((msg, index) => (
+            {selectedRoom?.messages.map((msg, index) => (
               <>
-                {(index == 0) ? (
+                {msg.senderId!==user?.id ? (
                   <div className='flex justify-start'>
                     <div key={index} className="p-4 mb-4 bg-blue-100 rounded-lg self-start max-w-lg ">
-                      {msg}
-                      <div className="text-xs text-gray-500 text-right mt-2">15:34</div>
+                      {msg.content}
+                      <div className="text-xs text-gray-500 text-right mt-2">{msg.timestamp}</div>
                     </div>
                   </div>
                 ) : (
                   <div className='flex justify-end'>
                     <div key={index} className="p-4 mb-4 bg-yellow-100 rounded-lg self-start max-w-lg">
-                      {msg}
-                      <div className="text-xs text-gray-500 text-right mt-2">15:34</div>
+                      {msg.content}
+                      <div className="text-xs text-gray-500 text-right mt-2">{msg.timestamp}</div>
                     </div>
                   </div>
                 )}
@@ -158,3 +158,5 @@ export default function EmployeeChat() {
     </div>
   );
 }
+
+export default withAuth(EmployeeChat)
