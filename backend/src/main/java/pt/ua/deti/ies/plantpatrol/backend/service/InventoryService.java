@@ -47,8 +47,7 @@ public class InventoryService {
                             .build();
                     inventoryRepository.save(plant);
                 },
-                error -> logger.error("An error occurred when fetching Gemini or Google Search API", error)
-        );
+                error -> logger.error("An error occurred when fetching Gemini or Google Search API", error));
     }
 
     public void deletePlant(String id) {
@@ -63,7 +62,7 @@ public class InventoryService {
         inventoryRepository.updateAvailableById(id, available);
     }
 
-    public void editPlantDetails(String id, String family, int maxHeight, String about, String curiosities){
+    public void editPlantDetails(String id, String family, int maxHeight, String about, String curiosities) {
         inventoryRepository.updateDetailsById(id, family, maxHeight, about, curiosities);
     }
 
@@ -71,9 +70,14 @@ public class InventoryService {
         return inventoryRepository.searchPlantsByName(name);
     }
 
+    public Plant getPlant(String id) {
+        return inventoryRepository.findById(id).orElse(null);
+    }
+
     public List<Plant> getPlants(int pageNo, int pageSize) {
         Pageable pageable = PageRequest.of(pageNo, pageSize);
 
         return inventoryRepository.findAll(pageable).toList();
     }
+
 }

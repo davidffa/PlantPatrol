@@ -70,7 +70,8 @@ public class InventoryController {
             return ResponseEntity.notFound().build();
         }
 
-        inventoryService.editPlantDetails(id, plt.getFamily(), plt.getMaxHeight(), plt.getAbout(), plt.getCuriosities());
+        inventoryService.editPlantDetails(id, plt.getFamily(), plt.getMaxHeight(), plt.getAbout(),
+                plt.getCuriosities());
 
         return ResponseEntity.noContent().build();
     }
@@ -99,13 +100,24 @@ public class InventoryController {
     public ResponseEntity<List<Plant>> searchByPlant(
             @RequestParam(required = false) String name,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int pageSize
-    ) {
+            @RequestParam(defaultValue = "10") int pageSize) {
         if (name == null) {
             return new ResponseEntity<>(inventoryService.getPlants(page, pageSize), HttpStatus.OK);
         }
 
         List<Plant> plants = inventoryService.searchByPlant(name);
         return new ResponseEntity<>(plants, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Search plant by id")
+    @GetMapping("/inventory/{id}")
+    public ResponseEntity<Plant> getPlant(
+            @PathVariable String id) {
+        if (id == null) {
+            return new ResponseEntity<>(new Plant(), HttpStatus.BAD_REQUEST);
+        }
+
+        Plant plant = inventoryService.getPlant(id);
+        return new ResponseEntity<>(plant, HttpStatus.OK);
     }
 }
