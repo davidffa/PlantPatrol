@@ -51,6 +51,9 @@ public class ChatRoomService extends TextWebSocketHandler {
     public ChatRoom getChatRoomByID(String chatRoomId) {
         return chatRoomRepository.findChatRoomByChatRoomId(chatRoomId).orElse(null);
     }
+    public List<ChatRoom> getChatRooms(){
+        return chatRoomRepository.findAll();
+    }
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {

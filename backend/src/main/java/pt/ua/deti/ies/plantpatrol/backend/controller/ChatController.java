@@ -56,6 +56,17 @@ public class ChatController {
 
         return new ResponseEntity<>(chatRoom.getMessages(), HttpStatus.OK);
     }
+    @Operation(summary = "Have all the chatRoom")
+    @GetMapping("/chatRooms")
+    public ResponseEntity<?> getChats () {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth.getPrincipal() instanceof Employee ) {
+            return new ResponseEntity<>(chatRoomService.getChatRooms(), HttpStatus.OK);
+        }
+        
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    }
 
     @Operation(summary = "Create a new chatRoom")
     @PostMapping("/chat")
