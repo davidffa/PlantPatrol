@@ -36,7 +36,7 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(authorize ->
-                        authorize.requestMatchers("/ws","/ws/**","/api/v1/login", "/api/v1/docs/**", "/swagger-ui/**", "chat/**")
+                        authorize.requestMatchers("/chat","/chat/**","/api/v1/login", "/api/v1/docs/**", "/swagger-ui/**", "chat/**")
                                 .permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/inventory/**")
                                 .permitAll()
@@ -53,7 +53,7 @@ public class SecurityConfig {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of("http://localhost:3000","http://localhost:5500"));
+        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PATCH", "PUT", "DELETE"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
