@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, Image, ScrollView } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import api from "@/services/api";
 import uuid from "react-native-uuid";
@@ -24,52 +24,57 @@ type Plant = {
 export default function Details() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const id = params.id;
+  const id = params.id as string;
 
   const [clientId, setClientId] = useState("");
   const [plant, setPlant] = useState<Plant>();
   const [alertPlantIds, setAlertPlantIds] = useState<string[]>([]);
-  const alert = alertPlantIds.includes(id.toString());
+  const [alert, setAlert] = useState(false);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      async function loadAlert() {
+        try {
+          const { data } = await api.get<string[]>(`/reminders/${clientId}`);
+          setAlert(data.includes(id))
+        } catch { }
+      }
+
+      loadAlert();
+    }, [clientId])
+  )
 
   useEffect(() => {
     async function getData() {
+      let Id;
       try {
-        let Id = await AsyncStorage.getItem('clientId');
+        Id = await AsyncStorage.getItem('clientId');
         if (Id === null) {
           Id = uuid.v4();
           await AsyncStorage.setItem('clientId', Id);
         }
         setClientId(Id);
-
       } catch (e) { console.log(e) }
-    }
 
-    async function getPlant() {
       const { data } = await api.get<Plant>(`/inventory/${id}`);
       setPlant(data);
-    }
 
-    async function getToggles() {
       try {
         const { data } = await api.get<string[]>(`/reminders/${clientId}`);
-        setAlertPlantIds(data);
+        setAlert(data.includes(id))
       } catch { }
     }
 
     getData();
-    getPlant();
-    getToggles();
   }, []);
 
   async function toggleAlert() {
-    if (alertPlantIds.includes(id.toString())) {
+    if (alert) {
       await api.delete(`/reminders/${id}`, { headers: { clientId } });
-      const { data } = await api.get(`/reminders/${clientId}`);
-      setAlertPlantIds(data);
+      setAlert(false);
     } else {
       await api.post("/reminders", { clientId, plantId: id });
-      const { data } = await api.get(`/reminders/${clientId}`);
-      setAlertPlantIds(data);
+      setAlert(true);
     }
   }
 

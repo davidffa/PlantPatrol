@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
 import { View, Text, TouchableOpacity, TextInput, FlatList } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { PlantCard } from "@/components/PlantCard";
@@ -29,31 +29,31 @@ export default function Home() {
   const [searchPlants, setSearchPlants] = useState<Plant[]>([]);
   const [alertPlantIds, setAlertPlantIds] = useState<string[]>([]);
 
-  useEffect(() => {
-    async function getData() {
-      let id;
-      try {
-        id = await AsyncStorage.getItem('clientId');
-        if (id === null) {
-          id = uuid.v4();
-          await AsyncStorage.setItem('clientId', id);
-        }        
-        setClientId(id);
+  useFocusEffect(
+    React.useCallback(() => {
+      async function getData() {
+        let id;
+        try {
+          id = await AsyncStorage.getItem('clientId');
+          if (id === null) {
+            id = uuid.v4();
+            await AsyncStorage.setItem('clientId', id);
+          }
+          setClientId(id);
 
-      } catch (e) { console.log(e) }
+        } catch (e) { console.log(e) }
 
-      const { data } = await api.get<Plant[]>("/inventory");
-      setPlants(data);
+        const { data } = await api.get<Plant[]>("/inventory");
+        setPlants(data);
+        try {
+          const { data } = await api.get<string[]>(`/reminders/${id}`);
+          setAlertPlantIds(data);
+        } catch { }
+      }
 
-      try {
-        const { data } = await api.get<string[]>(`/reminders/${id}`);
-        setAlertPlantIds(data);
-        console.log(data);
-      } catch { }
-    }
-
-    getData();
-  }, []);
+      getData();
+    }, [])
+  )
 
   useEffect(() => {
     async function getSearchPlants() {
