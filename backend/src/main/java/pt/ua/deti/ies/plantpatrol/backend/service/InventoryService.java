@@ -79,11 +79,4 @@ public class InventoryService {
 
         return inventoryRepository.findAll(pageable).toList();
     }
-<<<<<<< HEAD
-    public Plant getPlant(String id) {
-        return inventoryRepository.findById(id).orElse(null);
-    }
-=======
-
->>>>>>> origin/dev
 }
