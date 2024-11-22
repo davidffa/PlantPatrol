@@ -24,7 +24,10 @@ function EmployeeChat() {
 
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
   const [newMessage, setNewMessage] = useState<string>("");
+  
+  const [webSocket,setWebSocket] = useState<WebSocket>();
 
+  const chatBox = useRef();
   // Create a reference for the last message
   const lastMessageRef = useRef<HTMLDivElement | null>(null);
   const getChatRooms= async ()=>{
@@ -38,14 +41,14 @@ function EmployeeChat() {
   }, []);
 
   function appendMessage(ev: MessageEvent){
-    const newMessage:MessagePayload = JSON.parse(ev.data) 
-    if(newMessage.content.trim()!=="")
+    const msg:MessagePayload = JSON.parse(ev.data) 
+    if(msg.content.trim()!=="")
     {
       setSelectedRoom((prevRoom) => {
         if (!prevRoom) return null; // Handle null case
         return {
           ...prevRoom,
-          messages: [...prevRoom.messages, newMessage], // Correctly concatenate messages
+          messages: [...prevRoom.messages, msg], // Correctly concatenate messages
         };
       });
     }
@@ -55,7 +58,11 @@ function EmployeeChat() {
 
     //connection to the socket
     try{
-        const ws = new WebSocket("ws://localhost:8080/chat")
+        if(webSocket != null){
+          webSocket.close()
+        }
+        const ws =new WebSocket("ws://localhost:8080/chat")
+        setWebSocket(ws)
         setSelectedRoom(Room)
           ws.onopen =()=>{
             ws.send(`{"chatRoomId":"${Room.chatRoomId}"}`)
@@ -77,7 +84,13 @@ function EmployeeChat() {
   }
   // Function to add a new message for the selected user
   const sendMessage = async () => {
-    await api.post(`/chat/${selectedRoom?.chatRoomId}`,{ content:newMessage})
+
+    const res = await api.post(`/chat/${selectedRoom?.chatRoomId}`,{ content:newMessage})
+    if(res.status = 200){
+      // scroll to the bottom
+      console.log(chatBox?.current.scrollIntoView({behavior:"smooth"}))
+    }
+
   };
 
   // Find the selected user to display their messages
@@ -85,7 +98,7 @@ function EmployeeChat() {
   return (
     <div className="h-screen flex flex-col">
       <Navbar />
-
+      { chatRooms.length !=0 ? (
       <div className="flex-grow w-full flex h-full overflow-hidden">
 
         {/* List of clients */}
@@ -113,7 +126,7 @@ function EmployeeChat() {
           </div>
 
 
-          <div className="flex-grow p-4 overflow-y-auto bg-white mx-2 rounded-lg">
+          <div  className="flex-grow p-4 overflow-y-auto flex-reverse bg-white mx-2 rounded-lg" id= "something" ref={chatBox}>
             {selectedRoom?.messages.map((msg, index) => (
               <>
                 {msg.senderId!==user?.id ? (
@@ -155,6 +168,13 @@ function EmployeeChat() {
           </div>
         </div>
       </div>
+      ):(
+        <div className="flex-grow w-full flex h-full overflow-hidden">
+        <div className="text-2xl text-black w-full text-center m-auto">
+            There are no chats available!
+            </div>
+      </div>
+      )}
     </div>
   );
 }
