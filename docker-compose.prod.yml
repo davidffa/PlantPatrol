@@ -12,7 +12,6 @@ services:
   mongo:
     image: mongo
     restart: unless-stopped
-    env_file: .env
 
     environment:
       MONGO_INITDB_DATABASE: $DB_NAME
@@ -26,11 +25,11 @@ services:
   backend:
     depends_on:
       - mongo
+      - kafka
 
     image: davidffa/plantpatrol-backend:latest
 
     restart: on-failure
-    env_file: .env
 
     environment:
       SPRING_APPLICATION_JSON: '{
@@ -58,7 +57,6 @@ services:
     depends_on:
       - backend
 
-    env_file: .env
     environment:
       NEXT_PUBLIC_BACKEND_URL: $NEXT_PUBLIC_BACKEND_URL
 
@@ -71,6 +69,32 @@ services:
 
     ports:
       - "$WEB_PORT:3000"
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper
+    networks:
+      - backend
+    environment:
+      ZOOKEEPER_CLIENT_PORT: $ZOOKEEPER_CLIENT_PORT
+      ZOOKEEPER_TICK_TIME: $ZOOKEEPER_TICK_TIME
+
+  kafka:
+    image: confluentinc/cp-kafka
+    networks:
+      - backend
+    depends_on:
+      - zookeeper
+    ports:
+      - "$KAFKA_PORT:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:$ZOOKEEPER_CLIENT_PORT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:$KAFKA_PORT
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_LOG_RETENTION_MS: $KAFKA_LOG_RETENTION_MS
+      KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: $KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS
 
 volumes:
   mongodb:
