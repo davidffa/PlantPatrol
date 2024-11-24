@@ -2,21 +2,44 @@ import React, { useState, useRef, useEffect } from "react";
 import { Text, View, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Keyboard } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { useDeviceUUID } from "@/utils/deviceUUID";
+import api from "@/services/api";
+
+
+type MessagePayload = {
+  content: string,
+  senderId: string,
+  timestamp: string
+}
 
 export default function Chat() {
   const router = useRouter();
-
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      text: "Good afternoon.\nLast month I bought two May flowers and have been watering them every day.\nHowever, they seem to me to be withered.\nCould you help me?",
-      time: "15:34",
-    },
-  ]);
+  const { isUUIDReady, deviceUUID } = useDeviceUUID()
+  const [messages, setMessages] = useState<MessagePayload[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const scrollViewRef = useRef<ScrollView>(null); // Reference to the ScrollView
 
+
+  function websocket() {
+    const ws = new WebSocket("ws://192.168.1.228:8080/chat")
+
+    ws.onopen = () => {
+      console.log("Connect to the websocket")
+      ws.send(`{"chatRoomId":${deviceUUID}}`)
+    }
+    ws.onmessage = (ev) => appendMessage(ev)
+    ws.onclose = () => {
+      console.log("Closed socket")
+    }
+
+  }
+
   useEffect(() => {
+    if (isUUIDReady && deviceUUID != null) {
+      //connect to the websocket
+      console.log(deviceUUID)
+      websocket()
+    }
     // Scroll chat down when the keyboard is opened
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
@@ -24,20 +47,36 @@ export default function Chat() {
     )
 
     return () => keyboardDidShowListener.remove();
-  }, []);
+  }, [isUUIDReady]);
 
-  const handleSendMessage = () => {
-    if (newMessage.trim() === "") return; // Prevent sending empty messages
+  const handleSendMessage = async () => {
+    if (newMessage.trim() === "" || deviceUUID == null) return; // Prevent sending empty messages
 
-    const newMessageObject = {
-      id: messages.length + 1,
-      text: newMessage,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    };
-
-    setMessages([...messages, newMessageObject]);
-    setNewMessage(""); // Clear the input field
+    try {
+      const response = await api.post(`/chat/${deviceUUID}`, { "content": newMessage }, {
+        headers: {
+          'senderId': deviceUUID
+        }
+      })
+    } catch (error) {
+      console.log("Couldn't send message")
+      console.log(error)
+    }
   };
+
+  function appendMessage(ev: MessageEvent) {
+    const msg: MessagePayload = JSON.parse(ev.data)
+    if (msg.content.trim() !== "") {
+      const newMessageObject: MessagePayload = {
+        senderId: msg.senderId,
+        content: msg.content,
+        timestamp: msg.timestamp,
+      };
+      setMessages(prev => [...prev, newMessageObject]);
+      setNewMessage(""); // Clear the input field
+    }
+  }
+
 
   return (
     <KeyboardAvoidingView
@@ -52,18 +91,27 @@ export default function Chat() {
         </View>
 
         {/* Chat container */}
-        <View className="flex-1 mx-6 mb-6 bg-white rounded-lg p-3">
+        <View className="flex-1 mx-6 mb-6 bg-white rounded-lg p-1">
           <ScrollView
             className="flex-1"
             ref={scrollViewRef} // Attach the ref to the ScrollView
             onContentSizeChange={() => scrollViewRef.current?.scrollToEnd()}
           >
-            {messages.map((message) => (
-              <View key={message.id} className="bg-blue-100 rounded-lg m-2 p-3 self-end max-w-[80%]">
-                <Text className="text-black">{message.text}</Text>
-                <Text className="text-xs text-gray-500 text-right mt-1">{message.time}</Text>
-              </View>
-            ))}
+            {messages.map((m, idx) => (
+
+              deviceUUID != null && m.senderId !== deviceUUID ? (
+                <View key={idx} className="bg-blue-100 rounded-xl m-2 p-3 self-start max-w-[80%]">
+                  <Text className="text-black text-left">{m.content}</Text>
+                  <Text className="text-xs text-gray-500 text-right mt-1">{m.timestamp}</Text>
+                </View>
+              ) : (
+                <View key={idx} className="bg-green rounded-lg m-2 p-3 self-end max-w-[80%]">
+                  <Text className="text-white text-right">{m.content}</Text>
+                  <Text className="text-xs text-white  text-right mt-1">{m.timestamp}</Text>
+                </View>
+              )
+            ))
+            }
           </ScrollView>
         </View>
 
