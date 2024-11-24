@@ -18,26 +18,28 @@ export default function Chat() {
   const [messages, setMessages] = useState<MessagePayload[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const scrollViewRef = useRef<ScrollView>(null); // Reference to the ScrollView
-
+  const [webSocket, setWebSocket] = useState<WebSocket>()
 
   function websocket() {
-    const ws = new WebSocket("ws://192.168.1.228:8080/chat")
+    try {
+      const ws = new WebSocket("ws://192.168.1.228:8080/chat")
 
-    ws.onopen = () => {
-      console.log("Connect to the websocket")
-      ws.send(`{"chatRoomId":${deviceUUID}}`)
+      ws.onopen = () => {
+        ws.send(`{"chatRoomId":${deviceUUID}}`)
+      }
+      ws.onmessage = (ev) => appendMessage(ev)
+      ws.onclose = () => {
+        console.log("Closed socket")
+      }
+      setWebSocket(ws)
+    } catch (error) {
+      alert("Couldn't connect to the socket")
     }
-    ws.onmessage = (ev) => appendMessage(ev)
-    ws.onclose = () => {
-      console.log("Closed socket")
-    }
-
   }
 
   useEffect(() => {
     if (isUUIDReady && deviceUUID != null) {
       //connect to the websocket
-      console.log(deviceUUID)
       websocket()
     }
     // Scroll chat down when the keyboard is opened
@@ -53,14 +55,13 @@ export default function Chat() {
     if (newMessage.trim() === "" || deviceUUID == null) return; // Prevent sending empty messages
 
     try {
-      const response = await api.post(`/chat/${deviceUUID}`, { "content": newMessage }, {
+      await api.post(`/chat/${deviceUUID}`, { "content": newMessage }, {
         headers: {
           'senderId': deviceUUID
         }
       })
     } catch (error) {
-      console.log("Couldn't send message")
-      console.log(error)
+      alert("Coundl't send the message to the server!")
     }
   };
 
@@ -86,7 +87,7 @@ export default function Chat() {
       <View className="flex-1 bg-slate-200">
         {/* Header */}
         <View className="flex flex-row items-center mt-8 p-8">
-          <Ionicons name="arrow-back" size={24} color="black" onPress={() => router.back()} />
+          <Ionicons name="arrow-back" size={24} color="black" onPress={() => { router.back(); webSocket?.close() }} />
           <Text className="text-3xl font-bold text-green ml-8">PlantPatrol</Text>
         </View>
 
