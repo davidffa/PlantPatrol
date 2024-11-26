@@ -13,6 +13,7 @@ import {
   Roboto_300Light_Italic,
   Roboto_700Bold
 } from "@expo-google-fonts/roboto"
+import { UserProvider } from "@/contexts/user";
 
 export default function Layout() {
   const [fontsLoaded] = useFonts({
@@ -25,5 +26,9 @@ export default function Layout() {
 
   if (!fontsLoaded) return;
 
-  return <Stack screenOptions={{ headerShown: false }} />
+  return (
+    <UserProvider>
+      <Stack screenOptions={{ headerShown: false }} />
+    </UserProvider>
+  )
 }
