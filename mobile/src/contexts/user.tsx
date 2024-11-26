@@ -28,11 +28,12 @@ function handleRegistrationError(errorMessage: string) {
 
 async function registerForPushNotificationsAsync() {
   if (Platform.OS === "android") {
-    Notifications.setNotificationChannelAsync("default", {
-      name: "default",
+    Notifications.setNotificationChannelAsync("Plant Reminders", {
+      name: "Plant Reminders",
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
-      lightColor: "#FF231F7C"
+      lightColor: "#FF231F7C",
+      enableLights: true
     });
   }
 

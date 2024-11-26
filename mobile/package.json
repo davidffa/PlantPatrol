@@ -28,7 +28,8 @@
     "react-native-uuid": "^2.0.3",
     "tailwindcss": "^3.4.13",
     "expo-notifications": "~0.29.8",
-    "expo-device": "~7.0.1"
+    "expo-device": "~7.0.1",
+    "expo-build-properties": "~0.13.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

@@ -26,11 +26,16 @@ public class PushNotificationService {
         List<Reminder> reminders = reminderRepository.findRemindersForPlantId(plantId);
         List<String> pushTokens = reminders.stream().map(Reminder::getPushToken).toList();
 
+        if (pushTokens.isEmpty()) return;
+
         Plant plant = inventoryRepository.findById(plantId).orElseThrow();
 
         webClient.post()
                 .uri("https://exp.host/--/api/v2/push/send")
-                .bodyValue(buildExpoNotificationsBody(pushTokens, plant.getName()));
+                .bodyValue(buildExpoNotificationsBody(pushTokens, plant.getName()))
+                .retrieve()
+                .toBodilessEntity()
+                .subscribe();
     }
 
     private String buildExpoNotificationsBody(List<String> pushTokens, String plantName) {

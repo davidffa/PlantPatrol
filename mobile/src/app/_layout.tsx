@@ -14,6 +14,7 @@ import {
   Roboto_700Bold
 } from "@expo-google-fonts/roboto"
 import { UserProvider } from "@/contexts/user";
+import { StatusBar } from "react-native";
 
 export default function Layout() {
   const [fontsLoaded] = useFonts({
@@ -28,6 +29,7 @@ export default function Layout() {
 
   return (
     <UserProvider>
+      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
       <Stack screenOptions={{ headerShown: false }} />
     </UserProvider>
   )
