@@ -44,6 +44,7 @@ public class PushNotificationService {
                 .put("title", "Plant available")
                 .put("body", String.format("The plant %s is now available for purchase!", plantName))
                 .put("priority", "high")
+                .put("channelId", "Plant Reminders")
                 .toString();
     }
 }

@@ -32,8 +32,7 @@ async function registerForPushNotificationsAsync() {
       name: "Plant Reminders",
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
-      lightColor: "#FF231F7C",
-      enableLights: true
+      lightColor: "#FF231F7C"
     });
   }
 
