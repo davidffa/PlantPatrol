@@ -1,4 +1,4 @@
-{
+module.exports = {
   "expo": {
     "name": "PlantPatrol",
     "slug": "plant-patrol-mobile",
@@ -22,7 +22,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "pt.ua.deti.ies.plantpatrol.mobile",
-      "googleServicesFile": "google-services.json"
+      "googleServicesFile": process.env.GOOGLE_SERVICES_JSON
     },
     "web": {
       "favicon": "./assets/favicon.png"
