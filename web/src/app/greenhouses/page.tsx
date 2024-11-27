@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 import GreenHouse from './[greenhouseId]/page';
 import Swal from 'sweetalert2';
 import AddHomeIcon from '@mui/icons-material/AddHome';
+import { useAuth } from '@/contexts/auth';
 
 
 type GreenHouse = {
@@ -25,6 +26,8 @@ type GreenHouse = {
   const closeRef = useRef<HTMLButtonElement>(null);
   const [newName, setNewName] = useState<string>("")
   const [location, setLocation] = useState<string>("")
+  const {user} = useAuth();
+
 
   useEffect(() => {
     try {
@@ -93,7 +96,7 @@ type GreenHouse = {
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
                     type="text"
-                    placeholder="ex: GreenHouse for Cactus..."
+                    placeholder="GreenHouse for Cactus..."
                     className="input input-bordered border-green w-full max-w-xs" />
                 </label>
               </div>
@@ -106,13 +109,16 @@ type GreenHouse = {
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     type="text"
-                    placeholder="Ex: Rua Almeida Garret"
+                    placeholder="Street ..."
                     className="input input-bordered border-green w-full max-w-xs" />
                 </label>
               </div>
-              <button onClick={addGreenHouse} className='w-1/2 p-3 text-white bg-green text-xl mx-auto shadow-lg rounded-badge mt-3'>
+              {
+                user?.manager && (<button onClick={addGreenHouse} className='w-1/2 p-3 text-white bg-green text-xl mx-auto shadow-lg rounded-badge mt-3'>
                   Create
-              </button>
+                </button>)
+                
+              }
             </div>
             <div className="modal-action">
               <form method="dialog">
