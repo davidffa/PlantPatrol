@@ -6,8 +6,7 @@ import { PlantCard } from "@/components/PlantCard";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import api from "@/services/api";
-import uuid from "react-native-uuid";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useUser } from "@/contexts/user";
 
 
 type Plant = {
@@ -23,7 +22,8 @@ type Plant = {
 
 export default function Home() {
   const router = useRouter();
-  const [clientId, setClientId] = useState("");
+  const { clientId, pushToken } = useUser();
+
   const [plants, setPlants] = useState<Plant[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchPlants, setSearchPlants] = useState<Plant[]>([]);
@@ -32,21 +32,10 @@ export default function Home() {
   useFocusEffect(
     React.useCallback(() => {
       async function getData() {
-        let id;
-        try {
-          id = await AsyncStorage.getItem('clientId');
-          if (id === null) {
-            id = uuid.v4();
-            await AsyncStorage.setItem('clientId', id);
-          }
-          setClientId(id);
-
-        } catch (e) { console.log(e) }
-
         const { data } = await api.get<Plant[]>("/inventory");
         setPlants(data);
         try {
-          const { data } = await api.get<string[]>(`/reminders/${id}`);
+          const { data } = await api.get<string[]>(`/reminders/${clientId}`);
           setAlertPlantIds(data);
         } catch { }
       }
@@ -72,7 +61,7 @@ export default function Home() {
       const { data } = await api.get(`/reminders/${clientId}`);
       setAlertPlantIds(data);
     } else {
-      await api.post("/reminders", { clientId, plantId: id });
+      await api.post("/reminders", { clientId, plantId: id, pushToken });
       const { data } = await api.get(`/reminders/${clientId}`);
       setAlertPlantIds(data);
     }
