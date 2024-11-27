@@ -6,7 +6,8 @@
   #include "SSD1306.h"  // alias for `#include "SSD1306Wire.h"`
   //Wifi and MQTTClient
   #include "EspMQTTClient.h"
-
+  //Json
+  #include <ArduinoJson.h>
 // *** end imports ***
 
 
@@ -15,7 +16,8 @@
 #define DHTPIN 4       // DHT11 data pin connected to digital pin 2
 //***
 
-
+//JsonDocument
+JsonDocument doc;
 //temperature and humidity sensors
 DHT dht(DHTPIN, DHTTYPE);
 //display
@@ -24,21 +26,33 @@ unsigned long globalTime;
 unsigned long displayTime;
 bool modeTH = true;
 int modeInterval=2400;
+//broker times
+unsigned long publisingTime;
+int publishingInterval=60000;
+
+String id="e3ba4698-d64b-447e-81f5-0bf0e09700eb";
+
 //Wifi
 #define SSID "HenriqueFreitas"
 #define WIFI_PASSWORD "irnz6912"
-//Broker IP
-#define IP_BROKER "192.168.41.5"
+//Topic
+#define TOPIC "ies/sensors"
+//Broker IP or dns
+#define IP_BROKER "192.168.222.64"
+//Device Name
+#define DEVICE_NAME "ESP8266-IES"
 
 EspMQTTClient client(
   SSID,
   WIFI_PASSWORD,
   IP_BROKER,  // MQTT Broker server ip
-  "ESP8266-IES",     // Client name that uniquely identify your device
+  DEVICE_NAME,     // Client name that uniquely identify your device
   1883              // The MQTT port, default to 1883. this line can be omitted
 );
 void setup() {
   displayTime = millis();
+  publisingTime  = millis();
+  //id = uuid.toCharArray();
   // put your setup code here, to run once:
   Serial.begin(115200);
   //initialize sensors
@@ -63,6 +77,19 @@ void loop() {
     return;
   }
   sensorDisplay(temperature, humidity);
+
+
+  if(globalTime -publisingTime > publishingInterval ){
+    publisingTime=globalTime;
+    doc["temperature"]=String(temperature);
+    doc["humidity"]=String(humidity);
+    doc["uuid"]=String(id);
+    doc["aiq"]=String(random(10,500));
+    doc["uv"]=String(random(100,200));
+    String message;
+    serializeJson(doc, message);
+    client.publish(TOPIC,message);
+  }
   client.loop();
 }
 
@@ -95,5 +122,5 @@ void sensorDisplay(float temperature, float humidity) {
 void onConnectionEstablished()
 {
   // Publish a message to "mytopic/test"
-  client.publish("mytopic/test", "This is a message"); // You can activate the retain flag by setting the third parameter to true
+  Serial.println("Connected to the broker!");
 }
