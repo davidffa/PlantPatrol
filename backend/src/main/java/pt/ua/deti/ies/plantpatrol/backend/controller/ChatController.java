@@ -2,6 +2,7 @@ package pt.ua.deti.ies.plantpatrol.backend.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -14,7 +15,9 @@ import pt.ua.deti.ies.plantpatrol.backend.entity.Employee;
 import pt.ua.deti.ies.plantpatrol.backend.dto.chat.MessagePayload;
 import pt.ua.deti.ies.plantpatrol.backend.service.ChatRoomService;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.time.Instant;
 
 @RestController
@@ -49,12 +52,28 @@ public class ChatController {
     @Operation(summary = "Have all the messages in a specified chatRoom")
     @GetMapping("/chat/{chatRoomId}")
     public ResponseEntity<?> findChatMessages (@PathVariable String chatRoomId) {
-        ChatRoom chatRoom = chatRoomService.getChatRoomByID(chatRoomId);
+        try {
+            ChatRoom chatRoom = chatRoomService.getChatRoomByID(chatRoomId);
 
-        if (chatRoom == null)
-            return ResponseEntity.notFound().build();
+            if (chatRoom == null) {
+                return ResponseEntity.notFound().build();
+            }
 
-        return new ResponseEntity<>(chatRoom.getMessages(), HttpStatus.OK);
+            List<MessagePayload> messages = chatRoom.getMessages();
+            if (messages == null) {
+                messages = new ArrayList<>();
+            }
+
+            return new ResponseEntity<>(messages, HttpStatus.OK);
+        } catch (IncorrectResultSizeDataAccessException e) {
+            // Handle non-unique result
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body("Multiple chat rooms found with the same ID: " + chatRoomId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body("Unknown error occurred while fetching messages.");
+        }
     }
     @Operation(summary = "Have all the chatRoom")
     @GetMapping("/chatRooms")
