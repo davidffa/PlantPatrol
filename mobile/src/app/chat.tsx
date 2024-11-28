@@ -39,6 +39,9 @@ export default function Chat() {
 
   useEffect(() => {
     if (isUUIDReady && deviceUUID != null) {
+      // create chat room
+      createChatRoom();
+
       //connect to the websocket
       websocket()
 
@@ -54,17 +57,29 @@ export default function Chat() {
     return () => keyboardDidShowListener.remove();
   }, [isUUIDReady]);
 
+  const createChatRoom = async () => {
+    try {
+      const response = await api.post(`/chat`, { chatRoomId: deviceUUID });
+      console.log("Chat Room created: ", response.data);
+    } catch (error) {
+      console.error("Error creating chat room:", error);
+      alert("Couldn't create chat room.");
+    }
+  }
+
   const fetchMessages = async () => {
     try {
-      const response = await api.get(`/chat/${deviceUUID}`);
+      const response = await api.get(`/chat/${deviceUUID}`, );
       const fetchedMessages: MessagePayload[] = response.data;
-      console.log(fetchedMessages)
+      console.log("Messages fetched: ", fetchMessages);
   
       // Update the messages state
       setMessages(fetchedMessages);
+      setNewMessage("");
     } catch (error) {
-      console.error("Error fetching messages:", error);
-      alert("Couldn't load messages from the server.");
+      console.error('Error fetching messages:', error);
+      alert('Couldn\'t load messages from the server.');
+      setMessages([]);
     }
   };
 
@@ -84,6 +99,7 @@ export default function Chat() {
 
   function appendMessage(ev: MessageEvent) {
     const msg: MessagePayload = JSON.parse(ev.data)
+    console.log(msg);
     if (msg.content.trim() !== "") {
       const newMessageObject: MessagePayload = {
         senderId: msg.senderId,
