@@ -36,23 +36,14 @@ message_queue=[]
     
 # ------KAFKA callbacks-------
 def on_send_success(record_metadata):
-    print(record_metadata.topic)
-    print(record_metadata.partition)
-    print(record_metadata.offset)
+    logger.info(f"Sent message (Kafka):\n Topic:{record_metadata.topic} \n Partition: {record_metadata.partition} \n Offset:{record_metadata.offset}")
 
 def on_send_error(excp):
-    # Check if excp is actually an exception
-    if excp is None:
-        logger.warning("Received None in error callback - potential false positive")
-        return
-    
-    # Log detailed error information
-    logger.error('Error sending message to Kafka', exc_info=excp)
-    
-    # If it's a Kafka-specific error, add more context
+    logger.error('Error sending message to Kafka', exc_info=True)
+    # If the exception is a specific Kafka error, log more details
     if isinstance(excp, KafkaError):
-        logger.error(f"Kafka Error Code: {excp.errno if hasattr(excp, 'errno') else 'N/A'}")
-        logger.error(f"Kafka Error Message: {str(excp)}")
+        logger.error(f"Kafka Error Code: {excp.errno}")
+        logger.error(f"Kafka Error Message: {excp}")
 
 #------- MQTT callbacks ------
 def on_connect(client, userdata, flags, reason_code, properties):
@@ -87,23 +78,22 @@ def main():
             # if the mqttc is disconnected reconnect 
             if mqttc.is_connected() and len(message_queue)!=0 :
                 try:
-                    msg = message_queue.pop(0)
+                    msg = message_queue.pop(0)[MESSAGE.PAYLOAD.value]
                     logger.info("Sending message to kafka...")
-                    future=producer.send(kafka_topic,msg[MESSAGE.PAYLOAD.value]).add_callback(on_send_success).add_callback(on_send_error)
-                    try:
-                        record_metadata = future.get(timeout=10)
-                        on_send_success(record_metadata)
-                    except Exception as send_err:
-                        on_send_error(send_err)
+                    future=producer.send(kafka_topic,msg).add_callback(on_send_success)
+                    # Strange noneType:None error message, ignored because consumer is receiving the messages
+                    # .add_callback(on_send_error)
+                    future.get(timeout=10)
+                    producer.flush()
                 except Exception as e :
                     logger.info(f"Connection error:{e}")
             # a small delay
             time.sleep(0.1)
+        producer.close()
     except Exception as e :
         logger.info(f"Shutting down... {e}") 
     finally:
         mqttc.loop_stop()
-        producer.close()
 if __name__=="__main__":
     main()
 
