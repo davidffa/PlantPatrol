@@ -41,6 +41,9 @@ export default function Chat() {
     if (isUUIDReady && deviceUUID != null) {
       //connect to the websocket
       websocket()
+
+      // fetch existing messages
+      fetchMessages();
     }
     // Scroll chat down when the keyboard is opened
     const keyboardDidShowListener = Keyboard.addListener(
@@ -50,6 +53,20 @@ export default function Chat() {
 
     return () => keyboardDidShowListener.remove();
   }, [isUUIDReady]);
+
+  const fetchMessages = async () => {
+    try {
+      const response = await api.get(`/chat/${deviceUUID}`);
+      const fetchedMessages: MessagePayload[] = response.data;
+      console.log(fetchedMessages)
+  
+      // Update the messages state
+      setMessages(fetchedMessages);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      alert("Couldn't load messages from the server.");
+    }
+  };
 
   const handleSendMessage = async () => {
     if (newMessage.trim() === "" || deviceUUID == null) return; // Prevent sending empty messages
