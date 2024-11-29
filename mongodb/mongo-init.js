@@ -68,23 +68,15 @@ db.plants.insertOne({
 })
 
 db.greenhouses.insertOne({
-  "name": "Greenhouse 1",
+  "name": "Vegetable Greenhouse",
   "location": "Fifth Avenue",
   "rules": [],
   '_class': "pt.ua.deti.ies.plantpatrol.backend.entity.rules.GreenHouse"
 })
 
-db.rules.insertOne({
-
-  "name": "Basic Rule",
-  "minTemp": 25,
-  "maxTemp": 35,
-  "minHumidity": 50,
-  "maxHumidity": 70,
-  "minAIQ": 420,
-  "maxAIQ": 460,
-  "waterSystemFlow": 70,
-  "ventilationRPM": 400,
-  "airPurifier": true,
-  "_class": "pt.ua.deti.ies.plantpatrol.backend.entity.rules.Rule"
+db.greenhouses.insertOne({
+  "name": "Floriculture Greenhouse",
+  "location": "Fifth Avenue",
+  "rules": [],
+  '_class': "pt.ua.deti.ies.plantpatrol.backend.entity.rules.GreenHouse"
 })
