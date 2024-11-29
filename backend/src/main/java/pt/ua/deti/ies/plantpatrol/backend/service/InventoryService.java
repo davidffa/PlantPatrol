@@ -73,8 +73,8 @@ public class InventoryService {
         inventoryRepository.updateAvailableById(id, available);
     }
 
-    public void editPlantDetails(String id, String family, int maxHeight, String about, String curiosities) {
-        inventoryRepository.updateDetailsById(id, family, maxHeight, about, curiosities);
+    public void editPlantDetails(String id, String imageUrl, String family, int maxHeight, String about, String curiosities) {
+        inventoryRepository.updateDetailsById(id,imageUrl, family, maxHeight, about, curiosities);
     }
 
     public List<Plant> searchByPlant(String name) {
