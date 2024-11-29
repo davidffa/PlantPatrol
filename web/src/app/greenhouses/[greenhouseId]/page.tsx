@@ -20,6 +20,7 @@ import api from '@/services/api'
 
 import Swal from 'sweetalert2'
 
+
 type Props = {
   params: { greenhouseId: string }
 }
@@ -54,16 +55,28 @@ enum IntervalEnum {
 Chart.register(CategoryScale);
 
  function GreenHouse({ params }: Props) {
-  const [sensors, setSensors] = useState({ 0: true, 1: true, 2: true, 3: true });
+
+  type Sensor = {
+    id: number;
+    name: string;
+    icon: JSX.Element; // Define the icon property as a JSX.Element
+  };
+
+  const [sensors, setSensors] = useState<Record<number, boolean>>({
+    0: true,
+    1: true,
+    2: true,
+    3: true,
+  });
   const [interval, setInterval] = useState<IntervalEnum>(IntervalEnum.Day)
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // TODO: Replace with actual sensors from the database
-  const availableSensors = [
-    { id: 1, name: "Temperature" },
-    { id: 2, name: "Carbon Dioxide (CO₂)" },
-    { id: 3, name: "Humidity" },
-    { id: 4, name: "UV Index" },
+  const availableSensors: Sensor[] = [
+    { id: 0, name: "UVLight", icon: <SolarPower fontSize="large" /> },
+    { id: 1, name: "Temperature", icon: <DeviceThermostatIcon fontSize="large" /> },
+    { id: 2, name: "Humidity", icon: <OpacityIcon fontSize="large" /> },
+    { id: 3, name: "AirQuality", icon: <Co2Icon fontSize="large" /> },
   ];
 
   // the id to make the request to the database it could be anything passed as the paramenter
@@ -78,7 +91,6 @@ Chart.register(CategoryScale);
   }
 
   const selectedStyle = "text-white bg-green"
-  const nonSelectedStyle = "text-brown bg-beje"
   const selectedInterval = "text-green bg-white shadow-xl"
   const [rules, setRules] = useState<Rule[]>([])
 
@@ -152,9 +164,42 @@ Chart.register(CategoryScale);
     setIsModalOpen(false);
   };
 
+  const handleDeleteSensor = async (sensorId: number) => {
+    const result = await Swal.fire({
+      title: "Delete this sensor?",
+      text: "This action cannot be undone!",
+      showConfirmButton: true,
+      showCancelButton: true,
+      confirmButtonText: "Delete",
+      confirmButtonColor: "red",
+    });
+  
+    if (result.isConfirmed) {
+      try {
+        // API call to delete the sensor (if required)
+        // await api.delete(`/greenhouse/${greenhouseId}/remove-sensor/${sensorId}`);
+  
+        // Update state to reflect sensor deletion
+        setSensors((prev) => ({
+          ...prev,
+          [sensorId]: false,
+        }));
+  
+        await Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: "Sensor deleted successfully!",
+        });
+      } catch (error) {
+        console.error("Error deleting sensor:", error);
+        Swal.fire("Error", "Failed to delete the sensor.", "error");
+      }
+    }
+  };
+
   useEffect(() => {
       getRules()
-  },[])
+  },[getRules])
 
   return (
     <>
@@ -175,18 +220,29 @@ Chart.register(CategoryScale);
           </div>
 
           <div className='flex my-4 mx-auto justify-center'>
-            <button onClick={() => sensorChange(SensorEnum.UVLight)} className={`aspect-square hover:scale-110 transition ease-in-out hover:shadow-md-fit rounded-full text-md p-4 my-0 mx-3 text-center flex align-middle ${sensors[SensorEnum.UVLight] ? selectedStyle : nonSelectedStyle}`}>
-              <SolarPower fontSize="large" />
-            </button>
-            <button onClick={() => sensorChange(SensorEnum.Temperature)} className={`aspect-square hover:scale-110 transition ease-in-out hover:shadow-md-fit rounded-full text-md p-4 my-0 mx-3 text-center flex align-middle ${sensors[SensorEnum.Temperature] ? selectedStyle : nonSelectedStyle}`} >
-              <DeviceThermostatIcon fontSize="large" />
-            </button>
-            <button onClick={() => sensorChange(SensorEnum.Humidity)} className={`hover:scale-110 transition ease-in-out hover:shadow-mdw-fit rounded-full text-md p-4 my-0 mx-3 text-center flex align-middle ${sensors[SensorEnum.Humidity] ? selectedStyle : nonSelectedStyle}`} >
-              <OpacityIcon fontSize="large" />
-            </button>
-            <button onClick={() => sensorChange(SensorEnum.AirQuality)} className={`hover:scale-110 transition ease-in-out hover:shadow-mdw-fit rounded-full text-md p-4 my-0 mx-3 text-center flex align-middle ${sensors[SensorEnum.AirQuality] ? selectedStyle : nonSelectedStyle}`} >
-              <Co2Icon fontSize="large" />
-            </button>
+            {Object.keys(sensors).map((key) => {
+              const sensorId = Number(key); // Convert key to a number
+              const sensor = availableSensors.find((s) => s.id === sensorId);
+
+              if (!sensors[sensorId] || !sensor) return null; // Check if the sensor exists
+
+              return (
+                <div key={sensorId} className="relative">
+                  <button
+                    onClick={() => sensorChange(sensor.id)}
+                    className="aspect-square hover:scale-110 transition ease-in-out hover:shadow-md-fit rounded-full text-md p-4 my-0 mx-3 text-center flex align-middle text-white bg-green"
+                  >
+                    {sensor.icon}
+                  </button>
+                  <button
+                    onClick={() => handleDeleteSensor(sensor.id)}
+                    className="absolute top-0 right-0 bg-transparent text-black rounded-full p-1 text-sm hover:text-gray-600 transition"
+                  >
+                    ✖
+                  </button>
+                </div>
+              );
+            })}
             <button
               onClick={() => setIsModalOpen(true)}
               className="aspect-square hover:scale-110 transition ease-in-out hover:shadow-mdw-fit rounded-full text-md p-4 my-0 mx-3 text-center flex align-middle bg-green text-white"
