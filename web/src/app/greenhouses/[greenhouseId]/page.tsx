@@ -56,6 +56,15 @@ Chart.register(CategoryScale);
  function GreenHouse({ params }: Props) {
   const [sensors, setSensors] = useState({ 0: true, 1: true, 2: true, 3: true });
   const [interval, setInterval] = useState<IntervalEnum>(IntervalEnum.Day)
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // TODO: Replace with actual sensors from the database
+  const availableSensors = [
+    { id: 1, name: "Temperature" },
+    { id: 2, name: "Carbon Dioxide (CO₂)" },
+    { id: 3, name: "Humidity" },
+    { id: 4, name: "UV Index" },
+  ];
 
   // the id to make the request to the database it could be anything passed as the paramenter
   const { greenhouseId } = params;
@@ -121,6 +130,28 @@ Chart.register(CategoryScale);
           console.log(error)
       }
   }
+  const handleAddSensor = (sensorId: number) => {
+    console.log(`Adding sensor with ID: ${sensorId}`);
+    // You can make an API call here to add the sensor
+    api.post(`/greenhouse/${greenhouseId}/add-sensor`, { sensorId })
+      .then((response) => {
+        if (response.status === 200) {
+          Swal.fire("Success", "Sensor added successfully!", "success");
+          // Optionally update state to reflect the added sensor
+          setSensors((prev) => ({ ...prev, [sensorId]: true }));
+        } else {
+          Swal.fire("Error", "Failed to add sensor.", "error");
+        }
+      })
+      .catch((error) => {
+        console.error("Error adding sensor:", error);
+        Swal.fire("Error", "Failed to add sensor.", "error");
+      });
+  
+    // Close the modal after adding
+    setIsModalOpen(false);
+  };
+
   useEffect(() => {
       getRules()
   },[])
@@ -156,7 +187,48 @@ Chart.register(CategoryScale);
             <button onClick={() => sensorChange(SensorEnum.AirQuality)} className={`hover:scale-110 transition ease-in-out hover:shadow-mdw-fit rounded-full text-md p-4 my-0 mx-3 text-center flex align-middle ${sensors[SensorEnum.AirQuality] ? selectedStyle : nonSelectedStyle}`} >
               <Co2Icon fontSize="large" />
             </button>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="aspect-square hover:scale-110 transition ease-in-out hover:shadow-mdw-fit rounded-full text-md p-4 my-0 mx-3 text-center flex align-middle bg-green text-white"
+            >
+              <AddIcon fontSize="large" />
+            </button>
           </div>
+          {/* Modal */}
+          {isModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+              <div className="bg-white w-3/4 max-w-md rounded-lg shadow-lg p-6 relative">
+                {/* Modal Header */}
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-2xl font-bold">Available Sensors</h2>
+                  <button
+                    onClick={() => setIsModalOpen(false)}
+                    className="text-gray-500 hover:text-black"
+                  >
+                    ✖
+                  </button>
+                </div>
+
+                {/* Sensor List */}
+                <ul className="flex flex-col gap-4">
+                  {availableSensors.map((sensor) => (
+                    <li
+                      key={sensor.id}
+                      className="flex justify-between items-center bg-gray-100 rounded-lg p-3 shadow-md"
+                    >
+                      <span className="text-lg">{sensor.name}</span>
+                      <button
+                        onClick={() => handleAddSensor(sensor.id)}
+                        className="bg-green text-white p-2 rounded-md"
+                      >
+                        Add
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Graphics */}
