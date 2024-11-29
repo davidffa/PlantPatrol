@@ -12,6 +12,7 @@ import pt.ua.deti.ies.plantpatrol.backend.repository.InventoryRepository;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -21,6 +22,7 @@ public class InventoryService {
     private final InventoryRepository inventoryRepository;
     private final GeminiService geminiService;
     private final GoogleSearchService googleSearchService;
+    private final PushNotificationService pushNotificationService;
 
     public boolean plantExists(String id) {
         return inventoryRepository.existsById(id);
@@ -59,6 +61,15 @@ public class InventoryService {
     }
 
     public void editAvailablePlant(String id, int available) {
+        Optional<Plant> optionalPlant = inventoryRepository.findById(id);
+        if (optionalPlant.isEmpty()) return;
+
+        Plant plant = optionalPlant.get();
+
+        if (plant.getAmount() == 0 && available > 0) {
+            pushNotificationService.sendNotificationsForPlant(id);
+        }
+
         inventoryRepository.updateAvailableById(id, available);
     }
 
