@@ -18,4 +18,9 @@ public class SensorsConsumer {
     public void consumeSensorData(SensorsReadingDTO dto) {
         sensorsService.createSensorsReading(dto);
     }
+
+    @KafkaListener(groupId = "backend_consumer_hourly", topics = "hourly-sensors-avg")
+    public void consumeHourlyAvg(SensorsReadingDTO dto) {
+        sensorsService.createHourlyAvg(dto);
+    }
 }
