@@ -9,6 +9,7 @@ import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.Serializer;
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
@@ -29,18 +30,20 @@ public class Processor {
 
     @Autowired
     public void process(StreamsBuilder streamsBuilder) {
+        registerAggregationPipeline(streamsBuilder, "sensors", Duration.ofHours(1), "hourly-sensors-avg");
+        registerAggregationPipeline(streamsBuilder, "hourly-sensors-avg", Duration.ofDays(1), "daily-sensors-avg");
+        registerAggregationPipeline(streamsBuilder, "daily-sensors-avg", Duration.ofDays(7), "weekly-sensors-avg");
+    }
+
+    private void registerAggregationPipeline(StreamsBuilder streamsBuilder, String ingestionTopic, Duration windowDuration, String outputTopic) {
         KStream<String, SensorsReadingDTO> messageStream = streamsBuilder
-                .stream("sensors", Consumed.with(STRING_SERDE, READING_SERDE));
-
-        ReadingsHelper initial = new ReadingsHelper();
-
-        // TODO: Change minute to hourly, and make daily, weekly and monthly
+                .stream(ingestionTopic, Consumed.with(STRING_SERDE, READING_SERDE));
 
         messageStream
                 .groupBy((k, v) -> v.getControllerId())
-                .windowedBy(TimeWindows.ofSizeWithNoGrace(Duration.ofMinutes(1)))
+                .windowedBy(TimeWindows.ofSizeWithNoGrace(windowDuration))
                 .aggregate(
-                        () -> initial,
+                        ReadingsHelper::new,
                         (key, value, aggregate) -> {
                             aggregate.setControllerId(value.getControllerId());
                             aggregate.setUv(aggregate.getUv() + value.getUv());
@@ -53,17 +56,20 @@ public class Processor {
                         Materialized.with(STRING_SERDE, READINGS_HELPER_SERDE)
                 )
                 .toStream()
-                .mapValues(v ->
-                    SensorsReadingDTO
-                            .builder()
-                            .controllerId(v.getControllerId())
-                            .humidity(v.getHumidity() / v.getCount())
-                            .temperature(v.getTemperature() / v.getCount())
-                            .aiq(v.getAiq() / v.getCount())
-                            .uv(v.getUv() / v.getCount())
-                            .build()
+                .map((k, v) ->
+                        new KeyValue<>(k.key(),
+                                SensorsReadingDTO
+                                        .builder()
+                                        .controllerId(v.getControllerId())
+                                        .humidity(v.getHumidity() / v.getCount())
+                                        .temperature(v.getTemperature() / v.getCount())
+                                        .aiq(v.getAiq() / v.getCount())
+                                        .uv(v.getUv() / v.getCount())
+                                        .timestampMs(k.window().end())
+                                        .build()
+                        )
                 )
-                .to("hourly-sensors-avg");
+                .to(outputTopic);
     }
 
     @Data

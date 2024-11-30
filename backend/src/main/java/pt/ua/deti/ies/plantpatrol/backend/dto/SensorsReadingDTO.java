@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -16,4 +18,6 @@ public class SensorsReadingDTO {
     private double humidity;
     private double aiq;
     private double uv;
+
+    private long timestampMs;
 }

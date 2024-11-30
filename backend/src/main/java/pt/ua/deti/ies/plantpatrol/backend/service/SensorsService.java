@@ -6,7 +6,9 @@ import pt.ua.deti.ies.plantpatrol.backend.entity.SensorsReading;
 import pt.ua.deti.ies.plantpatrol.backend.enums.ReadingType;
 import pt.ua.deti.ies.plantpatrol.backend.repository.SensorsRepository;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Optional;
 
 @Service
@@ -47,17 +49,35 @@ public class SensorsService {
         sensorsRepository.save(reading);
     }
 
-    public void createHourlyAvg(SensorsReadingDTO dto) {
-        SensorsReading reading = SensorsReading
-                .builder()
-                .controllerId(dto.getControllerId())
-                .readingType(ReadingType.HOURLY)
-                .temperature(dto.getTemperature())
-                .humidity(dto.getHumidity())
-                .aiq(dto.getAiq())
-                .uv((dto.getUv()))
-                .timestamp(LocalDateTime.now())
+    public void createAvg(SensorsReadingDTO dto, ReadingType type) {
+        LocalDateTime timestamp =
+                dto.getTimestampMs() != 0
+                ? Instant.ofEpochMilli(dto.getTimestampMs()).atZone(ZoneId.systemDefault()).toLocalDateTime()
+                : LocalDateTime.now();
+
+        Optional<SensorsReading> optionalReading =
+                sensorsRepository.findSensorsReadingByControllerIdAndReadingTypeAndTimestamp(dto.getControllerId(), type, timestamp);
+
+        SensorsReading reading;
+
+        if (optionalReading.isEmpty()) {
+            reading = SensorsReading
+                    .builder()
+                    .controllerId(dto.getControllerId())
+                    .readingType(type)
+                    .temperature(dto.getTemperature())
+                    .humidity(dto.getHumidity())
+                    .aiq(dto.getAiq())
+                    .uv((dto.getUv()))
+                    .timestamp(timestamp)
                 .build();
+        } else {
+            reading = optionalReading.get();
+            reading.setUv(dto.getUv());
+            reading.setHumidity(dto.getHumidity());
+            reading.setAiq(dto.getAiq());
+            reading.setTemperature(dto.getTemperature());
+        }
 
         sensorsRepository.save(reading);
     }
