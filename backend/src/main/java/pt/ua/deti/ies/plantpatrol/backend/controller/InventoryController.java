@@ -70,7 +70,7 @@ public class InventoryController {
             return ResponseEntity.notFound().build();
         }
 
-        inventoryService.editPlantDetails(id, plt.getFamily(), plt.getMaxHeight(), plt.getAbout(), plt.getCuriosities());
+        inventoryService.editPlantDetails(id, plt.getImageUrl(), plt.getFamily(), plt.getMaxHeight(), plt.getAbout(), plt.getCuriosities());
 
         return ResponseEntity.noContent().build();
     }
