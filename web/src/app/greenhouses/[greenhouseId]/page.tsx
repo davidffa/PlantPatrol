@@ -39,12 +39,6 @@ type Rule = {
   airPurifier: boolean,
 }
 
-enum SensorEnum {
-  Temperature,
-  Humidity,
-  UVLight,
-  AirQuality
-}
 enum IntervalEnum {
   Day,
   Week,
@@ -59,40 +53,37 @@ Chart.register(CategoryScale);
   type Sensor = {
     id: number;
     name: string;
-    icon: JSX.Element; // Define the icon property as a JSX.Element
+    icon: JSX.Element; 
+    enabled: boolean;
   };
 
-  const [sensors, setSensors] = useState<Record<number, boolean>>({
-    0: true,
-    1: true,
-    2: true,
-    3: true,
-  });
+  const [sensors, setSensors] = useState<Sensor[]>([
+    { id: 0, name: "UVLight", icon: <SolarPower fontSize="large" />, enabled: true },
+    { id: 1, name: "Temperature", icon: <DeviceThermostatIcon fontSize="large" />, enabled: true },
+    { id: 2, name: "Humidity", icon: <OpacityIcon fontSize="large" />, enabled: true },
+    { id: 3, name: "AirQuality", icon: <Co2Icon fontSize="large" /> , enabled: true },
+  ]);
   const [interval, setInterval] = useState<IntervalEnum>(IntervalEnum.Day)
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // TODO: Replace with actual sensors from the database
-  const availableSensors: Sensor[] = [
-    { id: 0, name: "UVLight", icon: <SolarPower fontSize="large" /> },
-    { id: 1, name: "Temperature", icon: <DeviceThermostatIcon fontSize="large" /> },
-    { id: 2, name: "Humidity", icon: <OpacityIcon fontSize="large" /> },
-    { id: 3, name: "AirQuality", icon: <Co2Icon fontSize="large" /> },
-  ];
 
   // the id to make the request to the database it could be anything passed as the paramenter
   const { greenhouseId } = params;
 
-  const sensorChange = (type: SensorEnum) => {
-    //changes the presented charts
-    setSensors(prev => ({
-      ...prev,
-      [type]: !prev[type]
-    }));
-  }
-
   const selectedStyle = "text-white bg-green"
+  const nonSelectedStyle = "text-brown bg-beje"
   const selectedInterval = "text-green bg-white shadow-xl"
+
   const [rules, setRules] = useState<Rule[]>([])
+
+  const toggleSensor = (sensorId: number) => {
+    setSensors(prevSensors => 
+      prevSensors.map(sensor => 
+        sensor.id === sensorId 
+          ? { ...sensor, enabled: !sensor.enabled } 
+          : sensor
+      )
+    );
+  };
 
   async function handleDeleteRule(id_rule: string | undefined) {
       const result = await Swal.fire({
@@ -143,14 +134,37 @@ Chart.register(CategoryScale);
       }
   }
   const handleAddSensor = (sensorId: number) => {
-    console.log(`Adding sensor with ID: ${sensorId}`);
-    // You can make an API call here to add the sensor
+    // Predefined sensor map with type assertion
+    const sensorMap: Record<number, Sensor> = {
+      0: { id: 0, name: "UVLight", icon: <SolarPower fontSize="large" />, enabled: true },
+      1: { id: 1, name: "Temperature", icon: <DeviceThermostatIcon fontSize="large" />, enabled: true },
+      2: { id: 2, name: "Humidity", icon: <OpacityIcon fontSize="large" />, enabled: true },
+      3: { id: 3, name: "AirQuality", icon: <Co2Icon fontSize="large" />, enabled: true }
+    };
+  
+    // Check if sensor already exists
+    const sensorExists = sensors.some(sensor => sensor.id === sensorId);
+    
+    // Ensure the sensor exists in the map
+    const sensorToAdd = sensorMap[sensorId];
+    
+    if (!sensorToAdd) {
+      Swal.fire("Error", "Invalid sensor", "error");
+      return;
+    }
+  
+    if (sensorExists) {
+      Swal.fire("Error", "Sensor already added", "error");
+      setIsModalOpen(false);
+      return;
+    }
+  
     api.post(`/greenhouse/${greenhouseId}/add-sensor`, { sensorId })
       .then((response) => {
         if (response.status === 200) {
+          setSensors(prevSensors => [...prevSensors, sensorToAdd]);
           Swal.fire("Success", "Sensor added successfully!", "success");
-          // Optionally update state to reflect the added sensor
-          setSensors((prev) => ({ ...prev, [sensorId]: true }));
+          setIsModalOpen(false);
         } else {
           Swal.fire("Error", "Failed to add sensor.", "error");
         }
@@ -159,9 +173,6 @@ Chart.register(CategoryScale);
         console.error("Error adding sensor:", error);
         Swal.fire("Error", "Failed to add sensor.", "error");
       });
-  
-    // Close the modal after adding
-    setIsModalOpen(false);
   };
 
   const handleDeleteSensor = async (sensorId: number) => {
@@ -176,14 +187,10 @@ Chart.register(CategoryScale);
   
     if (result.isConfirmed) {
       try {
-        // API call to delete the sensor (if required)
-        // await api.delete(`/greenhouse/${greenhouseId}/remove-sensor/${sensorId}`);
-  
         // Update state to reflect sensor deletion
-        setSensors((prev) => ({
-          ...prev,
-          [sensorId]: false,
-        }));
+        setSensors((prevSensors) => 
+          prevSensors.filter((sensor) => sensor.id !== sensorId)
+        );
   
         await Swal.fire({
           icon: "success",
@@ -199,7 +206,7 @@ Chart.register(CategoryScale);
 
   useEffect(() => {
       getRules()
-  },[getRules])
+  },[])
 
   return (
     <>
@@ -220,84 +227,84 @@ Chart.register(CategoryScale);
           </div>
 
           <div className='flex my-4 mx-auto justify-center'>
-            {Object.keys(sensors).map((key) => {
-              const sensorId = Number(key); // Convert key to a number
-              const sensor = availableSensors.find((s) => s.id === sensorId);
-
-              if (!sensors[sensorId] || !sensor) return null; // Check if the sensor exists
-
-              return (
-                <div key={sensorId} className="relative">
-                  <button
-                    onClick={() => sensorChange(sensor.id)}
-                    className="aspect-square hover:scale-110 transition ease-in-out hover:shadow-md-fit rounded-full text-md p-4 my-0 mx-3 text-center flex align-middle text-white bg-green"
-                  >
-                    {sensor.icon}
-                  </button>
-                  <button
-                    onClick={() => handleDeleteSensor(sensor.id)}
-                    className="absolute top-0 right-0 bg-transparent text-black rounded-full p-1 text-sm hover:text-gray-600 transition"
-                  >
-                    ✖
-                  </button>
-                </div>
-              );
-            })}
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="aspect-square hover:scale-110 transition ease-in-out hover:shadow-mdw-fit rounded-full text-md p-4 my-0 mx-3 text-center flex align-middle bg-green text-white"
-            >
-              <AddIcon fontSize="large" />
-            </button>
-          </div>
-          {/* Modal */}
-          {isModalOpen && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-              <div className="bg-white w-3/4 max-w-md rounded-lg shadow-lg p-6 relative">
-                {/* Modal Header */}
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-2xl font-bold">Available Sensors</h2>
-                  <button
-                    onClick={() => setIsModalOpen(false)}
-                    className="text-gray-500 hover:text-black"
-                  >
-                    ✖
-                  </button>
-                </div>
-
-                {/* Sensor List */}
-                <ul className="flex flex-col gap-4">
-                  {availableSensors.map((sensor) => (
-                    <li
-                      key={sensor.id}
-                      className="flex justify-between items-center bg-gray-100 rounded-lg p-3 shadow-md"
-                    >
-                      <span className="text-lg">{sensor.name}</span>
-                      <button
-                        onClick={() => handleAddSensor(sensor.id)}
-                        className="bg-green text-white p-2 rounded-md"
-                      >
-                        Add
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+          {sensors.map((sensor) => (
+            <div key={sensor.id} className="relative">
+              <button
+                onClick={() => toggleSensor(sensor.id)}
+                className={`aspect-square hover:scale-110 transition ease-in-out hover:shadow-md-fit rounded-full text-md p-4 my-0 mx-3 text-center flex align-middle ${
+                  sensor.enabled ? selectedStyle : nonSelectedStyle
+                }`}
+              >
+                {sensor.icon}
+              </button>
+              <button
+                onClick={() => handleDeleteSensor(sensor.id)}
+                className="absolute top-0 right-0 bg-transparent text-black rounded-full p-1 text-sm hover:text-gray-600 transition"
+              >
+                ✖
+              </button>
             </div>
-          )}
+          ))}
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="aspect-square hover:scale-110 transition ease-in-out hover:shadow-mdw-fit rounded-full text-md p-4 my-0 mx-3 text-center flex align-middle bg-green text-white"
+          >
+            <AddIcon fontSize="large" />
+          </button>
         </div>
+
+        {/* Modal for adding sensors */}
+        {isModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+            <div className="bg-white w-3/4 max-w-md rounded-lg shadow-lg p-6 relative">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold">Available Sensors</h2>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="text-gray-500 hover:text-black"
+                >
+                  ✖
+                </button>
+              </div>
+
+              <ul className="flex flex-col gap-4">
+                {[
+                  { id: 0, name: "UVLight" },
+                  { id: 1, name: "Temperature" },
+                  { id: 2, name: "Humidity" },
+                  { id: 3, name: "AirQuality" }
+                ]
+                .filter(availableSensor => 
+                  !sensors.some(sensor => sensor.id === availableSensor.id)
+                )
+                .map((sensor) => (
+                  <li
+                    key={sensor.id}
+                    className="flex justify-between items-center bg-gray-100 rounded-lg p-3 shadow-md"
+                  >
+                    <span className="text-lg">{sensor.name}</span>
+                    <button
+                      onClick={() => handleAddSensor(sensor.id)}
+                      className="bg-green text-white p-2 rounded-md"
+                    >
+                      Add
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
 
         {/* Graphics */}
         <div className='grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-3 w-5/6 mx-auto'>
-          {
-            Object.entries(sensors).map(([, value], idx) =>
-              value ? (
-                <div key={idx} className='w-full p-3 '>
-                  <SensorChart data={data[idx][interval]} />
-                </div>
-              ) :
-                null
-            )
+          {sensors
+            .filter(sensor => sensor.enabled)
+            .map((sensor) => (
+              <div key={sensor.id} className='w-full p-3'>
+                <SensorChart data={data[sensor.id][interval]} />
+              </div>
+            ))
           }
         </div>
         <div className='w-5/6 mx-auto p-3 flex flex-col'>
@@ -335,6 +342,7 @@ Chart.register(CategoryScale);
                                 }
                         </div>
                     </div>
+      </div>
       </div>
     </>
   )
