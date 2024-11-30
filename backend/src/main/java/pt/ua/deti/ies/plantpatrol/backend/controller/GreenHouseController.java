@@ -134,7 +134,7 @@ public class GreenHouseController {
 //**********************
 
     @Operation(summary = "Associate a micro-controller to a greenhouse")
-    @PatchMapping("/contorller/{id}")
+    @PatchMapping("/controller/{id}")
     public ResponseEntity<Object> addMicroController(@PathVariable String id, @RequestBody MicroController microController) {
         MicroController createdMicroController = greenHouseService.addMicroControllerToGreenHouse(id, microController);
         return new ResponseEntity<>(createdMicroController, HttpStatus.CREATED);
