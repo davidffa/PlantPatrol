@@ -73,6 +73,10 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: $ZOOKEEPER_TICK_TIME
 
+    volumes:
+      - zookeeper_data:/var/lib/zookeeper/data
+      - zookeeper_log:/var/lib/zookeeper/log
+
   kafka:
     image: confluentinc/cp-kafka
     networks:
@@ -91,8 +95,14 @@ services:
       KAFKA_LOG_RETENTION_MS: $KAFKA_LOG_RETENTION_MS
       KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: $KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS
 
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+
 volumes:
   mongodb:
+  zookeeper_data:
+  zookeeper_log:
+  kafka_data:
 
 networks:
   frontend:
