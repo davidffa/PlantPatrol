@@ -9,9 +9,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import pt.ua.deti.ies.plantpatrol.backend.entity.Employee;
 import pt.ua.deti.ies.plantpatrol.backend.entity.rules.GreenHouse;
+import pt.ua.deti.ies.plantpatrol.backend.entity.rules.MicroController;
 import pt.ua.deti.ies.plantpatrol.backend.entity.rules.Rule;
 import pt.ua.deti.ies.plantpatrol.backend.response.ErrorResponse;
 import pt.ua.deti.ies.plantpatrol.backend.service.GreenHouseService;
+import pt.ua.deti.ies.plantpatrol.backend.service.MicroControllerService;
 import pt.ua.deti.ies.plantpatrol.backend.service.RuleService;
 
 import java.util.List;
@@ -22,10 +24,12 @@ public class GreenHouseController {
 
     private final GreenHouseService greenHouseService;
     private final RuleService ruleService;
+    private final MicroControllerService microControllerService;
 
-    public GreenHouseController(GreenHouseService greenHouseService, RuleService ruleService) {
+    public GreenHouseController(GreenHouseService greenHouseService, RuleService ruleService, MicroControllerService microControllerService) {
         this.greenHouseService = greenHouseService;
         this.ruleService = ruleService;
+        this.microControllerService= microControllerService;
     }
 
     @Operation(summary = "Creates a new greenHouse, returning his credentials")
@@ -123,4 +127,41 @@ public class GreenHouseController {
         greenHouseService.removeRuleToGreenHouse(id, ruleId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+
+//**********************
+//        SENSORS
+//**********************
+
+    @Operation(summary = "Associate a micro-controller to a greenhouse")
+    @PatchMapping("/contorller/{id}")
+    public ResponseEntity<Object> addMicroController(@PathVariable String id, @RequestBody MicroController microController) {
+        MicroController createdMicroController = greenHouseService.addMicroControllerToGreenHouse(id, microController);
+        return new ResponseEntity<>(createdMicroController, HttpStatus.CREATED);
+    }
+
+    @Operation(summary = "Remove the association of a micro-controller to a greenhouse")
+    @PatchMapping("/controller/{id}/{controllerId}")
+    public ResponseEntity<Object> removeMicroControllerById(@PathVariable String id, @PathVariable String controllerId) {
+        greenHouseService.removeControllerToGreenHouse(id, controllerId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @Operation(summary = "List all the micro-controllers associated to a specific greenhouse")
+    @GetMapping("/greenhouse/{id}/controllers")
+    public ResponseEntity<?> getMicroController(@PathVariable String id) {
+        List<MicroController> microController = greenHouseService.getMicroController(id);
+        if (microController == null)
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(microController, HttpStatus.OK);
+    }
+
+    @Operation(summary = "List all the available micro-controllers")
+    @GetMapping("/controller")
+    public ResponseEntity<?> getMicroControllersAvailable() {
+        List<MicroController> microControllers = microControllerService.getAvailables();
+        return new ResponseEntity<>(microControllers, HttpStatus.OK);
+    }
+
+
 }
