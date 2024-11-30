@@ -6,8 +6,9 @@ import Image from "next/image";
 import { Navbar } from "@/components/Navbar";
 import { useState, useEffect } from "react";
 import api from "@/services/api";
+import withManagerAuth from "@/lib/withManagerAuth";
 
-export default function Alerts() {
+function Alerts() {
   interface Alert {
     id: string;
     title: string;
@@ -22,7 +23,7 @@ export default function Alerts() {
     async function fetchAlerts() {
       try {
         const response = await api.get("/alert");
-        const alerts = response.data.map((alert: {id:string,title:string,timestamp:string,sendto:string,message:string,fromSystem:boolean}) => ({
+        const alerts = response.data.map((alert: { id: string, title: string, timestamp: string, sendto: string, message: string, fromSystem: boolean }) => ({
           id: alert.id,
           title: alert.title,
           timestamp: alert.timestamp || new Date().toISOString(),
@@ -80,3 +81,5 @@ export default function Alerts() {
     </>
   );
 }
+
+export default withManagerAuth(Alerts);
