@@ -6,7 +6,7 @@ import Image from "next/image";
 import { Navbar } from "@/components/Navbar";
 import { useState, useEffect } from "react";
 import api from "@/services/api";
-import withAuth from "@/lib/withAuth";
+import withManagerAuth from "@/lib/withManagerAuth";
 
 function Alerts() {
   interface Alert {
@@ -82,4 +82,4 @@ function Alerts() {
   );
 }
 
-export default withAuth(Alerts);
+export default withManagerAuth(Alerts);
