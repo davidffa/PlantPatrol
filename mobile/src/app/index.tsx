@@ -4,9 +4,10 @@ import { View, Text, TouchableOpacity, TextInput, FlatList } from "react-native"
 import { Feather } from "@expo/vector-icons";
 import { PlantCard } from "@/components/PlantCard";
 import { SafeAreaView } from "react-native-safe-area-context";
-
 import api from "@/services/api";
 import { useUser } from "@/contexts/user";
+
+import { RadioButton } from 'react-native-paper';
 
 
 type Plant = {
@@ -23,11 +24,13 @@ type Plant = {
 export default function Home() {
   const router = useRouter();
   const { clientId, pushToken } = useUser();
+  const [checked, setChecked] = React.useState('all');
 
   const [plants, setPlants] = useState<Plant[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchPlants, setSearchPlants] = useState<Plant[]>([]);
   const [alertPlantIds, setAlertPlantIds] = useState<string[]>([]);
+  //const [plantsFilter, setPlantsFilter] = useState<Plant[]>([]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -66,6 +69,17 @@ export default function Home() {
       setAlertPlantIds(data);
     }
   }
+  // function ListPlants() {
+  //   if (checked === 'all') {
+  //     setFileredPlants(plants)
+  //   }
+  //   else if (checked === 'toggled') {
+  //     setFileredPlants(plants.filter(plant => alertPlantIds.includes(plant.id)))
+  //   }
+  //   else {
+  //     setFileredPlants(plants.filter(plant => !alertPlantIds.includes(plant.id)))
+  //   }
+  // }
 
   return (
     <SafeAreaView className="bg-white flex-1">
@@ -83,10 +97,39 @@ export default function Home() {
         </View>
 
         <View className="mt-8">
-          <View className="flex-row items-center bg-gray-100 rounded-lg px-4 w-full py-4 ">
+          <View className="flex-row items-center bg-gray-100 rounded-lg px-4 w-full py-2">
             <Feather name="search" size={18} />
             <TextInput className="px-4 w-full" placeholder="Search" value={searchQuery} onChangeText={setSearchQuery} />
           </View>
+        </View>
+        <View className="flex-row mt-3 justify-between bg-zinc-100 p-2 rounded-lg">
+          <View className="flex-row">
+            <RadioButton
+              value="nonToggled"
+              status={checked === 'nonToggled' ? 'checked' : 'unchecked'}
+              onPress={() => setChecked('nonToggled')}
+            />
+            <Feather className="mt-1" name="bell" color={"black"} size={28} />
+          </View>
+          <View className="flex-row">
+            <RadioButton
+              value="toggled"
+              status={checked === 'toggled' ? 'checked' : 'unchecked'}
+              onPress={() => setChecked('toggled')}
+            />
+            <Feather className="bg-red-600 rounded-full p-1.5 " name="bell" color={"white"} size={24} />
+          </View>
+          <View className="flex-row">
+            <RadioButton
+              value="all"
+              status={checked === 'all' ? 'checked' : 'unchecked'}
+              onPress={() => setChecked('all')}
+            />
+            <Feather className="mt-1" name="bell" color={"black"} size={28} />
+            <Feather className="mt-2 " name="plus" size={24} />
+            <Feather className="bg-red-600 rounded-full p-1.5 " name="bell" color={"white"} size={24} />
+          </View>
+
         </View>
         {searchQuery === "" ?
           <FlatList
