@@ -3,7 +3,9 @@ package pt.ua.deti.ies.plantpatrol.backend.service;
 import org.springframework.stereotype.Service;
 import pt.ua.deti.ies.plantpatrol.backend.dto.SensorsReadingDTO;
 import pt.ua.deti.ies.plantpatrol.backend.entity.SensorsReading;
+import pt.ua.deti.ies.plantpatrol.backend.entity.rules.MicroController;
 import pt.ua.deti.ies.plantpatrol.backend.enums.ReadingType;
+import pt.ua.deti.ies.plantpatrol.backend.repository.MicroControllerRepository;
 import pt.ua.deti.ies.plantpatrol.backend.repository.SensorsRepository;
 
 import java.time.Instant;
@@ -14,9 +16,11 @@ import java.util.Optional;
 @Service
 public class SensorsService {
     private final SensorsRepository sensorsRepository;
+    private final MicroControllerRepository microControllerRepository;
 
-    public SensorsService(SensorsRepository sensorsRepository) {
+    public SensorsService(SensorsRepository sensorsRepository, MicroControllerRepository microControllerRepository) {
         this.sensorsRepository = sensorsRepository;
+        this.microControllerRepository = microControllerRepository;
     }
 
     public void createSensorsReading(SensorsReadingDTO dto) {
@@ -36,6 +40,8 @@ public class SensorsService {
                 .uv(dto.getUv())
                 .timestamp(LocalDateTime.now())
                 .build();
+             MicroController microController = MicroController.builder().controllerId(dto.getControllerId()).greenhouseId(null).build();
+             microControllerRepository.save(microController);
         } else {
             reading = optionalReading.get();
 
