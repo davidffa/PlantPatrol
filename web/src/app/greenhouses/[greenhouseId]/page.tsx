@@ -46,25 +46,38 @@ enum IntervalEnum {
   Year
 }
 
+
+type Sensor = {
+  id: number;
+  name: string;
+  icon: JSX.Element; 
+  enabled: boolean;
+};
+
+type Microcontroller = {
+  id: number;
+  name: string;
+  sensors: Sensor[];
+};
+
 Chart.register(CategoryScale);
 
  function GreenHouse({ params }: Props) {
 
-  type Sensor = {
-    id: number;
-    name: string;
-    icon: JSX.Element; 
-    enabled: boolean;
-  };
-
-  const [sensors, setSensors] = useState<Sensor[]>([
-    { id: 0, name: "UVLight", icon: <SolarPower fontSize="large" />, enabled: true },
-    { id: 1, name: "Temperature", icon: <DeviceThermostatIcon fontSize="large" />, enabled: true },
-    { id: 2, name: "Humidity", icon: <OpacityIcon fontSize="large" />, enabled: true },
-    { id: 3, name: "AirQuality", icon: <Co2Icon fontSize="large" /> , enabled: true },
+  const [microcontrollers, setMicrocontrollers] = useState<Microcontroller[]>([
+    {
+      id: 0,
+      name: "Microcontroller 1",
+      sensors: [
+        { id: 0, name: "UVLight", icon: <SolarPower fontSize="large" />, enabled: true },
+        { id: 1, name: "Temperature", icon: <DeviceThermostatIcon fontSize="large" />, enabled: true },
+        { id: 2, name: "Humidity", icon: <OpacityIcon fontSize="large" />, enabled: true },
+        { id: 3, name: "AirQuality", icon: <Co2Icon fontSize="large" />, enabled: true },
+      ],
+    },
   ]);
   const [interval, setInterval] = useState<IntervalEnum>(IntervalEnum.Day)
-  const [isModalOpen, setIsModalOpen] = useState(false);
+
 
   // the id to make the request to the database it could be anything passed as the paramenter
   const { greenhouseId } = params;
@@ -75,12 +88,17 @@ Chart.register(CategoryScale);
 
   const [rules, setRules] = useState<Rule[]>([])
 
-  const toggleSensor = (sensorId: number) => {
-    setSensors(prevSensors => 
-      prevSensors.map(sensor => 
-        sensor.id === sensorId 
-          ? { ...sensor, enabled: !sensor.enabled } 
-          : sensor
+  const toggleSensor = (mcId: number, sensorId: number) => {
+    setMicrocontrollers((prev) =>
+      prev.map((mc) =>
+        mc.id === mcId
+          ? {
+              ...mc,
+              sensors: mc.sensors.map((sensor) =>
+                sensor.id === sensorId ? { ...sensor, enabled: !sensor.enabled } : sensor
+              ),
+            }
+          : mc
       )
     );
   };
@@ -133,74 +151,36 @@ Chart.register(CategoryScale);
           console.log(error)
       }
   }
-  const handleAddSensor = (sensorId: number) => {
-    // Predefined sensor map with type assertion
-    const sensorMap: Record<number, Sensor> = {
-      0: { id: 0, name: "UVLight", icon: <SolarPower fontSize="large" />, enabled: true },
-      1: { id: 1, name: "Temperature", icon: <DeviceThermostatIcon fontSize="large" />, enabled: true },
-      2: { id: 2, name: "Humidity", icon: <OpacityIcon fontSize="large" />, enabled: true },
-      3: { id: 3, name: "AirQuality", icon: <Co2Icon fontSize="large" />, enabled: true }
+  const handleAddMicrocontroller = () => {
+    const newId = microcontrollers.length;
+    const newMicrocontroller: Microcontroller = {
+      id: newId,
+      name: `Microcontroller ${newId + 1}`,
+      sensors: [
+        { id: 0, name: "UVLight", icon: <SolarPower fontSize="large" />, enabled: true },
+        { id: 1, name: "Temperature", icon: <DeviceThermostatIcon fontSize="large" />, enabled: true },
+        { id: 2, name: "Humidity", icon: <OpacityIcon fontSize="large" />, enabled: true },
+        { id: 3, name: "AirQuality", icon: <Co2Icon fontSize="large" />, enabled: true },
+      ],
     };
-  
-    // Check if sensor already exists
-    const sensorExists = sensors.some(sensor => sensor.id === sensorId);
-    
-    // Ensure the sensor exists in the map
-    const sensorToAdd = sensorMap[sensorId];
-    
-    if (!sensorToAdd) {
-      Swal.fire("Error", "Invalid sensor", "error");
-      return;
-    }
-  
-    if (sensorExists) {
-      Swal.fire("Error", "Sensor already added", "error");
-      setIsModalOpen(false);
-      return;
-    }
-  
-    api.post(`/greenhouse/${greenhouseId}/add-sensor`, { sensorId })
-      .then((response) => {
-        if (response.status === 200) {
-          setSensors(prevSensors => [...prevSensors, sensorToAdd]);
-          Swal.fire("Success", "Sensor added successfully!", "success");
-          setIsModalOpen(false);
-        } else {
-          Swal.fire("Error", "Failed to add sensor.", "error");
-        }
-      })
-      .catch((error) => {
-        console.error("Error adding sensor:", error);
-        Swal.fire("Error", "Failed to add sensor.", "error");
-      });
+
+    setMicrocontrollers((prev) => [...prev, newMicrocontroller]);
+    Swal.fire("Success", "Microcontroller added successfully!", "success");
   };
 
-  const handleDeleteSensor = async (sensorId: number) => {
+  const handleDeleteMicrocontroller = async (mcId: number) => {
     const result = await Swal.fire({
-      title: "Delete this sensor?",
+      title: "Delete this microcontroller?",
       text: "This action cannot be undone!",
       showConfirmButton: true,
       showCancelButton: true,
       confirmButtonText: "Delete",
       confirmButtonColor: "red",
     });
-  
+
     if (result.isConfirmed) {
-      try {
-        // Update state to reflect sensor deletion
-        setSensors((prevSensors) => 
-          prevSensors.filter((sensor) => sensor.id !== sensorId)
-        );
-  
-        await Swal.fire({
-          icon: "success",
-          title: "Success",
-          text: "Sensor deleted successfully!",
-        });
-      } catch (error) {
-        console.error("Error deleting sensor:", error);
-        Swal.fire("Error", "Failed to delete the sensor.", "error");
-      }
+      setMicrocontrollers((prev) => prev.filter((mc) => mc.id !== mcId));
+      Swal.fire("Success", "Microcontroller deleted successfully!", "success");
     }
   };
 
@@ -226,86 +206,52 @@ Chart.register(CategoryScale);
             <button onClick={() => setInterval(IntervalEnum.Year)} className={`${IntervalEnum.Year == interval ? selectedInterval : selectedStyle} text-center text-md font-bold w-fit p-3 px-5 transition-all ease-in  rounded-badge`} >Year</button>
           </div>
 
-          <div className='flex my-4 mx-auto justify-center'>
-          {sensors.map((sensor) => (
-            <div key={sensor.id} className="relative">
-              <button
-                onClick={() => toggleSensor(sensor.id)}
-                className={`aspect-square hover:scale-110 transition ease-in-out hover:shadow-md-fit rounded-full text-md p-4 my-0 mx-3 text-center flex align-middle ${
-                  sensor.enabled ? selectedStyle : nonSelectedStyle
-                }`}
-              >
-                {sensor.icon}
-              </button>
-              <button
-                onClick={() => handleDeleteSensor(sensor.id)}
-                className="absolute top-0 right-0 bg-transparent text-black rounded-full p-1 text-sm hover:text-gray-600 transition"
-              >
-                ✖
-              </button>
-            </div>
-          ))}
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="aspect-square hover:scale-110 transition ease-in-out hover:shadow-mdw-fit rounded-full text-md p-4 my-0 mx-3 text-center flex align-middle bg-green text-white"
-          >
-            <AddIcon fontSize="large" />
-          </button>
-        </div>
-
-        {/* Modal for adding sensors */}
-        {isModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div className="bg-white w-3/4 max-w-md rounded-lg shadow-lg p-6 relative">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold">Available Sensors</h2>
+          {/* Microcontrollers and Sensors */}
+          {microcontrollers.map((mc) => (
+            <div key={mc.id} className="my-6">
+              <div className="flex justify-between items-center">
+                <h3 className="text-xl font-bold">{mc.name}</h3>
                 <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="text-gray-500 hover:text-black"
+                  onClick={() => handleDeleteMicrocontroller(mc.id)}
+                  className="text-red-600 hover:text-red-800"
                 >
-                  ✖
+                  Delete
                 </button>
               </div>
 
-              <ul className="flex flex-col gap-4">
-                {[
-                  { id: 0, name: "UVLight" },
-                  { id: 1, name: "Temperature" },
-                  { id: 2, name: "Humidity" },
-                  { id: 3, name: "AirQuality" }
-                ]
-                .filter(availableSensor => 
-                  !sensors.some(sensor => sensor.id === availableSensor.id)
-                )
-                .map((sensor) => (
-                  <li
+              <div className="flex gap-4 mx-auto justify-center">
+                {mc.sensors.map((sensor) => (
+                  <button
                     key={sensor.id}
-                    className="flex justify-between items-center bg-gray-100 rounded-lg p-3 shadow-md"
+                    onClick={() => toggleSensor(mc.id, sensor.id)}
+                    className={`aspect-square hover:scale-110 transition ease-in-out hover:shadow-md-fit rounded-full text-md p-4 my-0 mx-3 text-center flex align-middle ${
+                      sensor.enabled ? selectedStyle : nonSelectedStyle
+                    }`}
                   >
-                    <span className="text-lg">{sensor.name}</span>
-                    <button
-                      onClick={() => handleAddSensor(sensor.id)}
-                      className="bg-green text-white p-2 rounded-md"
-                    >
-                      Add
-                    </button>
-                  </li>
+                    {sensor.icon}
+                  </button>
                 ))}
-              </ul>
-            </div>
-          </div>
-        )}
-
-        {/* Graphics */}
-        <div className='grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-3 w-5/6 mx-auto'>
-          {sensors
-            .filter(sensor => sensor.enabled)
-            .map((sensor) => (
-              <div key={sensor.id} className='w-full p-3'>
-                <SensorChart data={data[sensor.id][interval]} />
               </div>
-            ))
-          }
+
+              {/* Charts for Enabled Sensors */}
+              <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-3 w-5/6 mx-auto">
+                {mc.sensors
+                  .filter((sensor) => sensor.enabled)
+                  .map((sensor) => (
+                    <div key={`${mc.id}-${sensor.id}`} className="w-full p-3">
+                      <SensorChart data={data[sensor.id][interval]} />
+                    </div>
+                  ))}
+              </div>
+            </div>
+          ))}
+
+          <button
+            onClick={handleAddMicrocontroller}
+            className="bg-green text-white p-3 rounded-md"
+          >
+            Add Microcontroller
+          </button>
         </div>
         <div className='w-5/6 mx-auto p-3 flex flex-col'>
                         <div className='w-full flex flex-row'>
@@ -342,7 +288,6 @@ Chart.register(CategoryScale);
                                 }
                         </div>
                     </div>
-      </div>
       </div>
     </>
   )
