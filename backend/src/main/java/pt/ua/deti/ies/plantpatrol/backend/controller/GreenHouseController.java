@@ -10,9 +10,11 @@ import org.springframework.web.bind.annotation.*;
 import pt.ua.deti.ies.plantpatrol.backend.entity.Employee;
 import pt.ua.deti.ies.plantpatrol.backend.entity.rules.GreenHouse;
 import pt.ua.deti.ies.plantpatrol.backend.entity.rules.Rule;
+import pt.ua.deti.ies.plantpatrol.backend.enums.ReadingType;
 import pt.ua.deti.ies.plantpatrol.backend.response.ErrorResponse;
 import pt.ua.deti.ies.plantpatrol.backend.service.GreenHouseService;
 import pt.ua.deti.ies.plantpatrol.backend.service.RuleService;
+import pt.ua.deti.ies.plantpatrol.backend.service.SensorsService;
 
 import java.util.List;
 
@@ -22,10 +24,12 @@ public class GreenHouseController {
 
     private final GreenHouseService greenHouseService;
     private final RuleService ruleService;
+    private final SensorsService sensorsService;
 
-    public GreenHouseController(GreenHouseService greenHouseService, RuleService ruleService) {
+    public GreenHouseController(GreenHouseService greenHouseService, RuleService ruleService, SensorsService sensorsService) {
         this.greenHouseService = greenHouseService;
         this.ruleService = ruleService;
+        this.sensorsService = sensorsService;
     }
 
     @Operation(summary = "Creates a new greenHouse, returning his credentials")
@@ -122,5 +126,26 @@ public class GreenHouseController {
     public ResponseEntity<Object> deleteRuleById(@PathVariable String id, @PathVariable String ruleId) {
         greenHouseService.removeRuleToGreenHouse(id, ruleId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @Operation(summary = "Get historical data from the greenhouse sensors")
+    @GetMapping("/greenhouse/{id}/sensors-data")
+    public ResponseEntity<?> getHistoricalData(@PathVariable String id, @RequestParam(name = "type") ReadingType type) {
+        // TODO: Get the actual controller ids from the greenhouse
+        List<String> controllerIds = List.of("17d5a9dc-9b85-4499-9e66-f863e28173b1");
+
+        if (type == ReadingType.INSTANT) {
+            return ResponseEntity.ok(sensorsService.getInstantReadings(controllerIds));
+        } else if (type == ReadingType.HOURLY) {
+            return ResponseEntity.ok(sensorsService.getLast24HoursReadings(controllerIds));
+        } else if (type == ReadingType.DAILY) {
+            return ResponseEntity.ok(sensorsService.getLastWeekReadings(controllerIds));
+        } else if (type == ReadingType.WEEKLY) {
+            return ResponseEntity.ok(sensorsService.getLastMonthReadings(controllerIds));
+        } else if (type == ReadingType.MONTHLY) {
+            return ResponseEntity.ok(sensorsService.getLastYearReadings(controllerIds));
+        } else {
+            return ResponseEntity.internalServerError().body(new ErrorResponse("Unhandled reading type " + type));
+        }
     }
 }
