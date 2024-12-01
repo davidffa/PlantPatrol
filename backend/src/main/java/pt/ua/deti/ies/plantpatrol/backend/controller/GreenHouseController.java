@@ -175,8 +175,15 @@ public class GreenHouseController {
     @Operation(summary = "Get historical data from the greenhouse sensors")
     @GetMapping("/greenhouse/{id}/sensors-data")
     public ResponseEntity<?> getHistoricalData(@PathVariable String id, @RequestParam(name = "type") ReadingType type) {
-        // TODO: Get the actual controller ids from the greenhouse
-        List<String> controllerIds = List.of("17d5a9dc-9b85-4499-9e66-f863e28173b1");
+        List<MicroController> controllers = greenHouseService.getMicroController(id);
+
+        if (controllers == null)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        if (controllers.isEmpty())
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+
+        List<String> controllerIds = controllers.stream().map(MicroController::getControllerId).toList();
 
         if (type == ReadingType.INSTANT) {
             return ResponseEntity.ok(sensorsService.getInstantReadings(controllerIds));
