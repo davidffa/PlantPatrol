@@ -1,5 +1,6 @@
 package pt.ua.deti.ies.plantpatrol.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
 @Builder
 public class SensorsReading {
     @Id
+    @JsonIgnore
     private String id;
 
     @Indexed

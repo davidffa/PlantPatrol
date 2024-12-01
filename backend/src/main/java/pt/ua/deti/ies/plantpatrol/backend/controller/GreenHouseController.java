@@ -11,10 +11,12 @@ import pt.ua.deti.ies.plantpatrol.backend.entity.Employee;
 import pt.ua.deti.ies.plantpatrol.backend.entity.rules.GreenHouse;
 import pt.ua.deti.ies.plantpatrol.backend.entity.rules.MicroController;
 import pt.ua.deti.ies.plantpatrol.backend.entity.rules.Rule;
+import pt.ua.deti.ies.plantpatrol.backend.enums.ReadingType;
 import pt.ua.deti.ies.plantpatrol.backend.response.ErrorResponse;
 import pt.ua.deti.ies.plantpatrol.backend.service.GreenHouseService;
 import pt.ua.deti.ies.plantpatrol.backend.service.MicroControllerService;
 import pt.ua.deti.ies.plantpatrol.backend.service.RuleService;
+import pt.ua.deti.ies.plantpatrol.backend.service.SensorsService;
 
 import java.util.List;
 
@@ -24,11 +26,13 @@ public class GreenHouseController {
 
     private final GreenHouseService greenHouseService;
     private final RuleService ruleService;
+    private final SensorsService sensorsService;
     private final MicroControllerService microControllerService;
 
-    public GreenHouseController(GreenHouseService greenHouseService, RuleService ruleService, MicroControllerService microControllerService) {
+    public GreenHouseController(GreenHouseService greenHouseService, SensorsService sensorsService, RuleService ruleService, MicroControllerService microControllerService) {
         this.greenHouseService = greenHouseService;
         this.ruleService = ruleService;
+        this.sensorsService = sensorsService;
         this.microControllerService= microControllerService;
     }
 
@@ -166,5 +170,33 @@ public class GreenHouseController {
     public ResponseEntity<?> getMicroControllersAvailable() {
         List<MicroController> microControllers = microControllerService.getAvailables();
         return new ResponseEntity<>(microControllers, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Get historical data from the greenhouse sensors")
+    @GetMapping("/greenhouse/{id}/sensors-data")
+    public ResponseEntity<?> getHistoricalData(@PathVariable String id, @RequestParam(name = "type") ReadingType type) {
+        List<MicroController> controllers = greenHouseService.getMicroController(id);
+
+        if (controllers == null)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        if (controllers.isEmpty())
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+
+        List<String> controllerIds = controllers.stream().map(MicroController::getControllerId).toList();
+
+        if (type == ReadingType.INSTANT) {
+            return ResponseEntity.ok(sensorsService.getInstantReadings(controllerIds));
+        } else if (type == ReadingType.HOURLY) {
+            return ResponseEntity.ok(sensorsService.getLast24HoursReadings(controllerIds));
+        } else if (type == ReadingType.DAILY) {
+            return ResponseEntity.ok(sensorsService.getLastWeekReadings(controllerIds));
+        } else if (type == ReadingType.WEEKLY) {
+            return ResponseEntity.ok(sensorsService.getLastMonthReadings(controllerIds));
+        } else if (type == ReadingType.MONTHLY) {
+            return ResponseEntity.ok(sensorsService.getLastYearReadings(controllerIds));
+        } else {
+            return ResponseEntity.internalServerError().body(new ErrorResponse("Unhandled reading type " + type));
+        }
     }
 }

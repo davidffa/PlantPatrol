@@ -8,9 +8,11 @@ import pt.ua.deti.ies.plantpatrol.backend.enums.ReadingType;
 import pt.ua.deti.ies.plantpatrol.backend.repository.MicroControllerRepository;
 import pt.ua.deti.ies.plantpatrol.backend.repository.SensorsRepository;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -93,5 +95,53 @@ public class SensorsService {
         }
 
         sensorsRepository.save(reading);
+    }
+
+    public List<SensorsReading> getInstantReadings(List<String> controllerIds) {
+        return sensorsRepository.getInstantReadings(controllerIds, ReadingType.INSTANT);
+    }
+
+    /**
+     * Returns a list of the last 24 readings
+     * @param controllerIds The ids of the controllers
+     */
+    public List<SensorsReading> getLast24HoursReadings(List<String> controllerIds) {
+        LocalDateTime now = LocalDateTime.now().plus(Duration.ofHours(1));
+        LocalDateTime oneDayAgo = now.minus(Duration.ofDays(1));
+
+        return sensorsRepository.getReadingsBetweenDates(controllerIds, ReadingType.HOURLY, oneDayAgo, now);
+    }
+
+    /**
+     * Returns a list of the last 7 days readings
+     * @param controllerIds The ids of the controllers
+     */
+    public List<SensorsReading> getLastWeekReadings(List<String> controllerIds) {
+        LocalDateTime now = LocalDateTime.now().plus(Duration.ofDays(1));
+        LocalDateTime oneWeekAgo = now.minus(Duration.ofDays(7));
+
+        return sensorsRepository.getReadingsBetweenDates(controllerIds, ReadingType.DAILY, oneWeekAgo, now);
+    }
+
+    /**
+     * Returns a list of the last 4 weeks readings
+     * @param controllerIds The ids of the controllers
+     */
+    public List<SensorsReading> getLastMonthReadings(List<String> controllerIds) {
+        LocalDateTime now = LocalDateTime.now().plus(Duration.ofDays(7));
+        LocalDateTime fourWeeksAgo = now.minus(Duration.ofDays(7*4));
+
+        return sensorsRepository.getReadingsBetweenDates(controllerIds, ReadingType.WEEKLY, fourWeeksAgo, now);
+    }
+
+    /**
+     * Returns a list of the last 12 months readings
+     * @param controllerIds The ids of the controllers
+     */
+    public List<SensorsReading> getLastYearReadings(List<String> controllerIds) {
+        LocalDateTime now = LocalDateTime.now().plus(Duration.ofDays(7*4));
+        LocalDateTime oneYearAgo = now.minus(Duration.ofDays(365));
+
+        return sensorsRepository.aggregateMonthlyData(controllerIds, oneYearAgo, now);
     }
 }
