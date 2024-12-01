@@ -135,17 +135,19 @@ public class GreenHouseController {
 
     @Operation(summary = "Associate a micro-controller to a greenhouse")
     @PatchMapping("/controller/{id}")
-    public ResponseEntity<Object> addMicroController(@PathVariable String id, @RequestBody MicroController microController) {
-        MicroController createdMicroController = greenHouseService.addMicroControllerToGreenHouse(id, microController);
+    public ResponseEntity<?> addMicroController(@PathVariable String id, @RequestBody MicroController microController) {
+        greenHouseService.addMicroControllerToGreenHouse(id, microController);
         microControllerService.updateGreenhouseId(microController.getControllerId(),id);
-        return new ResponseEntity<>(HttpStatus.OK);
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @Operation(summary = "Remove the association of a micro-controller to a greenhouse")
     @PatchMapping("/controller/{id}/{controllerId}")
-    public ResponseEntity<Object> removeMicroControllerById(@PathVariable String id, @PathVariable String controllerId) {
-        greenHouseService.removeControllerToGreenHouse(id, controllerId);
+    public ResponseEntity<?> removeMicroControllerById(@PathVariable String id, @PathVariable String controllerId) {
+        greenHouseService.removeControllerFromGreenHouse(id, controllerId);
         microControllerService.updateGreenhouseId(controllerId, null);
+
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -154,7 +156,8 @@ public class GreenHouseController {
     public ResponseEntity<?> getMicroController(@PathVariable String id) {
         List<MicroController> microController = greenHouseService.getMicroController(id);
         if (microController == null)
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
         return new ResponseEntity<>(microController, HttpStatus.OK);
     }
 
@@ -164,6 +167,4 @@ public class GreenHouseController {
         List<MicroController> microControllers = microControllerService.getAvailables();
         return new ResponseEntity<>(microControllers, HttpStatus.OK);
     }
-
-
 }

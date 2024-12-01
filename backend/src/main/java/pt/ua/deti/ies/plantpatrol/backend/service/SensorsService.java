@@ -29,6 +29,15 @@ public class SensorsService {
 
         SensorsReading reading;
 
+        if (microControllerRepository.findById(dto.getControllerId()).isEmpty()) {
+            microControllerRepository.save(
+                    MicroController
+                            .builder()
+                            .controllerId(dto.getControllerId())
+                            .build()
+            );
+        }
+
         if (optionalReading.isEmpty()) {
              reading = SensorsReading
                 .builder()
@@ -40,8 +49,6 @@ public class SensorsService {
                 .uv(dto.getUv())
                 .timestamp(LocalDateTime.now())
                 .build();
-             MicroController microController = MicroController.builder().controllerId(dto.getControllerId()).greenhouseId(null).build();
-             microControllerRepository.save(microController);
         } else {
             reading = optionalReading.get();
 
