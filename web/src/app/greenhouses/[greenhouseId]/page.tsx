@@ -185,25 +185,39 @@ Chart.register(CategoryScale);
             <button onClick={() => setInterval(IntervalEnum.Year)} className={`${IntervalEnum.Year == interval ? selectedInterval : selectedStyle} text-center text-md font-bold w-fit p-3 px-5 transition-all ease-in  rounded-badge`} >Year</button>
           </div>
 
-          {/* Sensor Buttons */}
-        <div className="flex gap-4 mx-auto justify-center my-4">
-          {[
-            { id: 0, name: "UVLight", icon: <SolarPower fontSize="large" /> },
-            { id: 1, name: "Temperature", icon: <DeviceThermostatIcon fontSize="large" /> },
-            { id: 2, name: "Humidity", icon: <OpacityIcon fontSize="large" /> },
-            { id: 3, name: "AirQuality", icon: <Co2Icon fontSize="large" /> },
-          ].map((sensor) => (
-            <button
-              key={sensor.id}
-              onClick={() => toggleSensor(sensor.id)}
-              className={`aspect-square hover:scale-110 transition ease-in-out hover:shadow-md-fit rounded-full text-md p-4 text-center flex align-middle ${
-                selectedSensors[sensor.id] ? "bg-green text-white" : "bg-beje text-brown"
-              }`}
-            >
-              {sensor.icon}
-            </button>
-          ))}
-        </div>
+
+          <div className="flex items-center justify-between w-3/4 mx-auto my-4">
+            <div className="flex-1"></div>
+            {/* Sensor Buttons */}
+            <div className="flex gap-4 justify-center">
+              {[
+                { id: 0, name: "UVLight", icon: <SolarPower fontSize="large" /> },
+                { id: 1, name: "Temperature", icon: <DeviceThermostatIcon fontSize="large" /> },
+                { id: 2, name: "Humidity", icon: <OpacityIcon fontSize="large" /> },
+                { id: 3, name: "AirQuality", icon: <Co2Icon fontSize="large" /> },
+              ].map((sensor) => (
+                <button
+                  key={sensor.id}
+                  onClick={() => toggleSensor(sensor.id)}
+                  className={`aspect-square hover:scale-110 transition ease-in-out hover:shadow-md-fit rounded-full text-md p-4 text-center flex align-middle ${
+                    selectedSensors[sensor.id] ? "bg-green text-white" : "bg-beje text-brown"
+                  }`}
+                >
+                  {sensor.icon}
+                </button>
+              ))}
+            </div>
+
+            {/* Add Microcontroller Button */}
+            <div className="flex-1 flex justify-end">
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="bg-green text-white p-3 rounded-md"
+              >
+                Add Microcontroller
+              </button>
+            </div>
+          </div>
 
           {/* Microcontrollers */}
           {microcontrollers.map((mc) => (
@@ -228,14 +242,6 @@ Chart.register(CategoryScale);
             </div>
           </div>
         ))}
-
-        {/* Add Microcontroller Button */}
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="bg-green text-white p-3 rounded-md"
-        >
-          Add Microcontroller
-        </button>
         </div>
 
         {/* Modal */}
