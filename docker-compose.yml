@@ -1,4 +1,17 @@
 services:
+  watchtower:
+    image: containrrr/watchtower
+    restart: unless-stopped
+    container_name: watchtower
+    environment:
+      - WATCHTOWER_POLL_INTERVAL=1800
+      - WATCHTOWER_CLEANUP=true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /root/.docker/config.json:/config.json
+    profiles:
+      - production
+
   mongo:
     image: mongo
     restart: unless-stopped
@@ -17,6 +30,7 @@ services:
       - mongo
       - kafka
 
+    image: $BACKEND_IMAGE
     build:
       context: ./backend
 
@@ -54,6 +68,7 @@ services:
     environment:
       NEXT_PUBLIC_BACKEND_URL: $NEXT_PUBLIC_BACKEND_URL
 
+    image: $WEB_IMAGE
     build:
       context: ./web
 
