@@ -20,6 +20,7 @@ import api from '@/services/api'
 
 import Swal from 'sweetalert2'
 
+
 type Props = {
   params: { greenhouseId: string }
 }
@@ -38,12 +39,6 @@ type Rule = {
   airPurifier: boolean,
 }
 
-enum SensorEnum {
-  Temperature,
-  Humidity,
-  UVLight,
-  AirQuality
-}
 enum IntervalEnum {
   Day,
   Week,
@@ -51,27 +46,48 @@ enum IntervalEnum {
   Year
 }
 
+type Microcontroller = {
+  id: number;
+  name: string;
+};
+
 Chart.register(CategoryScale);
 
  function GreenHouse({ params }: Props) {
-  const [sensors, setSensors] = useState({ 0: true, 1: true, 2: true, 3: true });
+
+  const [microcontrollers, setMicrocontrollers] = useState<Microcontroller[]>([
+    { id: 0, name: "Microcontroller 1" },
+  ]);
+
+  const [selectedSensors, setSelectedSensors] = useState<Record<number, boolean>>({
+    0: true, // UVLight
+    1: true, // Temperature
+    2: true, // Humidity
+    3: true, // AirQuality
+  });
+
   const [interval, setInterval] = useState<IntervalEnum>(IntervalEnum.Day)
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const availableMicrocontrollers = [
+    { id: 1, name: "Microcontroller 2" },
+    { id: 2, name: "Microcontroller 3" },
+  ];
 
   // the id to make the request to the database it could be anything passed as the paramenter
   const { greenhouseId } = params;
 
-  const sensorChange = (type: SensorEnum) => {
-    //changes the presented charts
-    setSensors(prev => ({
-      ...prev,
-      [type]: !prev[type]
-    }));
-  }
-
   const selectedStyle = "text-white bg-green"
-  const nonSelectedStyle = "text-brown bg-beje"
   const selectedInterval = "text-green bg-white shadow-xl"
+
   const [rules, setRules] = useState<Rule[]>([])
+
+  const toggleSensor = (sensorId: number) => {
+    setSelectedSensors((prev) => ({
+      ...prev,
+      [sensorId]: !prev[sensorId],
+    }));
+  };
 
   async function handleDeleteRule(id_rule: string | undefined) {
       const result = await Swal.fire({
@@ -121,6 +137,32 @@ Chart.register(CategoryScale);
           console.log(error)
       }
   }
+  const handleAddMicrocontroller = (mc: Microcontroller) => {
+    if (microcontrollers.find((m) => m.id === mc.id)) {
+      Swal.fire("Warning", "This microcontroller is already added!", "warning");
+      return;
+    }
+    setMicrocontrollers((prev) => [...prev, mc]);
+    setIsModalOpen(false);
+    Swal.fire("Success", "Microcontroller added successfully!", "success");
+  };
+
+  const handleDeleteMicrocontroller = async (mcId: number) => {
+    const result = await Swal.fire({
+      title: "Delete this microcontroller?",
+      text: "This action cannot be undone!",
+      showConfirmButton: true,
+      showCancelButton: true,
+      confirmButtonText: "Delete",
+      confirmButtonColor: "red",
+    });
+
+    if (result.isConfirmed) {
+      setMicrocontrollers((prev) => prev.filter((mc) => mc.id !== mcId));
+      Swal.fire("Success", "Microcontroller deleted successfully!", "success");
+    }
+  };
+
   useEffect(() => {
       getRules()
   },[])
@@ -143,35 +185,99 @@ Chart.register(CategoryScale);
             <button onClick={() => setInterval(IntervalEnum.Year)} className={`${IntervalEnum.Year == interval ? selectedInterval : selectedStyle} text-center text-md font-bold w-fit p-3 px-5 transition-all ease-in  rounded-badge`} >Year</button>
           </div>
 
-          <div className='flex my-4 mx-auto justify-center'>
-            <button onClick={() => sensorChange(SensorEnum.UVLight)} className={`aspect-square hover:scale-110 transition ease-in-out hover:shadow-md-fit rounded-full text-md p-4 my-0 mx-3 text-center flex align-middle ${sensors[SensorEnum.UVLight] ? selectedStyle : nonSelectedStyle}`}>
-              <SolarPower fontSize="large" />
-            </button>
-            <button onClick={() => sensorChange(SensorEnum.Temperature)} className={`aspect-square hover:scale-110 transition ease-in-out hover:shadow-md-fit rounded-full text-md p-4 my-0 mx-3 text-center flex align-middle ${sensors[SensorEnum.Temperature] ? selectedStyle : nonSelectedStyle}`} >
-              <DeviceThermostatIcon fontSize="large" />
-            </button>
-            <button onClick={() => sensorChange(SensorEnum.Humidity)} className={`hover:scale-110 transition ease-in-out hover:shadow-mdw-fit rounded-full text-md p-4 my-0 mx-3 text-center flex align-middle ${sensors[SensorEnum.Humidity] ? selectedStyle : nonSelectedStyle}`} >
-              <OpacityIcon fontSize="large" />
-            </button>
-            <button onClick={() => sensorChange(SensorEnum.AirQuality)} className={`hover:scale-110 transition ease-in-out hover:shadow-mdw-fit rounded-full text-md p-4 my-0 mx-3 text-center flex align-middle ${sensors[SensorEnum.AirQuality] ? selectedStyle : nonSelectedStyle}`} >
-              <Co2Icon fontSize="large" />
-            </button>
+
+          <div className="flex items-center justify-between w-3/4 mx-auto my-4">
+            <div className="flex-1"></div>
+            {/* Sensor Buttons */}
+            <div className="flex gap-4 justify-center">
+              {[
+                { id: 0, name: "UVLight", icon: <SolarPower fontSize="large" /> },
+                { id: 1, name: "Temperature", icon: <DeviceThermostatIcon fontSize="large" /> },
+                { id: 2, name: "Humidity", icon: <OpacityIcon fontSize="large" /> },
+                { id: 3, name: "AirQuality", icon: <Co2Icon fontSize="large" /> },
+              ].map((sensor) => (
+                <button
+                  key={sensor.id}
+                  onClick={() => toggleSensor(sensor.id)}
+                  className={`aspect-square hover:scale-110 transition ease-in-out hover:shadow-md-fit rounded-full text-md p-4 text-center flex align-middle ${
+                    selectedSensors[sensor.id] ? "bg-green text-white" : "bg-beje text-brown"
+                  }`}
+                >
+                  {sensor.icon}
+                </button>
+              ))}
+            </div>
+
+            {/* Add Microcontroller Button */}
+            <div className="flex-1 flex justify-end">
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="bg-green text-white p-3 rounded-md"
+              >
+                Add Microcontroller
+              </button>
+            </div>
           </div>
+
+          {/* Microcontrollers */}
+          {microcontrollers.map((mc) => (
+          <div key={mc.id} className="my-6">
+            <div className="flex justify-between items-center">
+              <h3 className="text-xl font-bold">{mc.name}</h3>
+              <button
+                onClick={() => handleDeleteMicrocontroller(mc.id)}
+                className="text-red-600 hover:text-red-800"
+              >
+                Delete
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-3 w-5/6 mx-auto">
+              {Object.keys(selectedSensors)
+                .filter((key) => selectedSensors[Number(key)])
+                .map((sensorId) => (
+                  <div key={`${mc.id}-${sensorId}`} className="w-full p-3">
+                    <SensorChart data={data[Number(sensorId)][interval]} />
+                  </div>
+                ))}
+            </div>
+          </div>
+        ))}
         </div>
 
-        {/* Graphics */}
-        <div className='grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-3 w-5/6 mx-auto'>
-          {
-            Object.entries(sensors).map(([, value], idx) =>
-              value ? (
-                <div key={idx} className='w-full p-3 '>
-                  <SensorChart data={data[idx][interval]} />
-                </div>
-              ) :
-                null
-            )
-          }
-        </div>
+        {/* Modal */}
+        {isModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+            <div className="bg-white w-3/4 max-w-md rounded-lg shadow-lg p-6 relative">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold">Available Microcontrollers</h2>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="text-gray-500 hover:text-black"
+                >
+                  ✖
+                </button>
+              </div>
+              <ul className="flex flex-col gap-4">
+                {availableMicrocontrollers.map((mc) => (
+                  <li
+                    key={mc.id}
+                    className="flex justify-between items-center bg-gray-100 rounded-lg p-3 shadow-md"
+                  >
+                    <span className="text-lg">{mc.name}</span>
+                    <button
+                      onClick={() => handleAddMicrocontroller(mc)}
+                      className="bg-green text-white p-2 rounded-md"
+                    >
+                      Add
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
+
+        {/* Graphs */}
         <div className='w-5/6 mx-auto p-3 flex flex-col'>
                         <div className='w-full flex flex-row'>
                             <div className='w-1/2 flex justify-start text-2xl font-bold text-black'>
