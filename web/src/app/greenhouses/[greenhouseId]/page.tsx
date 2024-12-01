@@ -1,5 +1,5 @@
 "use client"
-import { useState,useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 import SolarPower from '@mui/icons-material/SolarPower'
 import OpacityIcon from '@mui/icons-material/Opacity';
@@ -47,17 +47,14 @@ enum IntervalEnum {
 }
 
 type Microcontroller = {
-  id: number;
-  name: string;
+  id: string;
+  greenhouseId: string;
 };
 
 Chart.register(CategoryScale);
 
- function GreenHouse({ params }: Props) {
-
-  const [microcontrollers, setMicrocontrollers] = useState<Microcontroller[]>([
-    { id: 0, name: "Microcontroller 1" },
-  ]);
+function GreenHouse({ params }: Props) {
+  const { greenhouseId } = params;
 
   const [selectedSensors, setSelectedSensors] = useState<Record<number, boolean>>({
     0: true, // UVLight
@@ -69,13 +66,24 @@ Chart.register(CategoryScale);
   const [interval, setInterval] = useState<IntervalEnum>(IntervalEnum.Day)
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const availableMicrocontrollers = [
-    { id: 1, name: "Microcontroller 2" },
-    { id: 2, name: "Microcontroller 3" },
-  ];
+  const [availableMicrocontrollers, setAvailableMicrocontrollers] = useState<Microcontroller[]>([]);
+  const [microcontrollers, setMicrocontrollers] = useState<Microcontroller[]>();
 
-  // the id to make the request to the database it could be anything passed as the paramenter
-  const { greenhouseId } = params;
+  useEffect(() => {
+    async function getAvailableMicrocontrollers() {
+      const { data } = await api.get<Microcontroller[]>(`/controller`);
+      setAvailableMicrocontrollers(data);
+    }
+
+    async function getMicrocontrollers() {
+      const { data } = await api.get<Microcontroller[]>(`/greenhouse/${greenhouseId}/controllers`);
+      setMicrocontrollers(data);
+
+    }
+    getAvailableMicrocontrollers();
+    getMicrocontrollers();
+    getRules();
+  }, [greenhouseId]);
 
   const selectedStyle = "text-white bg-green"
   const selectedInterval = "text-green bg-white shadow-xl"
@@ -90,64 +98,71 @@ Chart.register(CategoryScale);
   };
 
   async function handleDeleteRule(id_rule: string | undefined) {
-      const result = await Swal.fire({
-          title: "Delete employee rule?",
-          showConfirmButton: true,
-          showCancelButton: true,
-          confirmButtonText: "Confirm",
-          confirmButtonColor: "red"
-      });
+    const result = await Swal.fire({
+      title: "Delete employee rule?",
+      showConfirmButton: true,
+      showCancelButton: true,
+      confirmButtonText: "Confirm",
+      confirmButtonColor: "red"
+    });
 
-      if (result.isConfirmed) {
-          api.delete(`rules/${greenhouseId}/${id_rule}`).then(async (response) => {
-              if (response.status == 204) {
-                  await Swal.fire({
-                      icon: "success",
-                      title: "Success",
-                      text: "Rule deleted!"
-                  }).then(()=>{
-                      setRules(rules.filter(r=> r.id !== id_rule))
-                    })
-
-              }
-              else{
-                Swal.fire({
-                    icon: "error",
-                    title: "Unexpected Error",
-                    text: `There was an unexpected error. ${response.data}`
-                })
-              }
+    if (result.isConfirmed) {
+      api.delete(`rules/${greenhouseId}/${id_rule}`).then(async (response) => {
+        if (response.status == 204) {
+          await Swal.fire({
+            icon: "success",
+            title: "Success",
+            text: "Rule deleted!"
+          }).then(() => {
+            setRules(rules.filter(r => r.id !== id_rule))
           })
-      }
+
+        }
+        else {
+          Swal.fire({
+            icon: "error",
+            title: "Unexpected Error",
+            text: `There was an unexpected error. ${response.data}`
+          })
+        }
+      })
+    }
   }
   const getRules = () => {
-      try {
-          api.get(`greenhouse/${greenhouseId}/rules`).then((response) => {
-              if (response.status == 200) {
-                  setRules(response.data)
-              }
-          }).catch((error)=>{
-            Swal.fire({
-              icon: "error",
-              title: "Unexpected Error",
-              text: `There was an unexpected error. ${error}`
-          })
-          })
-      } catch (error) {
-          console.log(error)
-      }
-  }
-  const handleAddMicrocontroller = (mc: Microcontroller) => {
-    if (microcontrollers.find((m) => m.id === mc.id)) {
-      Swal.fire("Warning", "This microcontroller is already added!", "warning");
-      return;
+    try {
+      api.get(`greenhouse/${greenhouseId}/rules`).then((response) => {
+        if (response.status == 200) {
+          setRules(response.data)
+        }
+      }).catch((error) => {
+        Swal.fire({
+          icon: "error",
+          title: "Unexpected Error",
+          text: `There was an unexpected error. ${error}`
+        })
+      })
+    } catch (error) {
+      console.log(error)
     }
-    setMicrocontrollers((prev) => [...prev, mc]);
-    setIsModalOpen(false);
-    Swal.fire("Success", "Microcontroller added successfully!", "success");
-  };
+  }
+  async function handleAddMicrocontroller(mc: Microcontroller) {
+    await api.patch(`/controller/${greenhouseId}`, mc).then((response) => {
+      if (response.status == 204) {
+        //setMicrocontrollers((prev) => [...prev, mc]);
+        setIsModalOpen(false);
+        Swal.fire("Success", "Microcontroller added successfully!", "success");
+      } else {
+        setIsModalOpen(false);
+        Swal.fire({
+          icon: "error",
+          title: "Unexpected Error",
+          text: "There was an unexpected error."
+        })
+      }
+    })
+  }
 
-  const handleDeleteMicrocontroller = async (mcId: number) => {
+  async function handleDeleteMicrocontroller(mcId: string) {
     const result = await Swal.fire({
       title: "Delete this microcontroller?",
       text: "This action cannot be undone!",
@@ -156,23 +171,29 @@ Chart.register(CategoryScale);
       confirmButtonText: "Delete",
       confirmButtonColor: "red",
     });
-
     if (result.isConfirmed) {
-      setMicrocontrollers((prev) => prev.filter((mc) => mc.id !== mcId));
-      Swal.fire("Success", "Microcontroller deleted successfully!", "success");
-    }
-  };
-
-  useEffect(() => {
-      getRules()
-  },[])
+      await api.patch(`/controller/${greenhouseId}/${mcId}`).then((response) => {
+        if (response.status == 204) {
+          //setMicrocontrollers((prev) => prev.filter((mc) => mc.id !== mcId));
+          Swal.fire("Success", "Microcontroller added successfully!", "success");
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Unexpected Error",
+            text: "There was an unexpected error."
+          })
+        }
+      }
+      )
+    };
+  }
 
   return (
     <>
-    <Navbar />
+      <Navbar />
       <div className='w-full p-2 my-6 text-center flex-col justify-center'>
         <div className="text-5xl text-black p-3">
-          GreenHouse
+          Greenhouse
         </div>
         {/* filters */}
         <div className='w-3/4 mx-auto flex-col my-10'>
@@ -199,9 +220,8 @@ Chart.register(CategoryScale);
                 <button
                   key={sensor.id}
                   onClick={() => toggleSensor(sensor.id)}
-                  className={`aspect-square hover:scale-110 transition ease-in-out hover:shadow-md-fit rounded-full text-md p-4 text-center flex align-middle ${
-                    selectedSensors[sensor.id] ? "bg-green text-white" : "bg-beje text-brown"
-                  }`}
+                  className={`aspect-square hover:scale-110 transition ease-in-out hover:shadow-md-fit rounded-full text-md p-4 text-center flex align-middle ${selectedSensors[sensor.id] ? "bg-green text-white" : "bg-beje text-brown"
+                    }`}
                 >
                   {sensor.icon}
                 </button>
@@ -220,28 +240,28 @@ Chart.register(CategoryScale);
           </div>
 
           {/* Microcontrollers */}
-          {microcontrollers.map((mc) => (
-          <div key={mc.id} className="my-6">
-            <div className="flex justify-between items-center">
-              <h3 className="text-xl font-bold">{mc.name}</h3>
-              <button
-                onClick={() => handleDeleteMicrocontroller(mc.id)}
-                className="text-red-600 hover:text-red-800"
-              >
-                Delete
-              </button>
+          {microcontrollers?.map((mc) => (
+            <div key={mc.id} className="my-6">
+              <div className="flex justify-between items-center">
+                <h3 className="text-xl font-bold">Micro-controller:{mc.id}</h3>
+                <button
+                  onClick={() => handleDeleteMicrocontroller(mc.id)}
+                  className="text-red-600 hover:text-red-800"
+                >
+                  Delete
+                </button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-3 w-5/6 mx-auto">
+                {Object.keys(selectedSensors)
+                  .filter((key) => selectedSensors[Number(key)])
+                  .map((sensorId) => (
+                    <div key={`${mc.id}-${sensorId}`} className="w-full p-3">
+                      <SensorChart data={data[Number(sensorId)][interval]} />
+                    </div>
+                  ))}
+              </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-3 w-5/6 mx-auto">
-              {Object.keys(selectedSensors)
-                .filter((key) => selectedSensors[Number(key)])
-                .map((sensorId) => (
-                  <div key={`${mc.id}-${sensorId}`} className="w-full p-3">
-                    <SensorChart data={data[Number(sensorId)][interval]} />
-                  </div>
-                ))}
-            </div>
-          </div>
-        ))}
+          ))}
         </div>
 
         {/* Modal */}
@@ -263,7 +283,7 @@ Chart.register(CategoryScale);
                     key={mc.id}
                     className="flex justify-between items-center bg-gray-100 rounded-lg p-3 shadow-md"
                   >
-                    <span className="text-lg">{mc.name}</span>
+                    <span className="text-lg">{mc.id}</span>
                     <button
                       onClick={() => handleAddMicrocontroller(mc)}
                       className="bg-green text-white p-2 rounded-md"
@@ -279,40 +299,40 @@ Chart.register(CategoryScale);
 
         {/* Graphs */}
         <div className='w-5/6 mx-auto p-3 flex flex-col'>
-                        <div className='w-full flex flex-row'>
-                            <div className='w-1/2 flex justify-start text-2xl font-bold text-black'>
-                                Action
-                            </div>
-                            <div className='w-1/2 flex justify-end'>
-                                <a href={`${greenhouseId}/rules/new/0`} className='flex flex-row gap-2 text-green '>
-                                    Add New
-                                    <AddIcon />
-                                </a>
-                            </div>
-                        </div>
+          <div className='w-full flex flex-row'>
+            <div className='w-1/2 flex justify-start text-2xl font-bold text-black'>
+              Action
+            </div>
+            <div className='w-1/2 flex justify-end'>
+              <a href={`${greenhouseId}/rules/new/0`} className='flex flex-row gap-2 text-green '>
+                Add New
+                <AddIcon />
+              </a>
+            </div>
+          </div>
 
-                        <div className="divider"></div>
-                        <div className='w-full flex flex-col gap-3 p-3'>
-                                {
-                                    rules?.map((rule,idx) => (
-                                        
-                                        <div key={idx} className='w-full bg-gray-300 text-black grid grid-cols-2 rounded-lg gap-y-3'>
-                                            <div className='text-xl text-black flex font-semibold text-left p-3 justify-start my-auto'>
-                                                {rule.name}
-                                            </div>
-                                            <div className='flex flex-row gap-2 p-3 justify-end '>
-                                                <a href={`${greenhouseId}/rules/new/${rule.id}`} className="w-[150px] rounded-lg p-3 bg-green text-white text-center">
-                                                    edit
-                                                </a>
-                                                <button onClick={() => handleDeleteRule(rule.id)} className="w-[150px] rounded-lg p-3 bg-red-700 text-white">
-                                                    delete
-                                                </button>
-                                            </div>
-                                         </div>  
-                                    ))
-                                }
-                        </div>
-                    </div>
+          <div className="divider"></div>
+          <div className='w-full flex flex-col gap-3 p-3'>
+            {
+              rules?.map((rule, idx) => (
+
+                <div key={idx} className='w-full bg-gray-300 text-black grid grid-cols-2 rounded-lg gap-y-3'>
+                  <div className='text-xl text-black flex font-semibold text-left p-3 justify-start my-auto'>
+                    {rule.name}
+                  </div>
+                  <div className='flex flex-row gap-2 p-3 justify-end '>
+                    <a href={`${greenhouseId}/rules/new/${rule.id}`} className="w-[150px] rounded-lg p-3 bg-green text-white text-center">
+                      edit
+                    </a>
+                    <button onClick={() => handleDeleteRule(rule.id)} className="w-[150px] rounded-lg p-3 bg-red-700 text-white">
+                      delete
+                    </button>
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+        </div>
       </div>
     </>
   )
