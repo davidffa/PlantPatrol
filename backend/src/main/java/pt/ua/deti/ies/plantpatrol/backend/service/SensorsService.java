@@ -139,11 +139,9 @@ public class SensorsService {
      * @param controllerIds The ids of the controllers
      */
     public List<SensorsReading> getLastYearReadings(List<String> controllerIds) {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now().plus(Duration.ofDays(7*4));
         LocalDateTime oneYearAgo = now.minus(Duration.ofDays(365));
 
-        // TODO: Aggregate data monthly
-        // return sensorsRepository.getReadingsBetweenDates(controllerId, ReadingType.WEEKLY, oneYearAgo, now);
-        throw new UnsupportedOperationException("Not implemented yet");
+        return sensorsRepository.aggregateMonthlyData(controllerIds, oneYearAgo, now);
     }
 }
