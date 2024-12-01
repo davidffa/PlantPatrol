@@ -47,7 +47,7 @@ enum IntervalEnum {
 }
 
 type Microcontroller = {
-  id: string;
+  controllerId: string;
   greenhouseId: string;
 };
 
@@ -55,6 +55,9 @@ Chart.register(CategoryScale);
 
 function GreenHouse({ params }: Props) {
   const { greenhouseId } = params;
+  const reloadPage = () => {
+    window.location.reload();
+  };
 
   const [selectedSensors, setSelectedSensors] = useState<Record<number, boolean>>({
     0: true, // UVLight
@@ -159,6 +162,7 @@ function GreenHouse({ params }: Props) {
           text: "There was an unexpected error."
         })
       }
+      reloadPage();
     })
   }
 
@@ -183,6 +187,7 @@ function GreenHouse({ params }: Props) {
             text: "There was an unexpected error."
           })
         }
+        reloadPage();
       }
       )
     };
@@ -241,11 +246,11 @@ function GreenHouse({ params }: Props) {
 
           {/* Microcontrollers */}
           {microcontrollers?.map((mc) => (
-            <div key={mc.id} className="my-6">
+            <div key={mc.controllerId} className="my-6">
               <div className="flex justify-between items-center">
-                <h3 className="text-xl font-bold">Micro-controller:{mc.id}</h3>
+                <h3 className="text-xl font-bold">Micro-controller:{mc.controllerId}</h3>
                 <button
-                  onClick={() => handleDeleteMicrocontroller(mc.id)}
+                  onClick={() => handleDeleteMicrocontroller(mc.controllerId)}
                   className="text-red-600 hover:text-red-800"
                 >
                   Delete
@@ -255,7 +260,7 @@ function GreenHouse({ params }: Props) {
                 {Object.keys(selectedSensors)
                   .filter((key) => selectedSensors[Number(key)])
                   .map((sensorId) => (
-                    <div key={`${mc.id}-${sensorId}`} className="w-full p-3">
+                    <div key={`${mc.controllerId}-${sensorId}`} className="w-full p-3">
                       <SensorChart data={data[Number(sensorId)][interval]} />
                     </div>
                   ))}
@@ -280,10 +285,10 @@ function GreenHouse({ params }: Props) {
               <ul className="flex flex-col gap-4">
                 {availableMicrocontrollers.map((mc) => (
                   <li
-                    key={mc.id}
+                    key={mc.controllerId}
                     className="flex justify-between items-center bg-gray-100 rounded-lg p-3 shadow-md"
                   >
-                    <span className="text-lg">{mc.id}</span>
+                    <span className="text-lg">{mc.controllerId}</span>
                     <button
                       onClick={() => handleAddMicrocontroller(mc)}
                       className="bg-green text-white p-2 rounded-md"
