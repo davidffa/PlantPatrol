@@ -137,13 +137,15 @@ public class GreenHouseController {
     @PatchMapping("/controller/{id}")
     public ResponseEntity<Object> addMicroController(@PathVariable String id, @RequestBody MicroController microController) {
         MicroController createdMicroController = greenHouseService.addMicroControllerToGreenHouse(id, microController);
-        return new ResponseEntity<>(createdMicroController, HttpStatus.CREATED);
+        microControllerService.updateGreenhouseId(microController.getControllerId(),id);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Operation(summary = "Remove the association of a micro-controller to a greenhouse")
     @PatchMapping("/controller/{id}/{controllerId}")
     public ResponseEntity<Object> removeMicroControllerById(@PathVariable String id, @PathVariable String controllerId) {
         greenHouseService.removeControllerToGreenHouse(id, controllerId);
+        microControllerService.updateGreenhouseId(controllerId, null);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

@@ -17,4 +17,5 @@ public class MicroControllerService {
         return microControllerRepository.listAvailable();
     }
 
+    public void updateGreenhouseId(String controllerId,String greenhouseId){microControllerRepository.updateGreenhouseId(controllerId, greenhouseId);}
 }
