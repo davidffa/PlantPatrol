@@ -78,8 +78,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
       if (id === null) {
         id = uuid.v4();
         await AsyncStorage.setItem("clientId", id);
-
       }
+
       setClientId(id);
     }
 

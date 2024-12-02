@@ -2,9 +2,9 @@ import React, { useState, useRef, useEffect } from "react";
 import { Text, View, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Keyboard } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useDeviceUUID } from "@/utils/deviceUUID";
 import api from "@/services/api";
-
+import { useUser } from "@/contexts/user";
+import { AxiosError } from "axios";
 
 type MessagePayload = {
   content: string,
@@ -14,23 +14,21 @@ type MessagePayload = {
 
 export default function Chat() {
   const router = useRouter();
-  const { isUUIDReady, deviceUUID } = useDeviceUUID()
   const [messages, setMessages] = useState<MessagePayload[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const scrollViewRef = useRef<ScrollView>(null); // Reference to the ScrollView
   const [webSocket, setWebSocket] = useState<WebSocket>()
 
+  const { clientId } = useUser();
+
   function websocket() {
     try {
-      const ws = new WebSocket("ws://192.168.1.228:8080/chat")
+      const ws = new WebSocket(process.env.EXPO_PUBLIC_CHAT_WS_URL)
 
       ws.onopen = () => {
-        ws.send(`{"chatRoomId":${deviceUUID}}`)
+        ws.send(`{"chatRoomId":${clientId}}`)
       }
       ws.onmessage = (ev) => appendMessage(ev)
-      ws.onclose = () => {
-        console.log("Closed socket")
-      }
       setWebSocket(ws)
     } catch (error) {
       alert("Couldn't connect to the socket")
@@ -38,40 +36,47 @@ export default function Chat() {
   }
 
   useEffect(() => {
-    if (isUUIDReady && deviceUUID != null) {
-      const initializeChat = async () => {
-        // Check if the chat room exists or create a new one
-        const response = await api.get(`/chat/${deviceUUID}`);
-        if (response.status === 200) {
-          console.log("Chat room already exists.");
-        } else if (response.status === 404) {
+    const initializeChat = async () => {
+      // Check if the chat room exists or create a new one
+      try {
+        const response = await api.get<MessagePayload[]>(`/chat/${clientId}`);
+        const fetchedMessages = response.data;
+
+        setMessages(fetchedMessages.map(msg => {
+          return {
+            ...msg,
+            timestamp: formatDate(new Date(msg.timestamp))
+          }
+        }));
+        setNewMessage("");
+      } catch (error: any) {
+        const err = error as AxiosError;
+
+        if (err.status === 404) {
           await createChatRoom();
         }
-  
-        // Connect to the WebSocket and fetch messages
-        websocket();
-        await fetchMessages();
-      };
-  
-      initializeChat();
-  
-      // Scroll chat down when the keyboard is opened
-      const keyboardDidShowListener = Keyboard.addListener(
-        "keyboardDidShow",
-        () => scrollViewRef.current?.scrollToEnd({ animated: false })
-      );
-  
-      // Cleanup function to remove the keyboard listener
-      return () => {
-        keyboardDidShowListener.remove();
-      };
-    }
-  }, [isUUIDReady, deviceUUID]);
+      }
+
+      websocket();
+    };
+
+    initializeChat();
+
+    // Scroll chat down when the keyboard is opened
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      () => scrollViewRef.current?.scrollToEnd({ animated: false })
+    );
+
+    // Cleanup function to remove the keyboard listener
+    return () => {
+      keyboardDidShowListener.remove();
+    };
+  }, []);
 
   const createChatRoom = async () => {
     try {
-      const response = await api.post(`/chat`, { chatRoomId: deviceUUID });
-      console.log("Chat Room created: ", response.data);
+      await api.post(`/chat`, { chatRoomId: clientId });
     } catch (error: any) {
       if (error.response?.data?.includes("Multiple chat rooms")) {
         console.warn("Chat room already exists, avoiding duplicate creation.");
@@ -80,57 +85,33 @@ export default function Chat() {
     }
   }
 
-  const fetchMessages = async () => {
-    try {
-      console.log("Fetching messages for chat room:", deviceUUID);
-      const response = await api.get(`/chat/${deviceUUID}`);
-      console.log("Messages fetched successfully:", response.data);
-      const fetchedMessages: MessagePayload[] = response.data;
-  
-      setMessages(fetchedMessages);
-      setNewMessage("");
-    } catch (error: any) {
-      console.error("Error fetching messages:", error.response?.data || error.message);
-      alert("Couldn't load messages from the server.");
-      setMessages([]);
-    }
-  };
-
   const handleSendMessage = async () => {
-    console.log("Sending message:", newMessage);
-    if (newMessage.trim() === "" || deviceUUID == null) return; // Prevent sending empty messages
+    if (newMessage.trim() === "") return; // Prevent sending empty messages
 
-    const newMessageObject: MessagePayload = {
-      senderId: deviceUUID,
-      content: newMessage.trim(),
-      timestamp: new Date().toISOString(), 
-    };
-  
-    // Optimistically add the message to the UI
-    setMessages((prev) => [...prev, newMessageObject]);
-    setNewMessage(""); 
+    setNewMessage("");
 
     try {
-      const response =await api.post(`/chat/${deviceUUID}`, { "content": newMessage }, {
+      await api.post(`/chat/${clientId}`, { "content": newMessage }, {
         headers: {
-          'senderId': deviceUUID
+          'senderId': clientId
         }
       })
-      console.log("Message sent successfully:", response.data);
     } catch (error) {
       alert("Coudn't send the message to the server!")
     }
   };
 
+  function formatDate(date: Date) {
+    return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()} ${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
+  }
+
   function appendMessage(ev: MessageEvent) {
-    console.log("Received message:", ev.data);
     const msg: MessagePayload = JSON.parse(ev.data)
-    console.log(msg);
     if (msg.content.trim() !== "") {
       const newMessageObject: MessagePayload = {
         senderId: msg.senderId,
         content: msg.content,
-        timestamp: msg.timestamp,
+        timestamp: formatDate(new Date(msg.timestamp))
       };
       setMessages(prev => [...prev, newMessageObject]);
       setNewMessage(""); // Clear the input field
@@ -158,8 +139,7 @@ export default function Chat() {
             onContentSizeChange={() => scrollViewRef.current?.scrollToEnd()}
           >
             {messages.map((m, idx) => (
-
-              deviceUUID != null && m.senderId !== deviceUUID ? (
+              m.senderId !== clientId ? (
                 <View key={idx} className="bg-blue-100 rounded-xl m-2 p-3 self-start max-w-[80%]">
                   <Text className="text-black text-left">{m.content}</Text>
                   <Text className="text-xs text-gray-500 text-right mt-1">{m.timestamp}</Text>
