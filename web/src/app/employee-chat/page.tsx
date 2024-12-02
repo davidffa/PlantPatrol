@@ -27,7 +27,7 @@ function EmployeeChat() {
   
   const [webSocket,setWebSocket] = useState<WebSocket>();
 
-  const chatBox = useRef();
+  const chatBox = useRef<HTMLDivElement|null>(null);
   // Create a reference for the last message
   const lastMessageRef = useRef<HTMLDivElement | null>(null);
   const getChatRooms= async ()=>{
@@ -86,9 +86,10 @@ function EmployeeChat() {
   const sendMessage = async () => {
 
     const res = await api.post(`/chat/${selectedRoom?.chatRoomId}`,{ content:newMessage})
-    if(res.status = 200){
+    if(res.status == 200 ){
       // scroll to the bottom
-      console.log(chatBox?.current.scrollIntoView({behavior:"smooth"}))
+        chatBox.current?.scrollIntoView({behavior:"smooth"})
+      
     }
 
   };
