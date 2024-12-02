@@ -28,7 +28,6 @@ function ManagerPage() {
   const [location, setLocation] = useState<string>("")
   const { user } = useAuth();
 
-
   useEffect(() => {
     try {
       api.get("/greenhouse").then((response) => {
@@ -47,7 +46,6 @@ function ManagerPage() {
   const addGreenHouse = () => {
     const data = { "name": newName, location }
     closeRef.current?.click()
-
     try {
       api.post("greenhouse", data).then((response) => {
         if (response.status == 201) {
@@ -66,15 +64,15 @@ function ManagerPage() {
         text: `There was an unexpected error with the request. Error ${error} `
       });
     }
-
   }
+
   return (
     <>
       <Navbar />
       <div className='w-full grid md:grid-cols-2 sm:grid-cols-1 lg:grid-cols-3 xl:grid-cols-4  gap-12 align-center p-4 '>
         {
           greenhouses.map((gh, idx) => (
-            <GHouseCard key={idx} id={gh.id} image='/bg-greenhouse.png' greenhouse={gh.name} humidity={gh.humidity} uv={gh.uv} temperature={gh.temperature} aiq={gh.aiq} />
+            <GHouseCard key={idx} id={gh.id} image='/bg-greenhouse.png' greenhouse={gh.name} />
           ))
         }
         {
@@ -115,12 +113,9 @@ function ManagerPage() {
                     className="input input-bordered border-green w-full max-w-xs" />
                 </label>
               </div>
-              {
-                <button onClick={addGreenHouse} className='w-1/2 p-3 text-white bg-green text-xl mx-auto shadow-lg rounded-badge mt-3'>
-                  Create
-                </button>
-
-              }
+              <button onClick={addGreenHouse} className='w-1/2 p-3 text-white bg-green text-xl mx-auto shadow-lg rounded-badge mt-3'>
+                Create
+              </button>
             </div>
             <div className="modal-action">
               <form method="dialog">
