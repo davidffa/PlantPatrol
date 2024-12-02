@@ -31,27 +31,15 @@ export default function GHouseCards({ id, greenhouse, image }: Props) {
   const [uv, setUv] = useState<number>(0);
   const [temperature, setTemperature] = useState<number>(0);
   const [aiq, setAiq] = useState<number>(0);
-  const [lista, setLista] = useState<number[]>([]);
 
   useEffect(() => {
     async function getAVG() {
       const { data } = await api.get<SensorReading[]>(`/greenhouse/${id}/sensors-data`, { params: { "type": "INSTANT" } });
 
-      setLista(data.map(r => r.humidity));
-      lista.forEach(element => { setHumidity(humidity + element) });
-      setHumidity(humidity / lista.length);
-
-      setLista(data.map(r => r.uv));
-      lista.forEach(element => { setUv(uv + element) });
-      setUv(uv / lista.length);
-
-      setLista(data.map(r => r.temperature));
-      lista.forEach(element => { setTemperature(temperature + element) });
-      setTemperature(temperature / lista.length);
-
-      setLista(data.map(r => r.aiq));
-      lista.forEach(element => { setAiq(aiq + element) });
-      setAiq(aiq / lista.length);
+      setHumidity(data.reduce((acc, curr) => acc + curr.humidity, 0) / data.length);
+      setUv(data.reduce((acc, curr) => acc + curr.uv, 0) / data.length);
+      setTemperature(data.reduce((acc, curr) => acc + curr.temperature, 0) / data.length);
+      setAiq(data.reduce((acc, curr) => acc + curr.aiq, 0) / data.length);
     }
     getAVG();
   }, []);
