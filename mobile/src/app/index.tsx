@@ -122,7 +122,7 @@ export default function Home() {
         </View>
         <View className="flex-row mt-3 justify-between bg-zinc-100 p-2 rounded-lg">
           <View className="flex-row">
-            <RadioButton
+            <RadioButton.Android
               value="nonToggled"
               status={checked === 'nonToggled' ? 'checked' : 'unchecked'}
               onPress={() => setChecked('nonToggled')}
@@ -130,7 +130,7 @@ export default function Home() {
             <Feather className="mt-1" name="bell" color={"black"} size={28} />
           </View>
           <View className="flex-row">
-            <RadioButton
+            <RadioButton.Android
               value="toggled"
               status={checked === 'toggled' ? 'checked' : 'unchecked'}
               onPress={() => setChecked('toggled')}
@@ -138,7 +138,7 @@ export default function Home() {
             <Feather className="bg-red-600 rounded-full p-1.5 " name="bell" color={"white"} size={24} />
           </View>
           <View className="flex-row">
-            <RadioButton
+            <RadioButton.Android
               value="all"
               status={checked === 'all' ? 'checked' : 'unchecked'}
               onPress={() => setChecked('all')}
