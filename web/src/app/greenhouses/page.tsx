@@ -20,13 +20,13 @@ type GreenHouse = {
   temperature: number,
   aiq: number,
 }
- function ManagerPage() {
+function ManagerPage() {
   const [greenhouses, setGH] = useState<GreenHouse[]>([])
   const modalRef = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const [newName, setNewName] = useState<string>("")
   const [location, setLocation] = useState<string>("")
-  const {user} = useAuth();
+  const { user } = useAuth();
 
 
   useEffect(() => {
@@ -45,14 +45,13 @@ type GreenHouse = {
     }
   }, [])
   const addGreenHouse = () => {
-    const data = {"name":newName,location}
+    const data = { "name": newName, location }
     closeRef.current?.click()
 
-    try{
-      api.post("greenhouse",data).then( (response)=>{
-        if(response.status == 201)
-        {
-          setGH([...greenhouses,response.data])
+    try {
+      api.post("greenhouse", data).then((response) => {
+        if (response.status == 201) {
+          setGH([...greenhouses, response.data])
           Swal.fire({
             icon: "success",
             title: "Greenhouse",
@@ -60,8 +59,7 @@ type GreenHouse = {
           });
         }
       })
-    }catch(error)
-    {
+    } catch (error) {
       Swal.fire({
         icon: "error",
         title: "API Error",
@@ -79,9 +77,13 @@ type GreenHouse = {
             <GHouseCard key={idx} id={gh.id} image='/bg-greenhouse.png' greenhouse={gh.name} humidity={gh.humidity} uv={gh.uv} temperature={gh.temperature} aiq={gh.aiq} />
           ))
         }
-        <button onClick={()=>modalRef.current?.showModal()} className=" shadow-lg z-10 hover:text-green hover:bg-white min-h-[50px] min-w-[50px] w-[8vh] h-[8vh] flex align-middle justify-center bg-green text-white absolute bottom-0 right-0 m-6 rounded-full border-2 border-green p-3">
-          <AddHomeIcon className='my-auto ' />
-        </button>
+        {
+          user?.manager && (
+            <button onClick={() => modalRef.current?.showModal()} className=" shadow-lg z-10 hover:text-green hover:bg-white min-h-[50px] min-w-[50px] w-[8vh] h-[8vh] flex align-middle justify-center bg-green text-white absolute bottom-0 right-0 m-6 rounded-full border-2 border-green p-3">
+              <AddHomeIcon className='my-auto ' />
+            </button>
+          )
+        }
         {/* Open the modal using document.getElementById('ID').showModal() method */}
         <dialog ref={modalRef} className="modal">
           <div className="modal-box text-center">
@@ -114,10 +116,10 @@ type GreenHouse = {
                 </label>
               </div>
               {
-                user?.manager && (<button onClick={addGreenHouse} className='w-1/2 p-3 text-white bg-green text-xl mx-auto shadow-lg rounded-badge mt-3'>
+                <button onClick={addGreenHouse} className='w-1/2 p-3 text-white bg-green text-xl mx-auto shadow-lg rounded-badge mt-3'>
                   Create
-                </button>)
-                
+                </button>
+
               }
             </div>
             <div className="modal-action">
