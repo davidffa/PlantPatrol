@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "moskafka"
+version = "0.1.0"
+description = ""
+authors = ["HenriqueFreitas07 <henriquefreitasm87@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+kafka-python = "^2.0.2"
+paho-mqtt = "^2.1.0"
+python-dotenv = "^1.0.1"
+
+[tool.poetry.scripts]
+moskafka="moskafka.mybroker:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

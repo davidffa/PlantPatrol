@@ -66,6 +66,7 @@ function Details({ params }: Props) {
     if (plant) {
       const updatedPlant = {
         ...plant,
+        imageUrl,
         family,
         maxHeight: parseFloat(size),
         about,
@@ -104,6 +105,7 @@ function Details({ params }: Props) {
                 height={350}
                 width={400}
               />
+
             </div>
           </div>
           <div className="justify-around" >
@@ -156,7 +158,15 @@ function Details({ params }: Props) {
               <textarea className="textarea textarea-bordered textarea-xl min-w-full h-40" value={curiosities} onChange={(e) => setCuriosities(e.target.value)} disabled={!notesEnabled} />
             </div>
           </div>
+
         </div >
+        <div className="px-24 mb-6 pl-44">
+          <h2 className="text-2xl font-semibold mt-2">
+            Image url:
+          </h2>
+          <input type="text" value={imageUrl} className="input input-md input-bordered w-full" onChange={(e) => (setImageUrl(e.target.value))
+          } disabled={!notesEnabled} />
+        </div>
       </div >
 
     </>

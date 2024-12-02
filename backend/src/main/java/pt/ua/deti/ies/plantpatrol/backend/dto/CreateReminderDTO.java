@@ -13,5 +13,6 @@ import java.util.UUID;
 @Builder
 public class CreateReminderDTO {
     private UUID clientId;
+    private String pushToken;
     private String plantId;
 }
