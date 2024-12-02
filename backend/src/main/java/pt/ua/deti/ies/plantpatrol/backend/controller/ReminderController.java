@@ -33,7 +33,7 @@ public class ReminderController {
     @PostMapping("/reminders")
     public ResponseEntity<?> addReminder(@RequestBody CreateReminderDTO dto) {
         try {
-            reminderService.addPlant(dto.getClientId(), dto.getPlantId());
+            reminderService.addPlant(dto.getClientId(), dto.getPushToken(), dto.getPlantId());
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(new ErrorResponse(e.getMessage()), HttpStatus.BAD_REQUEST);

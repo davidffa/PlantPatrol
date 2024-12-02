@@ -22,5 +22,7 @@ public class Reminder {
     @Indexed(unique = true)
     private String clientId;
 
+    private String pushToken;
+
     private Set<String> plants;
 }

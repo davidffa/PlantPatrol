@@ -28,9 +28,11 @@ public class Alert {
     private String sendto;
 
     @NotNull
+    @Builder.Default
     private boolean fromSystem = false;
 
     @NotNull
+    @Builder.Default
     private Date timestamp = Date.from(Instant.now());
 
 }

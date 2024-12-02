@@ -30,4 +30,7 @@ public class GreenHouse {
 
     @Field("rules")
     private List<String> ruleIds = new ArrayList<>();
+
+    @Field("microControllers")
+    private List<String> microControllersIds = new ArrayList<>();
 }

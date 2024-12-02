@@ -30,7 +30,7 @@ public class ReminderService {
         return reminder.getPlants();
     }
 
-    public void addPlant(UUID clientId, String plantId) {
+    public void addPlant(UUID clientId, String pushToken, String plantId) {
         Optional<Reminder> existingReminder = reminderRepository.findByClientId(clientId.toString());
 
         if (inventoryRepository.findById(plantId).isEmpty()) {
@@ -38,7 +38,11 @@ public class ReminderService {
         }
 
         if (existingReminder.isEmpty()) {
-            Reminder r = Reminder.builder().clientId(clientId.toString()).plants(Set.of(plantId)).build();
+            Reminder r = Reminder.builder()
+                    .clientId(clientId.toString())
+                    .pushToken(pushToken)
+                    .plants(Set.of(plantId))
+                    .build();
             reminderRepository.save(r);
             return;
         }

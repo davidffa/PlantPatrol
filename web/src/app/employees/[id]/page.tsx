@@ -76,13 +76,23 @@ function ManageEmployee({ params }: Props) {
     if (result.isConfirmed) {
       const { data } = await api.patch<ResetCredentialsResponse>(`/employees/${id}/reset`);
 
-      Swal.fire({
-        icon: "success",
-        title: "Success",
-        text: "Employee's credentials copied to clipboard!"
+      const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end"
       });
 
-      await navigator.clipboard.writeText(`Password: ${data.password}`);
+      Toast.fire({
+        icon: "success",
+        title: "Employee's credentials",
+        text: `${data.password}`
+      });
+      // Swal.fire({
+      //   icon: "success",
+      //   title: "Success",
+      //   text: "Employee's credentials copied to clipboard!"
+      // });
+      //
+      // await navigator.clipboard.writeText(`Password: ${data.password}`);
     }
   }
 

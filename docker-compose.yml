@@ -1,10 +1,23 @@
 services:
+  watchtower:
+    image: containrrr/watchtower
+    restart: unless-stopped
+    container_name: watchtower
+    environment:
+      - WATCHTOWER_POLL_INTERVAL=1800
+      - WATCHTOWER_CLEANUP=true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /root/.docker/config.json:/config.json
+    profiles:
+      - production
+
   mongo:
     image: mongo
     restart: unless-stopped
 
     environment:
-      MONGO_INITDB_DATABASE: plantpatrol
+      MONGO_INITDB_DATABASE: $DB_NAME
 
     volumes:
       - mongodb:/data/db
@@ -15,26 +28,30 @@ services:
   backend:
     depends_on:
       - mongo
+      - kafka
 
+    image: $BACKEND_IMAGE
     build:
       context: ./backend
 
     restart: on-failure
-
-    env_file: .env
 
     environment:
       SPRING_APPLICATION_JSON: '{
         "spring.application.name": "backend",
         "spring.data.mongodb.host": "mongo",
         "spring.data.mongodb.port": "27017",
-        "spring.data.mongodb.database": "plantpatrol",
+        "spring.data.mongodb.database": "$DB_NAME",
+        "spring.kafka.consumer.auto-offset-reset": "earliest",
+        "spring.kafka.consumer.group-id": "backend_consumer",
+        "spring.kafka.bootstrap-servers": "kafka:29092",
         "security.jwt.secret-key": "$JWT_SECRET_KEY",
         "security.jwt.expiration-time": "$JWT_EXPIRATION_TIME",
         "springdoc.api-docs.path": "/api/v1/docs",
         "gemini.api-key": "$GEMINI_API_KEY",
         "google.search-api-key": "$GOOGLE_SEARCH_API_KEY",
-        "google.search-engine-id": "$GOOGLE_SEARCH_ENGINE_ID"
+        "google.search-engine-id": "$GOOGLE_SEARCH_ENGINE_ID",
+        "webUrl": "$WEB_URL"
       }'
 
     networks:
@@ -42,12 +59,16 @@ services:
       - frontend
 
     ports:
-      - "8080:8080"
+      - "$BACKEND_PORT:8080"
 
   web:
     depends_on:
       - backend
 
+    environment:
+      NEXT_PUBLIC_BACKEND_URL: $NEXT_PUBLIC_BACKEND_URL
+
+    image: $WEB_IMAGE
     build:
       context: ./web
 
@@ -57,10 +78,46 @@ services:
       - frontend
 
     ports:
-      - "3000:3000"
+      - "$WEB_PORT:3000"
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper
+    networks:
+      - backend
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: $ZOOKEEPER_TICK_TIME
+
+    volumes:
+      - zookeeper_data:/var/lib/zookeeper/data
+      - zookeeper_log:/var/lib/zookeeper/log
+
+  kafka:
+    image: confluentinc/cp-kafka
+    networks:
+      - backend
+    depends_on:
+      - zookeeper
+    ports:
+      - "$KAFKA_PORT:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:$KAFKA_PORT
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_LOG_RETENTION_MS: $KAFKA_LOG_RETENTION_MS
+      KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: $KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS
+
+    volumes:
+      - kafka_data:/var/lib/kafka/data
 
 volumes:
   mongodb:
+  zookeeper_data:
+  zookeeper_log:
+  kafka_data:
 
 networks:
   frontend:
