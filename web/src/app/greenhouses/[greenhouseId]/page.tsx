@@ -8,8 +8,6 @@ import Co2Icon from '@mui/icons-material/Co2';
 import AddIcon from '@mui/icons-material/Add';
 
 import { SensorChart } from '../../../components/charts/SensorChart'
-import { DataCharts as data } from "../../../utils/data"
-
 import Chart from "chart.js/auto";
 import { CategoryScale } from "chart.js";
 
@@ -39,17 +37,22 @@ type Rule = {
   airPurifier: boolean,
 }
 
-enum IntervalEnum {
-  Day,
-  Week,
-  Month,
-  Year
-}
-
 type Microcontroller = {
   controllerId: string;
   greenhouseId: string | null;
 };
+
+type SensorReading = {
+  controllerId: string;
+  readingType: ReadingType;
+  temperature: number;
+  humidity: number;
+  aiq: number;
+  uv: number;
+  timestamp: string;
+};
+
+type ReadingType = "INSTANT" | "HOURLY" | "DAILY" | "WEEKLY" | "MONTHLY";
 
 Chart.register(CategoryScale);
 
@@ -63,11 +66,12 @@ function GreenHouse({ params }: Props) {
     3: true, // AirQuality
   });
 
-  const [interval, setInterval] = useState<IntervalEnum>(IntervalEnum.Day)
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [availableMicrocontrollers, setAvailableMicrocontrollers] = useState<Microcontroller[]>([]);
   const [microcontrollers, setMicrocontrollers] = useState<Microcontroller[]>([]);
+  const [tipo, setTipo] = useState<ReadingType>("DAILY");
+  const [resp, setResp] = useState<SensorReading[]>([]);
 
   useEffect(() => {
     async function getAvailableMicrocontrollers() {
@@ -80,9 +84,14 @@ function GreenHouse({ params }: Props) {
       setMicrocontrollers(data);
 
     }
+    async function getSensorsData(tipo: ReadingType) {
+      const { data } = await api.get<SensorReading[]>(`/greenhouse/${greenhouseId}/sensors-data`, { params: { "type": tipo } });
+      setResp(data);
+    }
     getAvailableMicrocontrollers();
     getMicrocontrollers();
     getRules();
+    getSensorsData(tipo);
   }, [greenhouseId]);
 
   const selectedStyle = "text-white bg-green"
@@ -96,6 +105,29 @@ function GreenHouse({ params }: Props) {
       [sensorId]: !prev[sensorId],
     }));
   };
+
+  function extractLabels(controllerId: string): string[] {
+    return resp.reduce<string[]>((acc, curr) => {
+      if (curr.controllerId === controllerId) {
+        switch (curr.readingType) {
+          case "HOURLY": {
+            acc.push(new Date(curr.timestamp).getHours().toString());
+          } break;
+          case "DAILY": {
+            acc.push(new Date(curr.timestamp).getDay().toString());
+          } break;
+          case "WEEKLY": {
+            acc.push(Math.floor(new Date(curr.timestamp).getDay() / 7).toString());
+          } break;
+          case "MONTHLY": {
+            acc.push(new Date(curr.timestamp).getMonth().toString());
+          } break;
+        }
+      }
+
+      return acc;
+    }, []);
+  }
 
   async function handleDeleteRule(id_rule: string | undefined) {
     const result = await Swal.fire({
@@ -202,10 +234,10 @@ function GreenHouse({ params }: Props) {
           {/* active button */}
           {/* time filter */}
           <div className='w-5/7 min-w-[200px] bg-green text-white flex justify-evenly p-2 rounded-badge'>
-            <button onClick={() => setInterval(IntervalEnum.Day)} className={`${IntervalEnum.Day == interval ? selectedInterval : selectedStyle} text-center text-md font-bold w-fit p-3 px-5 transition-all ease-in  rounded-badge`} >Day</button>
-            <button onClick={() => setInterval(IntervalEnum.Week)} className={`${IntervalEnum.Week == interval ? selectedInterval : selectedStyle} text-center text-md font-bold w-fit p-3 px-5 transition-all ease-in  rounded-badge`} >Week</button>
-            <button onClick={() => setInterval(IntervalEnum.Month)} className={`${IntervalEnum.Month == interval ? selectedInterval : selectedStyle} text-center text-md font-bold w-fit p-3 px-5 transition-all ease-in  rounded-badge`} >Month</button>
-            <button onClick={() => setInterval(IntervalEnum.Year)} className={`${IntervalEnum.Year == interval ? selectedInterval : selectedStyle} text-center text-md font-bold w-fit p-3 px-5 transition-all ease-in  rounded-badge`} >Year</button>
+            <button onClick={() => setTipo("HOURLY")} className={`${"HOURLY" == tipo ? selectedInterval : selectedStyle} text-center text-md font-bold w-fit p-3 px-5 transition-all ease-in  rounded-badge`} >Day</button>
+            <button onClick={() => setTipo("DAILY")} className={`${"DAILY" == tipo ? selectedInterval : selectedStyle} text-center text-md font-bold w-fit p-3 px-5 transition-all ease-in  rounded-badge`} >Week</button>
+            <button onClick={() => setTipo("WEEKLY")} className={`${"WEEKLY" == tipo ? selectedInterval : selectedStyle} text-center text-md font-bold w-fit p-3 px-5 transition-all ease-in  rounded-badge`} >Month</button>
+            <button onClick={() => setTipo("MONTHLY")} className={`${"MONTHLY" == tipo ? selectedInterval : selectedStyle} text-center text-md font-bold w-fit p-3 px-5 transition-all ease-in  rounded-badge`} >Year</button>
           </div>
 
 
@@ -258,7 +290,17 @@ function GreenHouse({ params }: Props) {
                   .filter((key) => selectedSensors[Number(key)])
                   .map((sensorId) => (
                     <div key={`${mc.controllerId}-${sensorId}`} className="w-full p-3">
-                      <SensorChart data={data[Number(sensorId)][interval]} />
+                      <SensorChart data={{
+                        labels: extractLabels(mc.controllerId),
+                        datasets: [
+                          {
+                            label: "Humidity (%)",
+                            data: resp.filter(r => r.controllerId === mc.controllerId).map(r => r.humidity),
+                            borderColor: "green",
+                            fill: true,
+                          }
+                        ]
+                      }} />
                     </div>
                   ))}
               </div>
@@ -302,7 +344,7 @@ function GreenHouse({ params }: Props) {
           </div>
         )}
 
-        {/* Graphs */}
+        {/* Rules */}
         <div className='w-5/6 mx-auto p-3 flex flex-col'>
           <div className='w-full flex flex-row'>
             <div className='w-1/2 flex justify-start text-2xl font-bold text-black'>
