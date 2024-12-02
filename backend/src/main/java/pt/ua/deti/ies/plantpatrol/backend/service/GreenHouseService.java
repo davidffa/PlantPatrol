@@ -1,30 +1,29 @@
 package pt.ua.deti.ies.plantpatrol.backend.service;
 
 
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 import pt.ua.deti.ies.plantpatrol.backend.entity.rules.GreenHouse;
+import pt.ua.deti.ies.plantpatrol.backend.entity.rules.MicroController;
 import pt.ua.deti.ies.plantpatrol.backend.entity.rules.Rule;
 import pt.ua.deti.ies.plantpatrol.backend.repository.GreenHouseRepository;
+import pt.ua.deti.ies.plantpatrol.backend.repository.MicroControllerRepository;
 import pt.ua.deti.ies.plantpatrol.backend.repository.RulesRepository;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class GreenHouseService {
 
     private final GreenHouseRepository greenHouseRepository;
     private final RulesRepository rulesRepository;
+    private final MicroControllerRepository microControllerRepository;
 
-    public GreenHouseService(GreenHouseRepository greenHouseRepository, RulesRepository rulesRepository) {
+    public GreenHouseService(GreenHouseRepository greenHouseRepository, RulesRepository rulesRepository, MicroControllerRepository microControllerRepository) {
         this.greenHouseRepository = greenHouseRepository;
         this.rulesRepository = rulesRepository;
+        this.microControllerRepository = microControllerRepository;
     }
 
     public List<GreenHouse> getGreenHouses() {
@@ -71,6 +70,31 @@ public class GreenHouseService {
             List<String> ruleIds = greenhouse.get().getRuleIds();
             if (!ruleIds.isEmpty()) {
                 return rulesRepository.findAllById(ruleIds);
+            }
+        }
+        return Collections.emptyList();
+    }
+
+    public void addMicroControllerToGreenHouse(String greenhouseId, MicroController microController) {
+        MicroController m = microControllerRepository.save(microController);
+        greenHouseRepository.addMicroController(greenhouseId, m.getControllerId());
+    }
+
+    public void removeControllerFromGreenHouse(String greenhouseId, String microController) {
+        greenHouseRepository.removeMicroController(greenhouseId, microController);
+    }
+
+    public List<MicroController> getMicroController(String greenhouseId) {
+        Optional<GreenHouse> optionalGreenHouse = greenHouseRepository.findById(greenhouseId);
+
+        if (optionalGreenHouse.isEmpty()) return null;
+
+        GreenHouse greenhouse = optionalGreenHouse.get();
+
+        if (greenhouse.getMicroControllersIds() != null) {
+            List<String> microControllersIds = greenhouse.getMicroControllersIds();
+            if (!microControllersIds.isEmpty()) {
+                return microControllerRepository.findAllById(microControllersIds);
             }
         }
         return Collections.emptyList();

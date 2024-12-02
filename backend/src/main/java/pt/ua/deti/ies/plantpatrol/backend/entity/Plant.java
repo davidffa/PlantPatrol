@@ -26,6 +26,7 @@ public class Plant {
     @Indexed(unique = true)
     private String name;
 
+    @Builder.Default
     private int minimum = 0;
 
     @NotNull

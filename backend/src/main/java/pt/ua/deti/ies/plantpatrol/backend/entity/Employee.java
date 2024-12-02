@@ -35,6 +35,7 @@ public class Employee implements UserDetails {
     @JsonIgnore
     private String password;
 
+    @Builder.Default
     private boolean isManager = false;
 
     @NotBlank
@@ -55,8 +56,10 @@ public class Employee implements UserDetails {
     private String notes;
 
     // In the first login, it'll be requested a password change
+    @Builder.Default
     private boolean passwordChanged = false;
 
+    @Builder.Default
     private LocalDate createdAt = LocalDate.now();
 
     @Override

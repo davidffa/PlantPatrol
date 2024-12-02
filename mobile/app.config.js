@@ -1,6 +1,6 @@
-{
+module.exports = {
   "expo": {
-    "name": "plant-patrol-mobile",
+    "name": "PlantPatrol",
     "slug": "plant-patrol-mobile",
     "scheme": "plantpatrol",
     "version": "1.0.0",
@@ -20,14 +20,32 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "pt.ua.deti.ies.plantpatrol.mobile",
+      "googleServicesFile": process.env.GOOGLE_SERVICES_JSON
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-router",
-      "expo-font"
-    ]
+      "expo-font",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ]
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "e06fe020-ee10-46c0-9222-6c195061f679"
+      }
+    }
   }
 }
