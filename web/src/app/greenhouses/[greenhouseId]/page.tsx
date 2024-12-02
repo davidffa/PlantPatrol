@@ -290,17 +290,63 @@ function GreenHouse({ params }: Props) {
                   .filter((key) => selectedSensors[Number(key)])
                   .map((sensorId) => (
                     <div key={`${mc.controllerId}-${sensorId}`} className="w-full p-3">
-                      <SensorChart data={{
-                        labels: extractLabels(mc.controllerId),
-                        datasets: [
-                          {
-                            label: "Humidity (%)",
-                            data: resp.filter(r => r.controllerId === mc.controllerId).map(r => r.humidity),
-                            borderColor: "green",
-                            fill: true,
-                          }
-                        ]
-                      }} />
+                      {
+                        sensorId === "0"
+                          ? (
+                            <SensorChart data={{
+                              labels: extractLabels(mc.controllerId),
+                              datasets: [
+                                {
+                                  label: "Temperature (ºC)",
+                                  data: resp.filter(r => r.controllerId === mc.controllerId).map(r => r.temperature),
+                                  borderColor: "red",
+                                  fill: true,
+                                }
+                              ]
+                            }} />
+                          )
+                          : sensorId === "1"
+                            ? (
+                              <SensorChart data={{
+                                labels: extractLabels(mc.controllerId),
+                                datasets: [
+                                  {
+                                    label: "Humidity (%)",
+                                    data: resp.filter(r => r.controllerId === mc.controllerId).map(r => r.humidity),
+                                    borderColor: "green",
+                                    fill: true,
+                                  }
+                                ]
+                              }} />
+                            )
+                            : sensorId === "2"
+                              ? (
+                                <SensorChart data={{
+                                  labels: extractLabels(mc.controllerId),
+                                  datasets: [
+                                    {
+                                      label: "UV Light Index",
+                                      data: resp.filter(r => r.controllerId === mc.controllerId).map(r => r.uv),
+                                      borderColor: "orange",
+                                      fill: true,
+                                    }
+                                  ]
+                                }} />
+                              )
+                              : (
+                                <SensorChart data={{
+                                  labels: extractLabels(mc.controllerId),
+                                  datasets: [
+                                    {
+                                      label: "Air Quality (AQI)",
+                                      data: resp.filter(r => r.controllerId === mc.controllerId).map(r => r.aiq),
+                                      borderColor: "gray",
+                                      fill: true,
+                                    }
+                                  ]
+                                }} />
+                              )
+                      }
                     </div>
                   ))}
               </div>
