@@ -48,16 +48,13 @@ enum IntervalEnum {
 
 type Microcontroller = {
   controllerId: string;
-  greenhouseId: string;
+  greenhouseId: string | null;
 };
 
 Chart.register(CategoryScale);
 
 function GreenHouse({ params }: Props) {
   const { greenhouseId } = params;
-  const reloadPage = () => {
-    window.location.reload();
-  };
 
   const [selectedSensors, setSelectedSensors] = useState<Record<number, boolean>>({
     0: true, // UVLight
@@ -70,7 +67,7 @@ function GreenHouse({ params }: Props) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [availableMicrocontrollers, setAvailableMicrocontrollers] = useState<Microcontroller[]>([]);
-  const [microcontrollers, setMicrocontrollers] = useState<Microcontroller[]>();
+  const [microcontrollers, setMicrocontrollers] = useState<Microcontroller[]>([]);
 
   useEffect(() => {
     async function getAvailableMicrocontrollers() {
@@ -151,7 +148,8 @@ function GreenHouse({ params }: Props) {
   async function handleAddMicrocontroller(mc: Microcontroller) {
     await api.patch(`/controller/${greenhouseId}`, mc).then((response) => {
       if (response.status == 204) {
-        //setMicrocontrollers((prev) => [...prev, mc]);
+        setMicrocontrollers((prev) => [...prev, mc]);
+        setAvailableMicrocontrollers((prev) => prev.filter((mc2) => mc2.controllerId !== mc.controllerId));
         setIsModalOpen(false);
         Swal.fire("Success", "Microcontroller added successfully!", "success");
       } else {
@@ -162,7 +160,6 @@ function GreenHouse({ params }: Props) {
           text: "There was an unexpected error."
         })
       }
-      reloadPage();
     })
   }
 
@@ -178,8 +175,9 @@ function GreenHouse({ params }: Props) {
     if (result.isConfirmed) {
       await api.patch(`/controller/${greenhouseId}/${mcId}`).then((response) => {
         if (response.status == 204) {
-          //setMicrocontrollers((prev) => prev.filter((mc) => mc.id !== mcId));
-          Swal.fire("Success", "Microcontroller added successfully!", "success");
+          setMicrocontrollers((prev) => prev.filter((mc) => mc.controllerId !== mcId));
+          setAvailableMicrocontrollers((prev) => [...prev, { controllerId: mcId, greenhouseId: null }]);
+          Swal.fire("Success", "Microcontroller deleted successfully!", "success");
         } else {
           Swal.fire({
             icon: "error",
@@ -187,7 +185,6 @@ function GreenHouse({ params }: Props) {
             text: "There was an unexpected error."
           })
         }
-        reloadPage();
       }
       )
     };
@@ -272,7 +269,7 @@ function GreenHouse({ params }: Props) {
         {/* Modal */}
         {isModalOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div className="bg-white w-3/4 max-w-md rounded-lg shadow-lg p-6 relative">
+            <div className="bg-white w-3/4 max-w-xl rounded-lg shadow-lg p-6 relative">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold">Available Microcontrollers</h2>
                 <button
@@ -283,20 +280,23 @@ function GreenHouse({ params }: Props) {
                 </button>
               </div>
               <ul className="flex flex-col gap-4">
-                {availableMicrocontrollers.map((mc) => (
-                  <li
-                    key={mc.controllerId}
-                    className="flex justify-between items-center bg-gray-100 rounded-lg p-3 shadow-md"
-                  >
-                    <span className="text-lg">{mc.controllerId}</span>
-                    <button
-                      onClick={() => handleAddMicrocontroller(mc)}
-                      className="bg-green text-white p-2 rounded-md"
+                {!availableMicrocontrollers.length ?
+                  <h3>Please connect a new microcontroller!</h3>
+                  :
+                  availableMicrocontrollers.map((mc) => (
+                    <li
+                      key={mc.controllerId}
+                      className="flex justify-between items-center bg-gray-100 rounded-lg p-3 shadow-md"
                     >
-                      Add
-                    </button>
-                  </li>
-                ))}
+                      <span className="text-lg">{mc.controllerId}</span>
+                      <button
+                        onClick={() => handleAddMicrocontroller(mc)}
+                        className="bg-green text-white p-2 rounded-md"
+                      >
+                        Add
+                      </button>
+                    </li>
+                  ))}
               </ul>
             </div>
           </div>
