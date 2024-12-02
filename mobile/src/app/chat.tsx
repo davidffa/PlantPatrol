@@ -39,65 +39,91 @@ export default function Chat() {
 
   useEffect(() => {
     if (isUUIDReady && deviceUUID != null) {
-      // create chat room
-      createChatRoom();
-
-      //connect to the websocket
-      websocket()
-
-      // fetch existing messages
-      fetchMessages();
+      const initializeChat = async () => {
+        // Check if the chat room exists or create a new one
+        const response = await api.get(`/chat/${deviceUUID}`);
+        if (response.status === 200) {
+          console.log("Chat room already exists.");
+        } else if (response.status === 404) {
+          await createChatRoom();
+        }
+  
+        // Connect to the WebSocket and fetch messages
+        websocket();
+        await fetchMessages();
+      };
+  
+      initializeChat();
+  
+      // Scroll chat down when the keyboard is opened
+      const keyboardDidShowListener = Keyboard.addListener(
+        "keyboardDidShow",
+        () => scrollViewRef.current?.scrollToEnd({ animated: false })
+      );
+  
+      // Cleanup function to remove the keyboard listener
+      return () => {
+        keyboardDidShowListener.remove();
+      };
     }
-    // Scroll chat down when the keyboard is opened
-    const keyboardDidShowListener = Keyboard.addListener(
-      "keyboardDidShow",
-      () => scrollViewRef.current?.scrollToEnd({ animated: false })
-    )
-
-    return () => keyboardDidShowListener.remove();
-  }, [isUUIDReady]);
+  }, [isUUIDReady, deviceUUID]);
 
   const createChatRoom = async () => {
     try {
       const response = await api.post(`/chat`, { chatRoomId: deviceUUID });
       console.log("Chat Room created: ", response.data);
-    } catch (error) {
-      console.error("Error creating chat room:", error);
-      alert("Couldn't create chat room.");
+    } catch (error: any) {
+      if (error.response?.data?.includes("Multiple chat rooms")) {
+        console.warn("Chat room already exists, avoiding duplicate creation.");
+        return; // Avoid creating duplicate chat rooms
+      }
     }
   }
 
   const fetchMessages = async () => {
     try {
-      const response = await api.get(`/chat/${deviceUUID}`, );
+      console.log("Fetching messages for chat room:", deviceUUID);
+      const response = await api.get(`/chat/${deviceUUID}`);
+      console.log("Messages fetched successfully:", response.data);
       const fetchedMessages: MessagePayload[] = response.data;
-      console.log("Messages fetched: ", fetchMessages);
   
-      // Update the messages state
       setMessages(fetchedMessages);
       setNewMessage("");
-    } catch (error) {
-      console.error('Error fetching messages:', error);
-      alert('Couldn\'t load messages from the server.');
+    } catch (error: any) {
+      console.error("Error fetching messages:", error.response?.data || error.message);
+      alert("Couldn't load messages from the server.");
       setMessages([]);
     }
   };
 
   const handleSendMessage = async () => {
+    console.log("Sending message:", newMessage);
     if (newMessage.trim() === "" || deviceUUID == null) return; // Prevent sending empty messages
 
+    const newMessageObject: MessagePayload = {
+      senderId: deviceUUID,
+      content: newMessage.trim(),
+      timestamp: new Date().toISOString(), 
+    };
+  
+    // Optimistically add the message to the UI
+    setMessages((prev) => [...prev, newMessageObject]);
+    setNewMessage(""); 
+
     try {
-      await api.post(`/chat/${deviceUUID}`, { "content": newMessage }, {
+      const response =await api.post(`/chat/${deviceUUID}`, { "content": newMessage }, {
         headers: {
           'senderId': deviceUUID
         }
       })
+      console.log("Message sent successfully:", response.data);
     } catch (error) {
-      alert("Coundl't send the message to the server!")
+      alert("Coudn't send the message to the server!")
     }
   };
 
   function appendMessage(ev: MessageEvent) {
+    console.log("Received message:", ev.data);
     const msg: MessagePayload = JSON.parse(ev.data)
     console.log(msg);
     if (msg.content.trim() !== "") {
