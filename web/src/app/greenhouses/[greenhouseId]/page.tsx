@@ -84,20 +84,39 @@ function GreenHouse({ params }: Props) {
       setMicrocontrollers(data);
 
     }
-    async function getSensorsData(tipo: ReadingType) {
-      const { data } = await api.get<SensorReading[]>(`/greenhouse/${greenhouseId}/sensors-data`, { params: { "type": tipo } });
-      setResp(data);
-    }
     getAvailableMicrocontrollers();
     getMicrocontrollers();
     getRules();
-    getSensorsData(tipo);
   }, [greenhouseId]);
+
+  useEffect(() => {
+    async function getSensorsData(tipo: ReadingType) {
+      const { data } = await api.get<SensorReading[]>(`/greenhouse/${greenhouseId}/sensors-data`, { params: { "type": tipo } });
+      setResp(data.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()));
+    }
+
+    getSensorsData(tipo);
+  }, [tipo]);
+
+  useEffect(() => {
+    function updateLabels(data: SensorReading[]) {
+      microcontrollers.forEach(mc => {
+        setChartLabels(prev => {
+          return {
+            ...prev,
+            [mc.controllerId]: extractLabels(data, mc.controllerId)
+          }
+        })
+      })
+    }
+    updateLabels(resp);
+  }, [resp, microcontrollers]);
 
   const selectedStyle = "text-white bg-green"
   const selectedInterval = "text-green bg-white shadow-xl"
 
   const [rules, setRules] = useState<Rule[]>([])
+  const [chartLabels, setChartLabels] = useState<Record<string, string[]>>({});
 
   const toggleSensor = (sensorId: number) => {
     setSelectedSensors((prev) => ({
@@ -106,18 +125,18 @@ function GreenHouse({ params }: Props) {
     }));
   };
 
-  function extractLabels(controllerId: string): string[] {
-    return resp.reduce<string[]>((acc, curr) => {
+  function extractLabels(data: SensorReading[], controllerId: string): string[] {
+    return data.reduce<string[]>((acc, curr) => {
       if (curr.controllerId === controllerId) {
         switch (curr.readingType) {
           case "HOURLY": {
             acc.push(new Date(curr.timestamp).getHours().toString());
           } break;
           case "DAILY": {
-            acc.push(new Date(curr.timestamp).getDay().toString());
+            acc.push(new Date(curr.timestamp).getDate().toString());
           } break;
           case "WEEKLY": {
-            acc.push(Math.floor(new Date(curr.timestamp).getDay() / 7).toString());
+            acc.push(Math.ceil(new Date(curr.timestamp).getDate() / 7).toString());
           } break;
           case "MONTHLY": {
             acc.push(new Date(curr.timestamp).getMonth().toString());
@@ -294,7 +313,7 @@ function GreenHouse({ params }: Props) {
                         sensorId === "0"
                           ? (
                             <SensorChart data={{
-                              labels: extractLabels(mc.controllerId),
+                              labels: chartLabels[mc.controllerId],
                               datasets: [
                                 {
                                   label: "Temperature (ºC)",
@@ -308,7 +327,7 @@ function GreenHouse({ params }: Props) {
                           : sensorId === "1"
                             ? (
                               <SensorChart data={{
-                                labels: extractLabels(mc.controllerId),
+                                labels: chartLabels[mc.controllerId],
                                 datasets: [
                                   {
                                     label: "Humidity (%)",
@@ -322,7 +341,7 @@ function GreenHouse({ params }: Props) {
                             : sensorId === "2"
                               ? (
                                 <SensorChart data={{
-                                  labels: extractLabels(mc.controllerId),
+                                  labels: chartLabels[mc.controllerId],
                                   datasets: [
                                     {
                                       label: "UV Light Index",
@@ -335,7 +354,7 @@ function GreenHouse({ params }: Props) {
                               )
                               : (
                                 <SensorChart data={{
-                                  labels: extractLabels(mc.controllerId),
+                                  labels: chartLabels[mc.controllerId],
                                   datasets: [
                                     {
                                       label: "Air Quality (AQI)",
