@@ -17,4 +17,12 @@ public interface GreenHouseRepository extends MongoRepository<GreenHouse,String>
 
     @Query(value = "{ '_id': ?0 }", fields = "{ 'rules': 1 }")
     public GreenHouse findGreenHouseRulesById(String id);
+
+    @Query("{_id: ?0}")
+    @Update("{'$addToSet': {'microControllers': ?1}}")
+    public void addMicroController(String id, String microController);
+
+    @Query("{'_id': ?0}")
+    @Update("{'$pull': {'microControllers':?1}}")
+    public void removeMicroController(String id,String microController);
 }
