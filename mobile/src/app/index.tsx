@@ -24,13 +24,13 @@ type Plant = {
 export default function Home() {
   const router = useRouter();
   const { clientId, pushToken } = useUser();
-  const [checked, setChecked] = React.useState('all');
+  const [checked, setChecked] = useState('all');
 
   const [plants, setPlants] = useState<Plant[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchPlants, setSearchPlants] = useState<Plant[]>([]);
   const [alertPlantIds, setAlertPlantIds] = useState<string[]>([]);
-  //const [plantsFilter, setPlantsFilter] = useState<Plant[]>([]);
+  const [plantsFilter, setPlantsFilter] = useState<Plant[]>([]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -42,7 +42,6 @@ export default function Home() {
           setAlertPlantIds(data);
         } catch { }
       }
-
       getData();
     }, [])
   )
@@ -55,7 +54,9 @@ export default function Home() {
       } catch (err) {
         console.error(err);
       }
-    } getSearchPlants();
+    }
+
+    getSearchPlants();
   }, [searchQuery]);
 
   async function toggleAlert(id: string) {
@@ -69,17 +70,34 @@ export default function Home() {
       setAlertPlantIds(data);
     }
   }
-  // function ListPlants() {
-  //   if (checked === 'all') {
-  //     setFileredPlants(plants)
-  //   }
-  //   else if (checked === 'toggled') {
-  //     setFileredPlants(plants.filter(plant => alertPlantIds.includes(plant.id)))
-  //   }
-  //   else {
-  //     setFileredPlants(plants.filter(plant => !alertPlantIds.includes(plant.id)))
-  //   }
-  // }
+
+  useEffect(() => {
+    function ListPlants() {
+      if (searchQuery === "") {
+        if (checked === 'all') {
+          setPlantsFilter(plants);
+        }
+        else if (checked === 'toggled') {
+          setPlantsFilter(plants.filter(plant => alertPlantIds.includes(plant.id)))
+        }
+        else {
+          setPlantsFilter(plants.filter(plant => !alertPlantIds.includes(plant.id)))
+        }
+      } else {
+        if (checked === 'all') {
+          setPlantsFilter(searchPlants);
+        }
+        else if (checked === 'toggled') {
+          setPlantsFilter(searchPlants.filter(plant => alertPlantIds.includes(plant.id)))
+        }
+        else {
+          setPlantsFilter(searchPlants.filter(plant => !alertPlantIds.includes(plant.id)))
+        }
+      }
+    }
+    ListPlants();
+  }, [plants, searchPlants, checked, searchQuery]);
+
 
   return (
     <SafeAreaView className="bg-white flex-1">
@@ -131,40 +149,21 @@ export default function Home() {
           </View>
 
         </View>
-        {searchQuery === "" ?
-          <FlatList
-            className="mt-6"
-            data={plants}
-            contentContainerStyle={{
-              paddingBottom: 20,
-              gap: 24
-            }}
-            columnWrapperStyle={{
-              paddingRight: 8,
-              gap: 8
-            }}
-            numColumns={2}
-            renderItem={({ item }) => <PlantCard name={item.name} image={{ uri: item.imageUrl }} alert={alertPlantIds.includes(item.id)} onToggleAlert={() => toggleAlert(item.id)} onClick={() => router.push({ pathname: 'details', params: { id: item.id } })} />}
-            keyExtractor={item => item.id}
-          />
-          :
-          <FlatList
-            className="mt-6"
-            data={searchPlants}
-            contentContainerStyle={{
-              paddingBottom: 20,
-              gap: 24
-            }}
-            columnWrapperStyle={{
-              paddingRight: 8,
-              gap: 8
-            }}
-            numColumns={2}
-            renderItem={({ item }) => <PlantCard name={item.name} image={{ uri: item.imageUrl }} alert={alertPlantIds.includes(item.id)} onToggleAlert={() => toggleAlert(item.id)} onClick={() => router.push({ pathname: 'details', params: { id: item.id } })} />}
-            keyExtractor={item => item.id}
-          />
-
-        }
+        <FlatList
+          className="mt-6"
+          data={plantsFilter}
+          contentContainerStyle={{
+            paddingBottom: 20,
+            gap: 24
+          }}
+          columnWrapperStyle={{
+            paddingRight: 8,
+            gap: 8
+          }}
+          numColumns={2}
+          renderItem={({ item }) => <PlantCard name={item.name} image={{ uri: item.imageUrl }} alert={alertPlantIds.includes(item.id)} onToggleAlert={() => toggleAlert(item.id)} onClick={() => router.push({ pathname: 'details', params: { id: item.id } })} />}
+          keyExtractor={item => item.id}
+        />
       </View>
     </SafeAreaView>
   )
