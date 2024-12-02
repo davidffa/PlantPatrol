@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 import GreenHouse from './[greenhouseId]/page';
 import Swal from 'sweetalert2';
 import AddHomeIcon from '@mui/icons-material/AddHome';
+import { useAuth } from '@/contexts/auth';
 
 
 type GreenHouse = {
@@ -19,13 +20,13 @@ type GreenHouse = {
   temperature: number,
   aiq: number,
 }
-
 function ManagerPage() {
   const [greenhouses, setGH] = useState<GreenHouse[]>([])
   const modalRef = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
-  const [newName, setNewName] = useState<string>("");
-  const [location, setLocation] = useState<string>("");
+  const [newName, setNewName] = useState<string>("")
+  const [location, setLocation] = useState<string>("")
+  const { user } = useAuth();
 
   useEffect(() => {
     try {
@@ -74,9 +75,13 @@ function ManagerPage() {
             <GHouseCard key={idx} id={gh.id} image='/bg-greenhouse.png' greenhouse={gh.name} />
           ))
         }
-        <button onClick={() => modalRef.current?.showModal()} className=" shadow-lg z-10 hover:text-green hover:bg-white min-h-[50px] min-w-[50px] w-[8vh] h-[8vh] flex align-middle justify-center bg-green text-white absolute bottom-0 right-0 m-6 rounded-full border-2 border-green p-3">
-          <AddHomeIcon className='my-auto ' />
-        </button>
+        {
+          user?.manager && (
+            <button onClick={() => modalRef.current?.showModal()} className=" shadow-lg z-10 hover:text-green hover:bg-white min-h-[50px] min-w-[50px] w-[8vh] h-[8vh] flex align-middle justify-center bg-green text-white absolute bottom-0 right-0 m-6 rounded-full border-2 border-green p-3">
+              <AddHomeIcon className='my-auto ' />
+            </button>
+          )
+        }
         {/* Open the modal using document.getElementById('ID').showModal() method */}
         <dialog ref={modalRef} className="modal">
           <div className="modal-box text-center">
@@ -91,7 +96,7 @@ function ManagerPage() {
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
                     type="text"
-                    placeholder="ex: GreenHouse for Cactus..."
+                    placeholder="GreenHouse for Cactus..."
                     className="input input-bordered border-green w-full max-w-xs" />
                 </label>
               </div>
@@ -104,7 +109,7 @@ function ManagerPage() {
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     type="text"
-                    placeholder="Ex: Rua Almeida Garret"
+                    placeholder="Street ..."
                     className="input input-bordered border-green w-full max-w-xs" />
                 </label>
               </div>

@@ -23,6 +23,29 @@ type Rule = {
   airPurifier: boolean,
 }
 
+
+const marksAIQ = [
+  {
+    value: 0,
+    label: '0',
+  },
+  {
+    value: 100,
+    label: '100',
+  },
+  {
+    value: 200,
+    label: '200',
+  },
+  {
+    value: 300,
+    label: '300',
+  },
+  {
+    value: 500,
+    label: '500',
+  },
+];
 const marks = [
   {
     value: 0,
@@ -97,19 +120,20 @@ function valuetextAIQ(value: number) {
   const minDistance = 10;
   const getRule = () => {
     try {
-
       if (idRule !== '0') {
         //updating
         // change the endnpoit 
         api.get(`/rule/${idRule}`).then((response) => {
           if (response.status == 200) {
             setRule(response.data)
-
           }
         })
       }
     } catch (erro) {
-      console.log(erro)
+      Swal.fire({
+        icon: "error",
+        title: `Ensure to give a name to the rule! Error:${erro}`
+      });
     }
   }
 
@@ -251,7 +275,6 @@ function valuetextAIQ(value: number) {
       })
     }
     else {
-      console.log(rule)
       //create a new rule 
       api.post(`/rules/${greenhouseId}`, { ...rule }).then(async (response) => {
         if (response.status == 201) {
@@ -266,7 +289,7 @@ function valuetextAIQ(value: number) {
       }).catch((erro) => {
         Swal.fire({
           icon: "error",
-          title: `There was an unexpected error with the creation of the rule! Erro:${erro.detail}`
+          title: `There was an unexpected error with the creation of the rule! (${erro.response.data.detail})`
         });
       })
     }
@@ -290,8 +313,8 @@ function valuetextAIQ(value: number) {
                 Sensors
               </div>
               <div className="text-center grid grid-cols-1 gap-y-6 w-full p-3 ">
-                <div className="rounded-md grid grid-cols-2 w-full p-3 border border-1 border-gray align-middle">
-                  <div className="text-center text-xl h-full ">Temperature</div>
+                <div className="rounded-md grid grid-cols-2 w-full bg-white p-3 border border-1 border-gray align-middle">
+                  <div className="text-center text-xl h-full text-black">Temperature</div>
                   <div className="px-5">
                     <Slider
                       className="text-white"
@@ -306,8 +329,8 @@ function valuetextAIQ(value: number) {
                   </div>
                 </div>
 
-                <div className="rounded-md grid grid-cols-2 w-full p-3 border border-1 border-gray align-middle">
-                  <div className="text-center text-xl h-full ">Humidity</div>
+                <div className="rounded-md grid grid-cols-2 w-full p-3 border bg-white border-1 border-gray align-middle">
+                  <div className="text-center text-xl h-full text-black">Humidity</div>
                   <div className="px-5">
                     <Slider
                       className="text-white"
@@ -321,8 +344,8 @@ function valuetextAIQ(value: number) {
                     />
                   </div>
                 </div>
-                <div className="rounded-md grid grid-cols-2 w-full p-3 border border-1 border-gray align-middle">
-                  <div className="text-center text-xl h-full ">Air Quality</div>
+                <div className="rounded-md grid grid-cols-2 w-full p-3 bg-white border border-1 border-gray align-middle">
+                  <div className="text-center text-xl h-full text-black">Air Quality</div>
                   <div className="px-5">
                     <Slider
                       className="text-white"
@@ -330,7 +353,7 @@ function valuetextAIQ(value: number) {
                       onChange={slideAIQ}
                       valueLabelDisplay="auto"
                       getAriaValueText={valuetextAIQ}
-                      marks={marksPercentage(500)}
+                      marks={marksAIQ}
                       max={500}
                       step={20}
                     />
@@ -343,8 +366,8 @@ function valuetextAIQ(value: number) {
                 Actuators
               </div>
               <div className="text-center grid grid-cols-1 gap-y-6 w-full p-3 ">
-                <div className="rounded-md grid grid-cols-2 w-full p-3 border border-1 border-gray align-middle">
-                  <div className="text-center text-xl h-full ">Water System Flow</div>
+                <div className="rounded-md grid grid-cols-2 bg-white w-full p-3 border border-1 border-gray align-middle">
+                  <div className="text-center text-xl h-full text-black">Water System Flow</div>
                   <div className="px-5">
                     <Slider
                       className="text-white"
@@ -358,8 +381,8 @@ function valuetextAIQ(value: number) {
                   </div>
                 </div>
 
-                <div className="rounded-md grid grid-cols-2 w-full p-3 border border-1 border-gray align-middle">
-                  <div className="text-center text-xl h-full ">Ventilation Speed</div>
+                <div className="rounded-md grid grid-cols-2 w-full bg-white p-3 border border-1 border-gray align-middle">
+                  <div className="text-center text-xl h-full text-black">Ventilation Speed</div>
                   <div className="px-5">
                     <Slider
                       className="text-white"
@@ -373,8 +396,8 @@ function valuetextAIQ(value: number) {
                     />
                   </div>
                 </div>
-                <div className="rounded-md grid grid-cols-2 w-full p-3 border border-1 border-gray align-middle">
-                  <div className="text-center text-xl h-full ">Air Purifier</div>
+                <div className="rounded-md grid grid-cols-2 w-full bg-white p-3 border border-1 border-gray align-middle">
+                  <div className="text-center text-xl h-full text-black">Air Purifier</div>
                   <div className="px-5">
                     <input
                       type="checkbox"
@@ -388,9 +411,9 @@ function valuetextAIQ(value: number) {
             </div>
           </div>
           <div className="w-full flex justify-around my-3 p-5">
-            <a className="w-1/6 bg-beje text-xl text-center p-3 rounded-lg text-black" href="/greenhouses/rules">
+            <button onClick={()=>router.back()} className="w-1/6 bg-beje text-xl text-center p-3 rounded-lg text-white">
               Cancel
-            </a>
+            </button>
             <button onClick={handleSave} className="w-1/6 bg-green text-xl text-center p-3 rounded-lg text-white">
               Save
             </button>
