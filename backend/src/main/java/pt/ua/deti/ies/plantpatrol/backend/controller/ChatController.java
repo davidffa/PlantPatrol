@@ -52,7 +52,6 @@ public class ChatController {
     @Operation(summary = "Have all the messages in a specified chatRoom")
     @GetMapping("/chat/{chatRoomId}")
     public ResponseEntity<?> findChatMessages (@PathVariable String chatRoomId) {
-        try {
             ChatRoom chatRoom = chatRoomService.getChatRoomByID(chatRoomId);
 
             if (chatRoom == null) {
@@ -65,15 +64,6 @@ public class ChatController {
             }
 
             return new ResponseEntity<>(messages, HttpStatus.OK);
-        } catch (IncorrectResultSizeDataAccessException e) {
-            // Handle non-unique result
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                .body("Multiple chat rooms found with the same ID: " + chatRoomId);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                .body("Unknown error occurred while fetching messages.");
-        }
     }
     @Operation(summary = "Have all the chatRoom")
     @GetMapping("/chatRooms")
