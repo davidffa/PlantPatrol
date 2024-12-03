@@ -15,6 +15,7 @@ import pt.ua.deti.ies.plantpatrol.backend.entity.Employee;
 import pt.ua.deti.ies.plantpatrol.backend.dto.chat.MessagePayload;
 import pt.ua.deti.ies.plantpatrol.backend.service.ChatRoomService;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -33,7 +34,7 @@ public class ChatController {
 
         MessagePayload msg = MessagePayload.builder()
                 .content(dto.getContent())
-                .timestamp(Date.from(Instant.now()))
+                .timestamp(LocalDateTime.now())
                 .build();
 
         if (auth.getPrincipal() instanceof Employee issuer) {

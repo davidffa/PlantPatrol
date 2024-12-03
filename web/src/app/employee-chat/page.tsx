@@ -5,6 +5,7 @@ import Image from 'next/image';
 import api from '@/services/api';
 import { useAuth } from '../../contexts/auth';
 import withAuth from '@/lib/withAuth';
+import { env } from 'next-runtime-env';
 
 type MessagePayload = {
   content: string,
@@ -31,14 +32,29 @@ function EmployeeChat() {
   // Create a reference for the last message
   const lastMessageRef = useRef<HTMLDivElement | null>(null);
   const getChatRooms = async () => {
-    const res = await api.get("/chatRooms")
-    setChatRooms(res.data)
+    const res = await api.get<Room[]>("/chatRooms")
+    const data = res.data.map(room => {
+      return {
+        ...room,
+        messages: room.messages.map(msg => {
+          return {
+            ...msg,
+            timestamp: formatDate(new Date(msg.timestamp))
+          }
+        })
+      }
+    })
+    setChatRooms(data);
   }
 
   // Automatically scroll to the last message when the messages change
   useEffect(() => {
     getChatRooms()
   }, []);
+
+  function formatDate(date: Date) {
+    return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()} ${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
+  }
 
   function appendMessage(ev: MessageEvent) {
     const msg: MessagePayload = JSON.parse(ev.data)
@@ -47,7 +63,7 @@ function EmployeeChat() {
         if (!prevRoom) return null; // Handle null case
         return {
           ...prevRoom,
-          messages: [...prevRoom.messages, msg], // Correctly concatenate messages
+          messages: [...prevRoom.messages, { ...msg, timestamp: formatDate(new Date(msg.timestamp)) }], // Correctly concatenate messages
         };
       });
     }
@@ -60,7 +76,7 @@ function EmployeeChat() {
       if (webSocket != null) {
         webSocket.close()
       }
-      const ws = new WebSocket("ws://localhost:8080/chat")
+      const ws = new WebSocket(env("NEXT_PUBLIC_CHAT_WS_URL") ?? "ws://localhost:8080/chat")
       setWebSocket(ws)
       setSelectedRoom(Room)
       ws.onopen = () => {
