@@ -23,8 +23,8 @@ export default function Drawer() {
                     </svg>
                 </label>
             </div>
-            <div className="drawer-side bg-transparent fixed top-16 h-full">
-                <label htmlFor="my-drawer" aria-label="close sidebar" className="drawer-overlay"></label>
+            <div className="drawer-side w-1/3 bg-transparent fixed top-16 h-full">
+                <label htmlFor="my-drawer" aria-label="close sidebar"></label>
                 <ul className="menu bg-base-200 text-base-content min-h-full py-4 border-none">
                     {/* Sidebar content here */}
                     {user?.manager ?
