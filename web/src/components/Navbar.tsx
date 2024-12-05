@@ -14,7 +14,12 @@ export function Navbar() {
         <Image src="/logo.png" height={38} width={38} alt="PlantPatrol logo" />
         <span className="text-white text-xl font-bold font-alt">PlantPatrol</span>
       </Link>
-      <Drawer />
+
+      {
+        isLogged && (
+          <Drawer />
+        )
+      }
 
       {
         isLogged && (
