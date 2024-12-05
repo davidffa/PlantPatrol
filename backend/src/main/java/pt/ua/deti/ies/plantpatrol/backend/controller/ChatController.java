@@ -15,6 +15,7 @@ import pt.ua.deti.ies.plantpatrol.backend.entity.Employee;
 import pt.ua.deti.ies.plantpatrol.backend.dto.chat.MessagePayload;
 import pt.ua.deti.ies.plantpatrol.backend.service.ChatRoomService;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -33,7 +34,7 @@ public class ChatController {
 
         MessagePayload msg = MessagePayload.builder()
                 .content(dto.getContent())
-                .timestamp(Date.from(Instant.now()))
+                .timestamp(LocalDateTime.now())
                 .build();
 
         if (auth.getPrincipal() instanceof Employee issuer) {
@@ -52,18 +53,17 @@ public class ChatController {
     @Operation(summary = "Have all the messages in a specified chatRoom")
     @GetMapping("/chat/{chatRoomId}")
     public ResponseEntity<?> findChatMessages (@PathVariable String chatRoomId) {
-            ChatRoom chatRoom = chatRoomService.getChatRoomByID(chatRoomId);
+        ChatRoom chatRoom = chatRoomService.getChatRoomByID(chatRoomId);
 
-            if (chatRoom == null) {
-                return ResponseEntity.notFound().build();
-            }
+        if (chatRoom == null)
+            return ResponseEntity.notFound().build();
 
-            List<MessagePayload> messages = chatRoom.getMessages();
-            if (messages == null) {
-                messages = new ArrayList<>();
-            }
+        List<MessagePayload> messages = chatRoom.getMessages();
+        if (messages == null) {
+            messages = new ArrayList<>();
+        }
 
-            return new ResponseEntity<>(messages, HttpStatus.OK);
+        return new ResponseEntity<>(messages, HttpStatus.OK);
     }
     @Operation(summary = "Have all the chatRoom")
     @GetMapping("/chatRooms")

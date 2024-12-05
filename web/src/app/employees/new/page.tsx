@@ -40,13 +40,24 @@ function NewEmployee() {
         notes
       });
 
-      Swal.fire({
-        icon: "success",
-        title: "Success",
-        text: "Employee's credentials copied to clipboard!"
+      // Swal.fire({
+      //   icon: "success",
+      //   title: "Success",
+      //   text: "Employee's credentials copied to clipboard!"
+      // });
+
+      const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end"
       });
 
-      await navigator.clipboard.writeText(`Username: ${data.username} ; Password: ${data.password}`)
+      Toast.fire({
+        icon: "success",
+        title: "Employee's credentials",
+        text: `Username: ${data.username} ; Password: ${data.password}`
+      });
+      // It was a good idea, but we only have access to the clipboard if the site is https or localhost
+      // await navigator.clipboard.writeText(`Username: ${data.username} ; Password: ${data.password}`)
 
       router.replace("/employees");
     } catch (err) {

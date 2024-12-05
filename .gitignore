@@ -10,6 +10,11 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 
+
+### Python ###
+__pycache__/
+*.pyc
+
 ### Java ###
 # Compiled class file
 *.class

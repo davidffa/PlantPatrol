@@ -32,11 +32,11 @@ public class ChatRoomService extends TextWebSocketHandler {
         List<String> sessionIds = chatRoomSessions.get(chatRoomId);
 
         if (sessionIds != null) {
-            JSONObject json = new JSONObject(msg);
+            String json = new JSONObject(msg).toString();
 
             sessionIds.forEach(sId -> {
                 try {
-                    sessions.get(sId).sendMessage(new TextMessage(json.toString()));
+                    sessions.get(sId).sendMessage(new TextMessage(json));
                 } catch (Exception ignored) { }
             });
         }
@@ -56,7 +56,7 @@ public class ChatRoomService extends TextWebSocketHandler {
     }
 
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) {
         JSONObject json = new JSONObject(message.getPayload());
         String chatRoomId = json.getString("chatRoomId");
 
@@ -65,12 +65,12 @@ public class ChatRoomService extends TextWebSocketHandler {
     }
 
     @Override
-    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+    public void afterConnectionEstablished(WebSocketSession session) {
         sessions.put(session.getId(), session);
     }
 
     @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         sessions.remove(session.getId());
     }
 }
