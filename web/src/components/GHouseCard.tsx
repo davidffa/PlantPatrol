@@ -34,15 +34,21 @@ export default function GHouseCards({ id, greenhouse, image }: Props) {
 
   useEffect(() => {
     async function getAVG() {
-      const { data } = await api.get<SensorReading[]>(`/greenhouse/${id}/sensors-data`, { params: { "type": "INSTANT" } });
+      try {
+        const res = await api.get<SensorReading[]>(`/greenhouse/${id}/sensors-data`, { params: { "type": "INSTANT" } });
 
-      setHumidity(data.reduce((acc, curr) => acc + curr.humidity, 0) / data.length);
-      setUv(data.reduce((acc, curr) => acc + curr.uv, 0) / data.length);
-      setTemperature(data.reduce((acc, curr) => acc + curr.temperature, 0) / data.length);
-      setAiq(data.reduce((acc, curr) => acc + curr.aiq, 0) / data.length);
+        if (res.status === 200) {
+          const data = res.data;
+          setHumidity(data.reduce((acc, curr) => acc + curr.humidity, 0) / data.length);
+          setUv(data.reduce((acc, curr) => acc + curr.uv, 0) / data.length);
+          setTemperature(data.reduce((acc, curr) => acc + curr.temperature, 0) / data.length);
+          setAiq(data.reduce((acc, curr) => acc + curr.aiq, 0) / data.length);
+        }
+      } catch { }
     }
     getAVG();
   }, []);
+
   return (
     <>
       <div className="card cursor-pointer shadow-md  hover:shadow-green hover:translate-y-[-4px]  transition-all ease-in-out image-full w-full " onClick={() => router.push(`/greenhouses/${id}`)}>
