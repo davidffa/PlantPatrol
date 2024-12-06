@@ -36,7 +36,7 @@ export default function InventoryCard({ id, title, image, available, minimum, ma
 
   return (
 
-    <div className="card cursor-pointer shadow-md  hover:shadow-green hover:translate-y-[-4px]  transition-all ease-in-out image-full w-full h-12">
+    <div className="group card cursor-pointer shadow-md  hover:shadow-green hover:translate-y-[-4px]  transition-all ease-in-out image-full w-full h-16">
       <figure>
         <img
           src={image}
@@ -45,9 +45,9 @@ export default function InventoryCard({ id, title, image, available, minimum, ma
           width={350}
         />
       </figure>
-      <div className="card-body h-12 ">
+      <div className="card-body">
         <div className="w-full flex flex-col ">
-          <div className='flex justify-end'>
+          <div className='flex justify-end '>
             <Image src="/trash-2.svg" alt="Remove" height={20} width={20} onClick={handleDelete} />
           </div>
           <div className='h-2/5 w-full  text-left text-2xl text-white' onClick={() => !manager && router.push(`/employee/inventory/${id}`)} >

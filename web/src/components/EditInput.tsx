@@ -1,6 +1,5 @@
 'use client';
 import { useState } from "react";
-import Image from "next/image";
 import api from "@/services/api";
 import CreateIcon from '@mui/icons-material/Create';
 interface Props {
@@ -42,7 +41,7 @@ const EditInput = ({ id, min, minvalue, onChange }: Props) => {
       {isInputVisible ? (
         <div className="flex w-full">
           <input type="text" className="border rounded w-full bg-transparent text-white border-white " value={inputValue2} onChange={handleInputChange} />
-          <button className="w-full text-center mx-auto" onClick={() => update(minvalue)}>
+          <button className="w-full text-center mx-auto transition ease-in-out hover:-rotate-45" onClick={() => update(minvalue)}>
             {/* <Image src="/Vector.svg" alt="Editar" height={22} width={22} /> */}
             <CreateIcon width={22} height={22}/>
           </button>
@@ -51,7 +50,7 @@ const EditInput = ({ id, min, minvalue, onChange }: Props) => {
         (
           <div className="flex w-full">
             <div className="flex text-right text-white justify-between w-full" >{minvalue}</div>
-            <button className='w-full text-center mx-auto' onClick={editInput} >
+            <button className='w-full text-center mx-auto transition ease-in-out hover:-rotate-45' onClick={editInput} >
                 <CreateIcon width={22} height={22}/>
             </button>
           </div>
