@@ -36,7 +36,7 @@ export default function InventoryCard({ id, title, image, available, minimum, ma
 
   return (
 
-    <div className="card cursor-pointer shadow-md  hover:shadow-green hover:translate-y-[-4px]  transition-all ease-in-out image-full w-60 h-64">
+    <div className="card cursor-pointer shadow-md  hover:shadow-green hover:translate-y-[-4px]  transition-all ease-in-out image-full w-full h-12">
       <figure>
         <img
           src={image}
@@ -45,7 +45,7 @@ export default function InventoryCard({ id, title, image, available, minimum, ma
           width={350}
         />
       </figure>
-      <div className="card-body ">
+      <div className="card-body h-12 ">
         <div className="w-full flex flex-col ">
           <div className='flex justify-end'>
             <Image src="/trash-2.svg" alt="Remove" height={20} width={20} onClick={handleDelete} />
@@ -58,40 +58,42 @@ export default function InventoryCard({ id, title, image, available, minimum, ma
             manager ?
               (
                 <>
-                  <div className=' h-1/6 w-full grid grid-cols-2 align-bottom'>
-                    <div className='flex w-full text-left text-white justify-between text-md mt-12'>
+                  <div className=' h-1/6 w-full grid grid-cols-1 align-bottom'>
+                  <div className="grid grid-cols-2 w-full p-2">
+                    <div className='flex w-full text-left text-white justify-between text-md '>
                       <p>Available:</p>
                     </div>
-                    <div className='flex  text-right text-white justify-between mt-12 px-6'>{available}</div>
-                    <div></div>
+                    <div className='flex  text-right text-white justify-between '>{available}</div>
                   </div>
-                  <div className='h-1/6 flex w-full align-bottom justify-between '>
-                    <div className='flex  text-left text-white justify-between mt-12 '>
+                  <div className="grid grid-cols-2 w-full p-2">
+                    <div className='flex  text-left text-white justify-between '>
                       <p>Minimum:</p>
                     </div>
                     <div >
                       <EditInput id={id} min={minimum} minvalue={min} onChange={handleValueChange} />
                     </div>
                   </div>
+                </div>
                 </>
               ) :
               (
                 <>
-                  <div className='h-1/6 flex w-full align-bottom justify-between '>
-                    <div className='flex  text-left text-white justify-between mt-12 '>
+                  <div className='h-1/6  grid-cols-1 align-bottom  justify-between '>
+                  <div className="grid grid-cols-2 w-full p-2">
+                    <div className="flex text-left text-white justify-between">
                       <p>Available:</p>
                     </div>
                     <div>
                       <EditInput id={id} min={available} minvalue={ava} onChange={handleValueChange2} />
                     </div>
                   </div>
-                  <div className='h-1/6 w-full grid grid-cols-2 align-bottom'>
-                    <div className='flex w-full text-left text-white justify-between text-md mt-12'>
+                  <div className="grid grid-cols-2 w-full p-2">
+                    <div className='flex text-left text-white justify-between '>
                       <p>Minimum:</p>
                     </div>
-                    <div className='flex  text-right text-white justify-between mt-12 px-6'>{minimum}</div>
-                    <div></div>
+                    <div className='flex text-right text-white justify-between '>{minimum}</div>
                   </div>
+                </div>
                 </>
               )
           }

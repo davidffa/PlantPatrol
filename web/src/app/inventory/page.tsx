@@ -26,7 +26,6 @@ function Inventory() {
   useEffect(() => {
     async function getPlants() {
       const { data } = await api.get<Plant[]>("/inventory");
-
       setPlants(data);
     }
     getPlants();
@@ -66,7 +65,7 @@ function Inventory() {
           </button>
         </div>
       </div>
-      <div className="w-full grid md:grid-cols-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5  gap-12 align-center p-4">
+      <div className="w-full grid md:grid-cols-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6 align-center p-3">
         {searchQuery === "" ?
           plants.map(({ id, imageUrl, name, amount, minimum }) => (<InventoryCard key={id} id={id} image={imageUrl} title={name} available={amount} minimum={minimum} manager onDelete={reloadPage} />))
           :

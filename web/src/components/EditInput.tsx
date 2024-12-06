@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import api from "@/services/api";
-
+import CreateIcon from '@mui/icons-material/Create';
 interface Props {
   id: string;
   min: number;
@@ -40,18 +40,19 @@ const EditInput = ({ id, min, minvalue, onChange }: Props) => {
   return (
     <div>
       {isInputVisible ? (
-        <div className="flex ">
-          <input type="text" className="h-6 border rounded w-11 bg-transparent text-white border-white mt-12 " value={inputValue2} onChange={handleInputChange} />
-          <div className="mt-12 " onClick={() => update(minvalue)}>
-            <Image src="/Vector.svg" alt="Editar" height={22} width={22} />
-          </div>
+        <div className="flex w-full">
+          <input type="text" className="border rounded w-full bg-transparent text-white border-white " value={inputValue2} onChange={handleInputChange} />
+          <button className="w-full text-center mx-auto" onClick={() => update(minvalue)}>
+            {/* <Image src="/Vector.svg" alt="Editar" height={22} width={22} /> */}
+            <CreateIcon width={22} height={22}/>
+          </button>
         </div>
       ) :
         (
-          <div className="flex">
-            <div className="flex mt-12 text-right text-white justify-between px-8" >{minvalue}</div>
-            <button className='mt-12' onClick={editInput} >
-              <Image src="/Vector.svg" alt="Editar" height={22} width={22} />
+          <div className="flex w-full">
+            <div className="flex text-right text-white justify-between w-full" >{minvalue}</div>
+            <button className='w-full text-center mx-auto' onClick={editInput} >
+                <CreateIcon width={22} height={22}/>
             </button>
           </div>
         )
