@@ -2,6 +2,7 @@ package pt.ua.deti.ies.plantpatrol.backend.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -14,7 +15,10 @@ import pt.ua.deti.ies.plantpatrol.backend.entity.Employee;
 import pt.ua.deti.ies.plantpatrol.backend.dto.chat.MessagePayload;
 import pt.ua.deti.ies.plantpatrol.backend.service.ChatRoomService;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.time.Instant;
 
 @RestController
@@ -30,7 +34,7 @@ public class ChatController {
 
         MessagePayload msg = MessagePayload.builder()
                 .content(dto.getContent())
-                .timestamp(Date.from(Instant.now()))
+                .timestamp(LocalDateTime.now())
                 .build();
 
         if (auth.getPrincipal() instanceof Employee issuer) {
@@ -54,7 +58,12 @@ public class ChatController {
         if (chatRoom == null)
             return ResponseEntity.notFound().build();
 
-        return new ResponseEntity<>(chatRoom.getMessages(), HttpStatus.OK);
+        List<MessagePayload> messages = chatRoom.getMessages();
+        if (messages == null) {
+            messages = new ArrayList<>();
+        }
+
+        return new ResponseEntity<>(messages, HttpStatus.OK);
     }
     @Operation(summary = "Have all the chatRoom")
     @GetMapping("/chatRooms")
