@@ -28,28 +28,34 @@ public class InventoryService {
         return inventoryRepository.existsById(id);
     }
 
-    public void createPlant(String plantName, int amount) throws Exception {
+    public Plant createPlant(String plantName, int amount) throws Exception {
         if (inventoryRepository.findByName(plantName).isPresent())
             throw new Exception("Name already exists!");
+
+        Plant newPlant = Plant
+                .builder()
+                .name(plantName)
+                .amount(amount)
+                .build();
+
+        Plant savedPlant = inventoryRepository.save(newPlant);
 
         Mono<GeminiResponseDTO> geminiResponse = geminiService.getPlantDetails(plantName);
         Mono<String> googleSearchResponse = googleSearchService.searchImage(plantName);
 
         Mono.zip(geminiResponse, googleSearchResponse).subscribe(
                 results -> {
-                    Plant plant = Plant
-                            .builder()
-                            .name(plantName)
-                            .amount(amount)
-                            .family(results.getT1().getFamily())
-                            .maxHeight(results.getT1().getMaxHeight())
-                            .about(results.getT1().getDescription())
-                            .curiosities(results.getT1().getCuriosities())
-                            .imageUrl(results.getT2())
-                            .build();
-                    inventoryRepository.save(plant);
+                    newPlant.setFamily(results.getT1().getFamily());
+                    newPlant.setMaxHeight(results.getT1().getMaxHeight());
+                    newPlant.setAbout(results.getT1().getDescription());
+                    newPlant.setCuriosities(results.getT1().getCuriosities());
+                    newPlant.setImageUrl(results.getT2());
+
+                    inventoryRepository.save(newPlant);
                 },
                 error -> logger.error("An error occurred when fetching Gemini or Google Search API", error));
+
+        return savedPlant;
     }
 
     public void deletePlant(String id) {
