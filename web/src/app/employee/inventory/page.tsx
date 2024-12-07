@@ -82,16 +82,25 @@ function Inventory() {
       modalRef.current?.close();
 
       setComponents(1);
+      setAdds([]);
 
-      Swal.fire({
-        icon: 'success',
-        title: "Plants created",
-        text: "Please, wait a while before the new plants descriptions and images to show up"
-      });
+      if (data.length === 0) {
+        Swal.fire({
+          icon: 'error',
+          title: "Alredy exists a plant with the same name!"
+        });
+      }
+      else {
+        Swal.fire({
+          icon: 'success',
+          title: "Plants created",
+          text: "Please, wait a while before the new plants descriptions and images to show up"
+        });
 
-      setTimeout(() => {
-        getPlants();
-      }, 5000);
+        setTimeout(() => {
+          getPlants();
+        }, 5000);
+      }
     } catch (err) {
       Swal.fire({
         icon: "error",
