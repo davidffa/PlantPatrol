@@ -31,11 +31,6 @@ function Inventory() {
   const [searchPlants, setSearchPlants] = useState<Plant[]>([]);
 
   useEffect(() => {
-    async function getPlants() {
-      const { data } = await api.get<Plant[]>("/inventory");
-
-      setPlants(data);
-    }
     getPlants();
   }, []);
 
@@ -52,6 +47,12 @@ function Inventory() {
 
   const [components, setComponents] = useState<number>(1);
   const [adds, setAdds] = useState<AddPlant[]>([]);
+
+  async function getPlants() {
+    const { data } = await api.get<Plant[]>("/inventory");
+
+    setPlants(data);
+  }
 
   const reloadPage = () => {
     window.location.reload();
@@ -74,12 +75,23 @@ function Inventory() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     try {
-      await api.post("/inventory", adds.filter(it => it.name.length >= 0));
+      const { data } = await api.post<Plant[]>("/inventory", adds.filter(it => it.name.trim().length >= 0));
+
+      setPlants([...plants, ...data]);
 
       modalRef.current?.close();
 
       setComponents(1);
 
+      Swal.fire({
+        icon: 'success',
+        title: "Plants created",
+        text: "Please, wait a while before the new plants descriptions and images to show up"
+      });
+
+      setTimeout(() => {
+        getPlants();
+      }, 5000);
     } catch (err) {
       Swal.fire({
         icon: "error",
@@ -89,8 +101,6 @@ function Inventory() {
       console.error(err);
     }
   }
-
-
 
   return (
     <div>
