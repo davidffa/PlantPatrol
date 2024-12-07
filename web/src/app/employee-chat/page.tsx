@@ -82,6 +82,7 @@ function EmployeeChat() {
       ws.onopen = () => {
         ws.send(`{"chatRoomId":"${Room.chatRoomId}"}`)
         console.log("Socket Open")
+        chatBox.current?.scrollTo(0,chatBox.current?.scrollHeight)
       }
       ws.onclose = () => {
         console.log("Websocket Closed")
@@ -90,6 +91,7 @@ function EmployeeChat() {
         console.log("Websocket Error")
       }
       ws.onmessage = (ev) => appendMessage(ev)
+      //Scroll to the last messages 
     }
     catch (error) {
       console.log(error)
@@ -100,9 +102,12 @@ function EmployeeChat() {
   const sendMessage = async () => {
 
     const res = await api.post(`/chat/${selectedRoom?.chatRoomId}`, { content: newMessage })
+
     if (res.status == 200) {
       // scroll to the bottom
-      chatBox.current?.scrollIntoView({ behavior: "smooth" })
+      setNewMessage("")
+      chatBox.current?.scrollTo(0,chatBox.current?.scrollHeight)
+
     }
   };
 
