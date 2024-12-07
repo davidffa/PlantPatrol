@@ -74,6 +74,10 @@ export default function Chat() {
     };
   }, []);
 
+  useEffect(() => {
+    scrollViewRef.current?.scrollToEnd();
+  }, [messages]);
+
   const createChatRoom = async () => {
     try {
       await api.post(`/chat`, { chatRoomId: clientId });
@@ -114,7 +118,6 @@ export default function Chat() {
         timestamp: formatDate(new Date(msg.timestamp))
       };
       setMessages(prev => [...prev, newMessageObject]);
-      setNewMessage(""); // Clear the input field
     }
   }
 
