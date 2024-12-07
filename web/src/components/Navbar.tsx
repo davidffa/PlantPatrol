@@ -23,7 +23,7 @@ export function Navbar() {
 
       {
         isLogged && (
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center z-50">
             <div className="dropdown dropdown-end me-8  w-12 h-12 ">
               <div tabIndex={0} role="button" className="btn rounded-full p-2">
                 <Image
