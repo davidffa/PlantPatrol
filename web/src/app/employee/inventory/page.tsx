@@ -45,7 +45,7 @@ function Inventory() {
     } getSearchPlants();
   }, [searchQuery]);
 
-  const [components, setComponents] = useState<number>(1);
+  const [components, setComponents] = useState<number>(0);
   const [adds, setAdds] = useState<AddPlant[]>([]);
 
   async function getPlants() {
@@ -81,8 +81,7 @@ function Inventory() {
 
       modalRef.current?.close();
 
-      setComponents(1);
-      setAdds([]);
+      setComponents(0);
 
       if (data.length === 0) {
         Swal.fire({
@@ -132,7 +131,7 @@ function Inventory() {
           </div>
           <div className="mr-4">
             {/* Open the modal using document.getElementById('ID').showModal() method */}
-            <button className="bg-green  hover:bg-dark-green hover:duration-200 rounded-full flex py-1 px-6 justify-center items-center gap-2 " onClick={() => modalRef.current?.showModal()}>
+            <button className="bg-green  hover:bg-dark-green hover:duration-200 rounded-full flex py-1 px-6 justify-center items-center gap-2 " onClick={() => { modalRef.current?.showModal(); addInventory(); }}>
               <Image src="/plus.svg" alt="Adicionar" height={42} width={42} />
               <p className="text-2xl font-semibold text-white">New</p>
             </button>
