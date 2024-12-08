@@ -14,6 +14,7 @@ import pt.ua.deti.ies.plantpatrol.backend.response.ErrorResponse;
 import pt.ua.deti.ies.plantpatrol.backend.service.InventoryService;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -33,15 +34,14 @@ public class InventoryController {
             return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
         }
 
-        try {
-            for (CreatePlantDTO dto : dtos) {
-                inventoryService.createPlant(dto.getName(), dto.getQuantity());
-            }
+        List<Plant> createdPlants = dtos.stream().map(dto -> {
+            try {
+                return inventoryService.createPlant(dto.getName(), dto.getQuantity());
+            } catch (Exception ignored) {}
+            return null;
+        }).filter(Objects::nonNull).toList();
 
-            return ResponseEntity.accepted().build();
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
-        }
+        return new ResponseEntity<>(createdPlants, HttpStatus.CREATED);
     }
 
     @Operation(summary = "Delete a plant from the inventory")
@@ -70,8 +70,7 @@ public class InventoryController {
             return ResponseEntity.notFound().build();
         }
 
-        inventoryService.editPlantDetails(id, plt.getFamily(), plt.getMaxHeight(), plt.getAbout(),
-                plt.getCuriosities());
+        inventoryService.editPlantDetails(id, plt.getImageUrl(), plt.getFamily(), plt.getMaxHeight(), plt.getAbout(), plt.getCuriosities());
 
         return ResponseEntity.noContent().build();
     }
@@ -100,7 +99,8 @@ public class InventoryController {
     public ResponseEntity<List<Plant>> searchByPlant(
             @RequestParam(required = false) String name,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int pageSize) {
+            @RequestParam(defaultValue = "10") int pageSize
+    ) {
         if (name == null) {
             return new ResponseEntity<>(inventoryService.getPlants(page, pageSize), HttpStatus.OK);
         }
@@ -112,7 +112,8 @@ public class InventoryController {
     @Operation(summary = "Search plant by id")
     @GetMapping("/inventory/{id}")
     public ResponseEntity<Plant> getPlant(
-            @PathVariable String id) {
+            @PathVariable String id
+    ) {
         if (id == null) {
             return new ResponseEntity<>(new Plant(), HttpStatus.BAD_REQUEST);
         }
@@ -120,4 +121,5 @@ public class InventoryController {
         Plant plant = inventoryService.getPlant(id);
         return new ResponseEntity<>(plant, HttpStatus.OK);
     }
+
 }

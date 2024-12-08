@@ -8,13 +8,18 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import api from "@/services/api";
 import { AxiosError } from "axios";
+import { useAuth } from "@/contexts/auth";
+import withManagerAuth from "@/lib/withManagerAuth";
 
+type Employee = {
+  id: string;
+  name: string;
+  age: number;
+}
 
-// import withAuth from "@/lib/withAuth";
-// import { useAuth } from "@/contexts/auth";
-
-export default function Create() {
+function Create() {
   const router = useRouter();
+  const { user } = useAuth();
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -24,16 +29,20 @@ export default function Create() {
   useEffect(() => {
     async function fetchEmployees() {
       try {
-        const response = await api.get("/employees");
-        const employees = response.data.map((employee: { name: string }) => employee.name);
-        setEmployees(["Everyone", ...employees])
+        const response = await api.get<Employee[]>("/employees");
+        const employees = response.data.reduce((acc, curr) => {
+          if (curr.id !== user!.id) acc.push(curr.name);
+
+          return acc;
+        }, ["Everyone"]);
+        setEmployees(employees);
       } catch (error) {
         const err = error as AxiosError;
         console.log("Failed to fetch employee: " + err);
       }
     }
     fetchEmployees();
-  }, []);
+  }, [user]);
 
 
   async function handleCreateAlert(event: FormEvent<HTMLFormElement>) {
@@ -69,11 +78,11 @@ export default function Create() {
                 <h2 className="text-2xl font-semibold mb-3">
                   Title:
                 </h2>
-                <input 
-                  required 
-                  type="text" 
-                  placeholder="Type here" 
-                  className="input input-md input-bordered w-full" 
+                <input
+                  required
+                  type="text"
+                  placeholder="Type here"
+                  className="input input-md input-bordered w-full"
                   onChange={(e) => setTitle(e.target.value)}
                 />
               </div>
@@ -99,11 +108,11 @@ export default function Create() {
               <h2 className="text-2xl font-semibold mb-3">
                 Description:
               </h2>
-              <textarea 
-                required 
-                id="description" 
-                className="textarea textarea-bordered textarea-xl min-w-full min-h-64 resize-none" 
-                placeholder="Alert description" 
+              <textarea
+                required
+                id="description"
+                className="textarea textarea-bordered textarea-xl min-w-full min-h-64 resize-none"
+                placeholder="Alert description"
                 onChange={(e) => setDescription(e.target.value)}
               />
 
@@ -122,3 +131,5 @@ export default function Create() {
     </div>
   );
 }
+
+export default withManagerAuth(Create);

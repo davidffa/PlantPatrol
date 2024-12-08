@@ -1,32 +1,44 @@
 import React, { useState } from 'react'
 import EditInput from './EditInput';
-import Image from 'next/image';
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import api from "@/services/api";
 
 type Props = {
+  id: string,
   title: string,
   image: string,
   available: number,
   minimum: number,
-  manager?: boolean
+  manager?: boolean,
+  onDelete: () => void
 }
 
-export default function InventoryCard({ title, image, available, minimum, manager = false }: Props) {
+export default function InventoryCard({ id, title, image, available, minimum, manager = false, onDelete }: Props) {
   const router = useRouter();
+
   const [min, setValue] = useState(minimum);
   const [ava, setValue2] = useState(available);
-  const handleValueChange = (newValue: number) => {
+
+
+  async function handleValueChange(newValue: number) {
     setValue(newValue);
   };
   const handleValueChange2 = (newValue: number) => {
     setValue2(newValue);
   };
 
+  async function handleDelete() {
+    await api.delete(`/inventory/${id}`);
+    onDelete();
+  }
+
+
   return (
 
-    <div className="card cursor-pointer shadow-md  hover:shadow-green hover:translate-y-[-4px]  transition-all ease-in-out image-full w-60" >
+    <div className="card cursor-pointer shadow-md  hover:shadow-green hover:translate-y-[-4px]  transition-all ease-in-out image-full w-60 h-64">
       <figure>
-        <Image
+        <img
           src={image}
           alt={title}
           height={300}
@@ -35,9 +47,13 @@ export default function InventoryCard({ title, image, available, minimum, manage
       </figure>
       <div className="card-body ">
         <div className="w-full flex flex-col ">
-          <div className='h-4/6 w-full  text-left text-2xl text-white'onClick={() => !manager && router.push("/employee/inventory/details")} >
+          <div className='flex justify-end'>
+            <Image src="/trash-2.svg" alt="Remove" height={20} width={20} onClick={handleDelete} />
+          </div>
+          <div className='h-2/5 w-full  text-left text-2xl text-white' onClick={() => !manager && router.push(`/employee/inventory/${id}`)} >
             {title}
           </div>
+
           {
             manager ?
               (
@@ -54,7 +70,7 @@ export default function InventoryCard({ title, image, available, minimum, manage
                       <p>Minimum:</p>
                     </div>
                     <div >
-                      <EditInput min={minimum} minvalue={min} onChange={handleValueChange} />
+                      <EditInput id={id} min={minimum} minvalue={min} onChange={handleValueChange} />
                     </div>
                   </div>
                 </>
@@ -66,7 +82,7 @@ export default function InventoryCard({ title, image, available, minimum, manage
                       <p>Available:</p>
                     </div>
                     <div>
-                      <EditInput min={available} minvalue={ava} onChange={handleValueChange2} />
+                      <EditInput id={id} min={available} minvalue={ava} onChange={handleValueChange2} />
                     </div>
                   </div>
                   <div className='h-1/6 w-full grid grid-cols-2 align-bottom'>

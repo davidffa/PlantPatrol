@@ -4,10 +4,7 @@ import { Feather } from "@expo/vector-icons";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import api from "@/services/api";
-import uuid from "react-native-uuid";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-
+import { useUser } from "@/contexts/user";
 
 type Plant = {
   "id": string,
@@ -24,11 +21,10 @@ type Plant = {
 export default function Details() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const { clientId, pushToken } = useUser();
   const id = params.id as string;
 
-  const [clientId, setClientId] = useState("");
   const [plant, setPlant] = useState<Plant>();
-  const [alertPlantIds, setAlertPlantIds] = useState<string[]>([]);
   const [alert, setAlert] = useState(false);
 
   useFocusEffect(
@@ -46,16 +42,6 @@ export default function Details() {
 
   useEffect(() => {
     async function getData() {
-      let Id;
-      try {
-        Id = await AsyncStorage.getItem('clientId');
-        if (Id === null) {
-          Id = uuid.v4();
-          await AsyncStorage.setItem('clientId', Id);
-        }
-        setClientId(Id);
-      } catch (e) { console.log(e) }
-
       const { data } = await api.get<Plant>(`/inventory/${id}`);
       setPlant(data);
 
@@ -73,7 +59,7 @@ export default function Details() {
       await api.delete(`/reminders/${id}`, { headers: { clientId } });
       setAlert(false);
     } else {
-      await api.post("/reminders", { clientId, plantId: id });
+      await api.post("/reminders", { clientId, plantId: id, pushToken });
       setAlert(true);
     }
   }

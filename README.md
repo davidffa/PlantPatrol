@@ -18,5 +18,7 @@ Editable version of the report: https://docs.google.com/document/d/1IEPZ6IrZv8LE
 
 Figma Prototype: https://www.figma.com/design/usKdijbA1KcJ6UM2DbPs9V/MockupIES?node-id=0-1&t=lXHreMOJHYOSNgmf-1
 
+Editable version of the presentation: https://uapt33090-my.sharepoint.com/:p:/g/personal/franciscafpsilva_ua_pt/ETrHJvzoOXZHiikyRP0TIHABGBPu_MtMutLbnbLfA4fxTg?e=0fFicG
+
 ## Architecture
 ![Architecture](./reports/architecture.png) 
