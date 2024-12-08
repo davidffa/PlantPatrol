@@ -59,7 +59,7 @@ db.plants.insertMany([
     "imageUrl": "https://i.pinimg.com/236x/ac/f5/01/acf501b117630260ac5f83777d128d3e.jpg"
   },
   {
-    "name": "carrot",
+    "name": "Carrot",
     "minimum": 0,
     "amount": 5,
     "family": "Apiaceae",
@@ -75,12 +75,14 @@ db.greenhouses.insertMany([
     "name": "Vegetable Greenhouse",
     "location": "Fifth Avenue",
     "rules": [],
+    "microControllers": [],
     '_class': "pt.ua.deti.ies.plantpatrol.backend.entity.rules.GreenHouse"
   },
   {
     "name": "Floriculture Greenhouse",
     "location": "Fifth Avenue",
     "rules": [],
+    "microControllers": [],
     '_class': "pt.ua.deti.ies.plantpatrol.backend.entity.rules.GreenHouse"
   }
 ])

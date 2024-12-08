@@ -36,6 +36,7 @@ public class InventoryController {
 
         List<Plant> createdPlants = dtos.stream().map(dto -> {
             try {
+                dto.setName(dto.getName().substring(0, 1).toUpperCase() + dto.getName().substring(1).toLowerCase());
                 return inventoryService.createPlant(dto.getName(), dto.getQuantity());
             } catch (Exception ignored) {}
             return null;
