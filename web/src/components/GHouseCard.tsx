@@ -6,7 +6,6 @@ import OpacityIcon from '@mui/icons-material/Opacity';
 import DeviceThermostatIcon from '@mui/icons-material/DeviceThermostat';
 import Co2Icon from '@mui/icons-material/Co2';
 import api from '@/services/api';
-import { on } from "events";
 
 type Props = {
   greenhouse: string,
