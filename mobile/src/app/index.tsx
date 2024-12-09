@@ -32,11 +32,30 @@ export default function Home() {
   const [alertPlantIds, setAlertPlantIds] = useState<string[]>([]);
   const [plantsFilter, setPlantsFilter] = useState<Plant[]>([]);
 
+  const [invPage, setInvPage] = useState(1);
+
+  async function fetchInventory(page: number) {
+    const { data } = await api.get<Plant[]>("/inventory", { params: { page: page, pageSize: 10 } });
+    if (page === 0)
+      setPlants(data);
+    else
+      setPlants(prev => [...prev, ...data]);
+
+    return data.length;
+  }
+
+  async function onScrollEndReached() {
+    if (invPage === Infinity) return;
+    const len = await fetchInventory(invPage);
+
+    len === 0 ? setInvPage(Infinity) : setInvPage(prev => prev + 1);
+  }
+
   useFocusEffect(
     React.useCallback(() => {
       async function getData() {
-        const { data } = await api.get<Plant[]>("/inventory");
-        setPlants(data);
+        await fetchInventory(0);
+
         try {
           const { data } = await api.get<string[]>(`/reminders/${clientId}`);
           setAlertPlantIds(data);
@@ -163,6 +182,8 @@ export default function Home() {
           numColumns={2}
           renderItem={({ item }) => <PlantCard name={item.name} image={{ uri: item.imageUrl }} alert={alertPlantIds.includes(item.id)} onToggleAlert={() => toggleAlert(item.id)} onClick={() => router.push({ pathname: 'details', params: { id: item.id } })} />}
           keyExtractor={item => item.id}
+          onEndReached={onScrollEndReached}
+          onEndReachedThreshold={0.1}
         />
       </View>
     </SafeAreaView>
