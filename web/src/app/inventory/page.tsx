@@ -51,7 +51,7 @@ function Inventory() {
       <Navbar />
       <div className="p-3">
         <div className="flex justify-end px-8">
-          <div className="input input-bordered flex items-center gap-2">
+          <div className="input input-bordered flex items-center gap-x-2 gap-y-10">
             <input type="search" className="grow" placeholder="Search" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
           </div>
           <button className=" border ml-2 bg-gray-200 rounded-xl w-12 h-12 items-center justify-center">
@@ -65,7 +65,7 @@ function Inventory() {
           </button>
         </div>
       </div>
-      <div className="w-full grid md:grid-cols-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6 align-center p-3">
+      <div className="w-full grid md:grid-cols-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-x-6 align-center p-3">
         {searchQuery === "" ?
           plants.map(({ id, imageUrl, name, amount, minimum }) => (<InventoryCard key={id} id={id} image={imageUrl} title={name} available={amount} minimum={minimum} manager onDelete={reloadPage} />))
           :

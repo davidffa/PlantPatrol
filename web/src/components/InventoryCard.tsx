@@ -36,7 +36,7 @@ export default function InventoryCard({ id, title, image, available, minimum, ma
 
   return (
 
-    <div className="group card cursor-pointer shadow-md  hover:shadow-green hover:translate-y-[-4px]  transition-all ease-in-out image-full w-full h-16">
+    <div className="group card cursor-pointer shadow-md  hover:shadow-green hover:translate-y-[-4px]  transition-all ease-in-out image-full w-full h-64">
       <figure>
         <img
           src={image}
@@ -58,7 +58,7 @@ export default function InventoryCard({ id, title, image, available, minimum, ma
             manager ?
               (
                 <>
-                  <div className=' h-1/6 w-full grid grid-cols-1 align-bottom'>
+                  <div className='grid grid-cols-1 mt-20'>
                   <div className="grid grid-cols-2 w-full p-2">
                     <div className='flex w-full text-left text-white justify-between text-md '>
                       <p>Available:</p>
@@ -78,7 +78,7 @@ export default function InventoryCard({ id, title, image, available, minimum, ma
               ) :
               (
                 <>
-                  <div className='h-1/6  grid-cols-1 align-bottom  justify-between '>
+                  <div className='grid  grid-cols-1 mt-20'>
                   <div className="grid grid-cols-2 w-full p-2">
                     <div className="flex text-left text-white justify-between">
                       <p>Available:</p>
