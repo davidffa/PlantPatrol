@@ -77,10 +77,9 @@ public class InventoryService {
 
         if (plant.getAmount() < minimum) {
             Alert alert = Alert.builder()
-                    .title("SYSTEM: Plant "+ plant.getName() + " is running low")
+                    .title("SYSTEM: Plant - "+ plant.getName() + " - is running low")
                     .message("The quantity of "+plant.getName()+" is less that the minimum." +
-                            " Maybe it is a good idea add this plant to the next order." +
-                            " (This message is generated automatically from the system.) ")
+                            " Maybe it's a good idea to add this plant to the next order. ")
                     .sendto("Everyone")
                     .fromSystem(true)
                     .timestamp(Date.from(Instant.now()))
@@ -102,8 +101,9 @@ public class InventoryService {
         inventoryRepository.updateAvailableById(id, available);
         if (plant.getMinimum() > available) {
             Alert alert = Alert.builder()
-                    .title("SYSTEM: Plant "+ plant.getName() + " is running low")
-                    .message("The quantity of "+plant.getName()+" is less that the minimum. Maybe it is a good idea add this plant to the next order. (This message is generated automatically from the system.) ")
+                    .title("SYSTEM: Plant - "+ plant.getName() + " - is running low")
+                    .message("The quantity of "+plant.getName()+" is less that the minimum." +
+                            " Maybe it's a good idea to add this plant to the next order. ")
                     .sendto("Everyone")
                     .fromSystem(true)
                     .timestamp(Date.from(Instant.now()))

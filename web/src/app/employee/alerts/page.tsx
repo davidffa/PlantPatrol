@@ -57,6 +57,7 @@ export default function Alerts() {
               title={alert.title}
               data={new Date(alert.timestamp).toLocaleString()}
               description={alert.message}
+              sender={alert.fromSystem}
             />
           ))
         ) : (
