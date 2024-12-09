@@ -36,21 +36,19 @@ export default function InventoryCard({ id, title, image, available, minimum, ma
 
   return (
 
-    <div className="group card cursor-pointer shadow-md  hover:shadow-green hover:translate-y-[-4px]  transition-all ease-in-out image-full w-full h-64">
+    <div className="group card cursor-pointer shadow-md  hover:shadow-green hover:translate-y-[-4px]  transition-all ease-in-out image-full w-full h-72">
       <figure>
         <img
           src={image}
           alt={title}
-          height={300}
-          width={350}
+          className='w-full'
         />
       </figure>
-      <div className="card-body">
-        <div className="w-full flex flex-col ">
+      <div className="card-body relative w-full">
           <div className='flex justify-end '>
             <Image src="/trash-2.svg" alt="Remove" height={20} width={20} onClick={handleDelete} />
           </div>
-          <div className='h-2/5 w-full  text-left text-2xl text-white' onClick={() => !manager && router.push(`/employee/inventory/${id}`)} >
+          <div className='h-2/5 w-full text-left text-2xl text-white' onClick={() => !manager && router.push(`/employee/inventory/${id}`)} >
             {title}
           </div>
 
@@ -58,7 +56,7 @@ export default function InventoryCard({ id, title, image, available, minimum, ma
             manager ?
               (
                 <>
-                  <div className='grid grid-cols-1 mt-20'>
+                  <div className='h-fit grid grid-cols-1 w-5/6 absolute bottom-6'>
                   <div className="grid grid-cols-2 w-full p-2">
                     <div className='flex w-full text-left text-white justify-between text-md '>
                       <p>Available:</p>
@@ -78,7 +76,7 @@ export default function InventoryCard({ id, title, image, available, minimum, ma
               ) :
               (
                 <>
-                  <div className='grid  grid-cols-1 mt-20'>
+                  <div className='h-fit grid grid-cols-1 w-5/6 absolute bottom-6'>
                   <div className="grid grid-cols-2 w-full p-2">
                     <div className="flex text-left text-white justify-between">
                       <p>Available:</p>
@@ -98,7 +96,6 @@ export default function InventoryCard({ id, title, image, available, minimum, ma
               )
           }
         </div>
-      </div>
     </div>
   )
 }
