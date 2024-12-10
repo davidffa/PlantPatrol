@@ -7,10 +7,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import pt.ua.deti.ies.plantpatrol.backend.dto.inventory.GeminiResponseDTO;
+import pt.ua.deti.ies.plantpatrol.backend.entity.Alert;
 import pt.ua.deti.ies.plantpatrol.backend.entity.Plant;
+import pt.ua.deti.ies.plantpatrol.backend.repository.AlertRepository;
 import pt.ua.deti.ies.plantpatrol.backend.repository.InventoryRepository;
 import reactor.core.publisher.Mono;
 
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,6 +27,7 @@ public class InventoryService {
     private final GeminiService geminiService;
     private final GoogleSearchService googleSearchService;
     private final PushNotificationService pushNotificationService;
+    private final AlertRepository alertRepository;
 
     public boolean plantExists(String id) {
         return inventoryRepository.existsById(id);
@@ -63,7 +68,24 @@ public class InventoryService {
     }
 
     public void editMinimumPlant(String id, int minimum) {
+        Optional<Plant> optionalPlant = inventoryRepository.findById(id);
+        if (optionalPlant.isEmpty()) return;
+
+        Plant plant = optionalPlant.get();
+
         inventoryRepository.updateMinimumById(id, minimum);
+
+        if (plant.getAmount() < minimum) {
+            Alert alert = Alert.builder()
+                    .title("SYSTEM: Plant - "+ plant.getName() + " - is running low")
+                    .message("The quantity of "+plant.getName()+" is less that the minimum." +
+                            " Maybe it's a good idea to add this plant to the next order. ")
+                    .sendto("Everyone")
+                    .fromSystem(true)
+                    .timestamp(Date.from(Instant.now()))
+                    .build();
+            alertRepository.insert(alert);
+        }
     }
 
     public void editAvailablePlant(String id, int available) {
@@ -77,6 +99,17 @@ public class InventoryService {
         }
 
         inventoryRepository.updateAvailableById(id, available);
+        if (plant.getMinimum() > available) {
+            Alert alert = Alert.builder()
+                    .title("SYSTEM: Plant - "+ plant.getName() + " - is running low")
+                    .message("The quantity of "+plant.getName()+" is less that the minimum." +
+                            " Maybe it's a good idea to add this plant to the next order. ")
+                    .sendto("Everyone")
+                    .fromSystem(true)
+                    .timestamp(Date.from(Instant.now()))
+                    .build();
+            alertRepository.insert(alert);
+        }
     }
 
     public void editPlantDetails(String id, String imageUrl, String family, int maxHeight, String about, String curiosities) {

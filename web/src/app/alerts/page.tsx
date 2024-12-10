@@ -15,6 +15,7 @@ function Alerts() {
     timestamp: string;
     sendTo: string;
     description: string;
+    fromSystem: boolean;
   }
 
   const [alerts, setAlerts] = useState<Alert[]>([]);
@@ -29,7 +30,7 @@ function Alerts() {
           timestamp: alert.timestamp || new Date().toISOString(),
           sendTo: alert.sendto,
           description: alert.message || "",
-          sender: alert.fromSystem ? "System" : "Admin",
+          fromSystem: alert.fromSystem,
         }));
         setAlerts(alerts.reverse());
       } catch (error) {
@@ -71,7 +72,7 @@ function Alerts() {
               data={new Date(alert.timestamp).toLocaleString()}
               sentTo={alert.sendTo}
               description={alert.description}
-              sender="Admin"
+              sender={alert.fromSystem}
             />
           ))
         ) : (
