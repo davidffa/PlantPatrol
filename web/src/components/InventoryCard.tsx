@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import EditInput from './EditInput';
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Swal from "sweetalert2"
 import api from "@/services/api";
 
 type Props = {
@@ -29,8 +30,21 @@ export default function InventoryCard({ id, title, image, available, minimum, ma
   };
 
   async function handleDelete() {
-    await api.delete(`/inventory/${id}`);
-    onDelete();
+      Swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, delete it!"
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          await api.delete(`/inventory/${id}`).then(async ()=>{
+          onDelete();
+          })
+        }
+      });
   }
 
 
