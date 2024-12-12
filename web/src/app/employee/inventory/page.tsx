@@ -29,10 +29,28 @@ function Inventory() {
   const [plants, setPlants] = useState<Plant[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchPlants, setSearchPlants] = useState<Plant[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [invPage, setInvPage] = useState(1);
 
   useEffect(() => {
-    getPlants();
+    getPlants(0);
   }, []);
+
+  useEffect(() => {
+    async function handleScroll() {
+      if (window.innerHeight + document.documentElement.scrollTop !== document.documentElement.offsetHeight || isLoading) {
+        return;
+      }
+      if (invPage === Infinity) return;
+
+      const len = await getPlants(invPage);
+
+      setInvPage(prev => len === 0 ? Infinity : prev + 1);
+    }
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isLoading, invPage]);
 
   useEffect(() => {
     async function getSearchPlants() {
@@ -48,10 +66,18 @@ function Inventory() {
   const [components, setComponents] = useState<number>(0);
   const [adds, setAdds] = useState<AddPlant[]>([]);
 
-  async function getPlants() {
-    const { data } = await api.get<Plant[]>("/inventory");
+  async function getPlants(page: number) {
+    const { data } = await api.get<Plant[]>("/inventory", { params: { page, pageSize: 15 } });
 
-    setPlants(data);
+    if (page === 0) {
+      setPlants(data);
+    } else {
+      setPlants(prev => [...prev, ...data]);
+    }
+
+    setIsLoading(false);
+
+    return data.length;
   }
 
   const reloadPage = () => {
@@ -96,9 +122,10 @@ function Inventory() {
           text: "Please, wait a while before the new plants descriptions and images to show up"
         });
 
-        setTimeout(() => {
-          getPlants();
-        }, 5000);
+        setTimeout(async () => {
+          await getPlants(0);
+          setInvPage(1);
+        }, 2000);
       }
     } catch (err) {
       Swal.fire({
