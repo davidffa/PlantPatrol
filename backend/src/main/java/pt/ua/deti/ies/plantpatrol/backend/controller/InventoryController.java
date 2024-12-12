@@ -14,6 +14,7 @@ import pt.ua.deti.ies.plantpatrol.backend.response.ErrorResponse;
 import pt.ua.deti.ies.plantpatrol.backend.service.InventoryService;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -33,15 +34,15 @@ public class InventoryController {
             return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
         }
 
-        try {
-            for (CreatePlantDTO dto : dtos) {
-                inventoryService.createPlant(dto.getName(), dto.getQuantity());
-            }
+        List<Plant> createdPlants = dtos.stream().map(dto -> {
+            try {
+                dto.setName(dto.getName().substring(0, 1).toUpperCase() + dto.getName().substring(1).toLowerCase());
+                return inventoryService.createPlant(dto.getName(), dto.getQuantity());
+            } catch (Exception ignored) {}
+            return null;
+        }).filter(Objects::nonNull).toList();
 
-            return ResponseEntity.accepted().build();
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
-        }
+        return new ResponseEntity<>(createdPlants, HttpStatus.CREATED);
     }
 
     @Operation(summary = "Delete a plant from the inventory")
