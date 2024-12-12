@@ -5,9 +5,10 @@ import { Navbar } from "@/components/Navbar";
 import { useState, useEffect } from "react";
 import api from "@/services/api";
 import { useAuth } from "@/contexts/auth";
+import withAuth from "@/lib/withAuth";
 
 
-export default function Alerts() {
+function Alerts() {
   interface Alert {
     id: string;
     title: string;
@@ -67,3 +68,5 @@ export default function Alerts() {
     </>
   );
 }
+
+export default withAuth(Alerts);

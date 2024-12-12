@@ -196,4 +196,4 @@ function EmployeeChat() {
   );
 }
 
-export default withAuth(EmployeeChat)
+export default withAuth(EmployeeChat);

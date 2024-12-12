@@ -138,4 +138,4 @@ function ManagerPage() {
   )
 }
 
-export default withAuth(ManagerPage)
+export default withAuth(ManagerPage);

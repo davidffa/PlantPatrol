@@ -424,4 +424,4 @@ function valuetextAIQ(value: number) {
   )
 }
 
-export default withAuth(NewRule)
+export default withAuth(NewRule);
