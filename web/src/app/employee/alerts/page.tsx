@@ -5,7 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { useState, useEffect } from "react";
 import api from "@/services/api";
 import { useAuth } from "@/contexts/auth";
-import withAuth from "@/lib/withAuth";
+import withEmployeeAuth from "@/lib/withEmployeeAuth";
 
 
 function Alerts() {
@@ -69,4 +69,4 @@ function Alerts() {
   );
 }
 
-export default withAuth(Alerts);
+export default withEmployeeAuth(Alerts);

@@ -8,7 +8,7 @@ import { Navbar } from '@/components/Navbar'
 import api from '@/services/api'
 import Swal from 'sweetalert2'
 type Props = {
-  params: { idRule: string,greenhouseId:string }
+  params: { idRule: string, greenhouseId: string }
 }
 type Rule = {
   name: string,
@@ -99,8 +99,8 @@ function valuetextVentilation(value: number) {
 function valuetextAIQ(value: number) {
   return `${value}°C`;
 }
- function NewRule({ params }: Props) {
-  const { idRule,greenhouseId } = params
+function NewRule({ params }: Props) {
+  const { idRule, greenhouseId } = params
 
 
   const router = useRouter()
@@ -139,7 +139,7 @@ function valuetextAIQ(value: number) {
 
   useEffect(() => {
     getRule()
-  },[])
+  }, [])
 
   const toggleAirPurifier = (prevState: Rule) => {
     if (prevState && typeof prevState.airPurifier === 'boolean') {
@@ -257,7 +257,7 @@ function valuetextAIQ(value: number) {
   const handleSave = () => {
     if (idRule !== '0') {
       //update
-      api.put(`/rules`, { id: idRule, ...rule }).then(async(response) => {
+      api.put(`/rules`, { id: idRule, ...rule }).then(async (response) => {
         if (response.status == 204) {
           //message of success
           await Swal.fire({
@@ -411,7 +411,7 @@ function valuetextAIQ(value: number) {
             </div>
           </div>
           <div className="w-full flex justify-around my-3 p-5">
-            <button onClick={()=>router.back()} className="w-1/6 bg-beje text-xl text-center p-3 rounded-lg text-white">
+            <button onClick={() => router.back()} className="w-1/6 bg-beje text-xl text-center p-3 rounded-lg text-white">
               Cancel
             </button>
             <button onClick={handleSave} className="w-1/6 bg-green text-xl text-center p-3 rounded-lg text-white">

@@ -4,8 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import api from '@/services/api';
 import { useAuth } from '../../contexts/auth';
-import withAuth from '@/lib/withAuth';
 import { env } from 'next-runtime-env';
+import withEmployeeAuth from '@/lib/withEmployeeAuth';
 
 type MessagePayload = {
   content: string,
@@ -82,7 +82,7 @@ function EmployeeChat() {
       ws.onopen = () => {
         ws.send(`{"chatRoomId":"${Room.chatRoomId}"}`)
         console.log("Socket Open")
-        chatBox.current?.scrollTo(0,chatBox.current?.scrollHeight)
+        chatBox.current?.scrollTo(0, chatBox.current?.scrollHeight)
       }
       ws.onclose = () => {
         console.log("Websocket Closed")
@@ -106,7 +106,7 @@ function EmployeeChat() {
     if (res.status == 200) {
       // scroll to the bottom
       setNewMessage("")
-      chatBox.current?.scrollTo(0,chatBox.current?.scrollHeight)
+      chatBox.current?.scrollTo(0, chatBox.current?.scrollHeight)
 
     }
   };
@@ -196,4 +196,4 @@ function EmployeeChat() {
   );
 }
 
-export default withAuth(EmployeeChat);
+export default withEmployeeAuth(EmployeeChat);

@@ -6,7 +6,7 @@ import { FormEvent, useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import api from "@/services/api";
 import Swal from "sweetalert2";
-import withAuth from "@/lib/withAuth";
+import withEmployeeAuth from "@/lib/withEmployeeAuth";
 
 type Plant = {
   "id": string,
@@ -181,4 +181,4 @@ function Inventory() {
   );
 }
 
-export default withAuth(Inventory);
+export default withEmployeeAuth(Inventory);
