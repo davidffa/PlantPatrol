@@ -11,6 +11,7 @@ type Props = {
   greenhouse: string,
   id: number | string,
   image: string
+  onDelete: () => void;
 }
 
 type SensorReading = {
@@ -25,12 +26,17 @@ type SensorReading = {
 
 type ReadingType = "INSTANT" | "HOURLY" | "DAILY" | "WEEKLY" | "MONTHLY";
 
-export default function GHouseCards({ id, greenhouse, image }: Props) {
+export default function GHouseCards({ id, greenhouse, image, onDelete }: Props) {
   const router = useRouter();
   const [humidity, setHumidity] = useState<number>(0);
   const [uv, setUv] = useState<number>(0);
   const [temperature, setTemperature] = useState<number>(0);
   const [aiq, setAiq] = useState<number>(0);
+
+  async function handleDelete() {
+    await api.delete(`/greenhouse/${id}`);
+    onDelete();
+  }
 
   useEffect(() => {
     async function getAVG() {
@@ -62,6 +68,18 @@ export default function GHouseCards({ id, greenhouse, image }: Props) {
         </figure>
         <div className="card-body ">
           <div className="w-full p-2 flex flex-col ">
+            <div className='flex justify-end'>
+              <Image 
+                src="/trash-2.svg" 
+                alt="Remove" 
+                height={20} 
+                width={20} 
+                onClick={(event) => {
+                  event.stopPropagation(); // Prevents navigation when the delete button is clicked
+                  handleDelete();
+                }} 
+              />
+            </div>
             <div className='h-1/2 w-full p-2 text-left text-2xl text-white'>
               {greenhouse}
             </div>
