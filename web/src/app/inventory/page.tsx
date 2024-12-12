@@ -22,14 +22,28 @@ function Inventory() {
   const [plants, setPlants] = useState<Plant[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchPlants, setSearchPlants] = useState<Plant[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [invPage, setInvPage] = useState(1);
 
   useEffect(() => {
-    async function getPlants() {
-      const { data } = await api.get<Plant[]>("/inventory");
-      setPlants(data);
-    }
-    getPlants();
+    getPlants(0);
   }, []);
+
+  useEffect(() => {
+    async function handleScroll() {
+      if (window.innerHeight + document.documentElement.scrollTop !== document.documentElement.offsetHeight || isLoading) {
+        return;
+      }
+      if (invPage === Infinity) return;
+
+      const len = await getPlants(invPage);
+
+      setInvPage(prev => len === 0 ? Infinity : prev + 1);
+    }
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isLoading, invPage]);
 
   useEffect(() => {
     async function getSearchPlants() {
@@ -41,6 +55,20 @@ function Inventory() {
       }
     } getSearchPlants();
   }, [searchQuery]);
+
+  async function getPlants(page: number) {
+    const { data } = await api.get<Plant[]>("/inventory", { params: { page, pageSize: 15 } });
+
+    if (page === 0) {
+      setPlants(data);
+    } else {
+      setPlants(prev => [...prev, ...data]);
+    }
+
+    setIsLoading(false);
+
+    return data.length;
+  }
 
   const reloadPage = () => {
     window.location.reload();
