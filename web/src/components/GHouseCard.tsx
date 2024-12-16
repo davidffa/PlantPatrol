@@ -45,14 +45,17 @@ export default function GHouseCards({ id, greenhouse, image, onDelete }: Props) 
 
         if (res.status === 200) {
           const data = res.data;
-          setHumidity(data.reduce((acc, curr) => acc + curr.humidity, 0) / data.length);
-          setUv(data.reduce((acc, curr) => acc + curr.uv, 0) / data.length);
-          setTemperature(data.reduce((acc, curr) => acc + curr.temperature, 0) / data.length);
-          setAiq(data.reduce((acc, curr) => acc + curr.aiq, 0) / data.length);
+          setHumidity(Math.round(data.reduce((acc, curr) => acc + curr.humidity, 0) / data.length));
+          setUv(Math.round(data.reduce((acc, curr) => acc + curr.uv, 0) / data.length));
+          setTemperature(Math.round(data.reduce((acc, curr) => acc + curr.temperature, 0) / data.length));
+          setAiq(Math.round(data.reduce((acc, curr) => acc + curr.aiq, 0) / data.length));
         }
       } catch { }
     }
+    const interval = setInterval(() => getAVG(), 5000);
     getAVG();
+
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -69,15 +72,15 @@ export default function GHouseCards({ id, greenhouse, image, onDelete }: Props) 
         <div className="card-body ">
           <div className="w-full p-2 flex flex-col ">
             <div className='flex justify-end'>
-              <Image 
-                src="/trash-2.svg" 
-                alt="Remove" 
-                height={20} 
-                width={20} 
+              <Image
+                src="/trash-2.svg"
+                alt="Remove"
+                height={20}
+                width={20}
                 onClick={(event) => {
                   event.stopPropagation(); // Prevents navigation when the delete button is clicked
                   handleDelete();
-                }} 
+                }}
               />
             </div>
             <div className='h-1/2 w-full p-2 text-left text-2xl text-white'>
@@ -86,19 +89,19 @@ export default function GHouseCards({ id, greenhouse, image, onDelete }: Props) 
             <div className='h-1/2 w-full p-1 grid grid-cols-2 align-bottom'>
               <div className='flex w-full p-3 text-left text-white justify-between text-md'>
                 <OpacityIcon fontSize='large' />
-                {humidity}%
+                <div className="mt-1 flex">{humidity}<p className="text-sm mt-1">%</p></div>
               </div>
               <div className='flex w-full p-3 text-left text-white justify-between text-md'>
                 <DeviceThermostatIcon fontSize='large' />
-                {temperature}ºC
+                <div className="mt-1 flex">{temperature}<p className="text-sm mt-1">ºC</p></div>
               </div>
               <div className='flex w-full p-3 text-left text-white justify-between text-md'>
                 <SolarPower fontSize="large" />
-                {uv}mW/cm2
+                <div className="mt-1 flex">{uv}<p className="text-sm mt-1">mW/cm2</p></div>
               </div>
               <div className='flex w-full p-3 text-left text-white justify-between text-md'>
                 <Co2Icon fontSize="large" />
-                {aiq}AIQ
+                <div className="mt-1 flex">{aiq}<p className="text-sm mt-1">AIQ</p></div>
               </div>
             </div>
           </div>
