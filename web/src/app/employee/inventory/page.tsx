@@ -6,7 +6,7 @@ import { FormEvent, useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import api from "@/services/api";
 import Swal from "sweetalert2";
-import withAuth from "@/lib/withAuth";
+import withEmployeeAuth from "@/lib/withEmployeeAuth";
 
 type Plant = {
   "id": string,
@@ -29,15 +29,28 @@ function Inventory() {
   const [plants, setPlants] = useState<Plant[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchPlants, setSearchPlants] = useState<Plant[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [invPage, setInvPage] = useState(1);
 
   useEffect(() => {
-    async function getPlants() {
-      const { data } = await api.get<Plant[]>("/inventory");
-
-      setPlants(data);
-    }
-    getPlants();
+    getPlants(0);
   }, []);
+
+  useEffect(() => {
+    async function handleScroll() {
+      if (window.innerHeight + document.documentElement.scrollTop !== document.documentElement.offsetHeight || isLoading) {
+        return;
+      }
+      if (invPage === Infinity) return;
+
+      const len = await getPlants(invPage);
+
+      setInvPage(prev => len === 0 ? Infinity : prev + 1);
+    }
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isLoading, invPage]);
 
   useEffect(() => {
     async function getSearchPlants() {
@@ -50,8 +63,22 @@ function Inventory() {
     } getSearchPlants();
   }, [searchQuery]);
 
-  const [components, setComponents] = useState<number>(1);
+  const [components, setComponents] = useState<number>(0);
   const [adds, setAdds] = useState<AddPlant[]>([]);
+
+  async function getPlants(page: number) {
+    const { data } = await api.get<Plant[]>("/inventory", { params: { page, pageSize: 15 } });
+
+    if (page === 0) {
+      setPlants(data);
+    } else {
+      setPlants(prev => [...prev, ...data]);
+    }
+
+    setIsLoading(false);
+
+    return data.length;
+  }
 
   const reloadPage = () => {
     window.location.reload();
@@ -74,12 +101,32 @@ function Inventory() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     try {
-      await api.post("/inventory", adds.filter(it => it.name.length >= 0));
+      const { data } = await api.post<Plant[]>("/inventory", adds.filter(it => it.name.trim().length >= 0));
+
+      setPlants([...plants, ...data]);
 
       modalRef.current?.close();
 
-      setComponents(1);
+      setComponents(0);
 
+      if (data.length === 0) {
+        Swal.fire({
+          icon: 'error',
+          title: "Alredy exists a plant with the same name!"
+        });
+      }
+      else {
+        Swal.fire({
+          icon: 'success',
+          title: "Plants created",
+          text: "Please, wait a while before the new plants descriptions and images to show up"
+        });
+
+        setTimeout(async () => {
+          await getPlants(0);
+          setInvPage(1);
+        }, 2000);
+      }
     } catch (err) {
       Swal.fire({
         icon: "error",
@@ -89,8 +136,6 @@ function Inventory() {
       console.error(err);
     }
   }
-
-
 
   return (
     <div>
@@ -113,7 +158,7 @@ function Inventory() {
           </div>
           <div className="mr-4">
             {/* Open the modal using document.getElementById('ID').showModal() method */}
-            <button className="bg-green  hover:bg-dark-green hover:duration-200 rounded-full flex py-1 px-6 justify-center items-center gap-2 " onClick={() => modalRef.current?.showModal()}>
+            <button className="bg-green  hover:bg-dark-green hover:duration-200 rounded-full flex py-1 px-6 justify-center items-center gap-2 " onClick={() => { modalRef.current?.showModal(); addInventory(); }}>
               <Image src="/plus.svg" alt="Adicionar" height={42} width={42} />
               <p className="text-2xl font-semibold text-white">New</p>
             </button>
@@ -163,4 +208,4 @@ function Inventory() {
   );
 }
 
-export default withAuth(Inventory);
+export default withEmployeeAuth(Inventory);

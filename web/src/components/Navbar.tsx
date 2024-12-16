@@ -14,11 +14,16 @@ export function Navbar() {
         <Image src="/logo.png" height={38} width={38} alt="PlantPatrol logo" />
         <span className="text-white text-xl font-bold font-alt">PlantPatrol</span>
       </Link>
-      <Drawer />
 
       {
         isLogged && (
-          <div className="flex items-center justify-center">
+          <Drawer />
+        )
+      }
+
+      {
+        isLogged && (
+          <div className="flex items-center justify-center z-50">
             <div className="dropdown dropdown-end me-8  w-12 h-12 ">
               <div tabIndex={0} role="button" className="btn rounded-full p-2">
                 <Image

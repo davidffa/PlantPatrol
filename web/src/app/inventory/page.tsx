@@ -22,15 +22,28 @@ function Inventory() {
   const [plants, setPlants] = useState<Plant[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchPlants, setSearchPlants] = useState<Plant[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [invPage, setInvPage] = useState(1);
 
   useEffect(() => {
-    async function getPlants() {
-      const { data } = await api.get<Plant[]>("/inventory");
-
-      setPlants(data);
-    }
-    getPlants();
+    getPlants(0);
   }, []);
+
+  useEffect(() => {
+    async function handleScroll() {
+      if (window.innerHeight + document.documentElement.scrollTop !== document.documentElement.offsetHeight || isLoading) {
+        return;
+      }
+      if (invPage === Infinity) return;
+
+      const len = await getPlants(invPage);
+
+      setInvPage(prev => len === 0 ? Infinity : prev + 1);
+    }
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isLoading, invPage]);
 
   useEffect(() => {
     async function getSearchPlants() {
@@ -43,6 +56,20 @@ function Inventory() {
     } getSearchPlants();
   }, [searchQuery]);
 
+  async function getPlants(page: number) {
+    const { data } = await api.get<Plant[]>("/inventory", { params: { page, pageSize: 15 } });
+
+    if (page === 0) {
+      setPlants(data);
+    } else {
+      setPlants(prev => [...prev, ...data]);
+    }
+
+    setIsLoading(false);
+
+    return data.length;
+  }
+
   const reloadPage = () => {
     window.location.reload();
   };
@@ -52,7 +79,7 @@ function Inventory() {
       <Navbar />
       <div className="p-3">
         <div className="flex justify-end px-8">
-          <div className="input input-bordered flex items-center gap-2">
+          <div className="input input-bordered flex items-center gap-x-2 gap-y-10">
             <input type="search" className="grow" placeholder="Search" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
           </div>
           <button className=" border ml-2 bg-gray-200 rounded-xl w-12 h-12 items-center justify-center">
@@ -66,7 +93,7 @@ function Inventory() {
           </button>
         </div>
       </div>
-      <div className="w-full grid md:grid-cols-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5  gap-12 align-center p-4">
+      <div className="w-full grid md:grid-cols-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-12 align-center p-3">
         {searchQuery === "" ?
           plants.map(({ id, imageUrl, name, amount, minimum }) => (<InventoryCard key={id} id={id} image={imageUrl} title={name} available={amount} minimum={minimum} manager onDelete={reloadPage} />))
           :

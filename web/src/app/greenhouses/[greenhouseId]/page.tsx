@@ -91,8 +91,14 @@ function GreenHouse({ params }: Props) {
 
   useEffect(() => {
     async function getSensorsData(tipo: ReadingType) {
-      const { data } = await api.get<SensorReading[]>(`/greenhouse/${greenhouseId}/sensors-data`, { params: { "type": tipo } });
-      setResp(data.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()));
+      try {
+        const res = await api.get<SensorReading[]>(`/greenhouse/${greenhouseId}/sensors-data`, { params: { "type": tipo } });
+
+        if (res.status === 200) {
+          const data = res.data;
+          setResp(data.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()));
+        }
+      } catch { }
     }
 
     getSensorsData(tipo);

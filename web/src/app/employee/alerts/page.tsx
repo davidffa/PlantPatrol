@@ -5,9 +5,10 @@ import { Navbar } from "@/components/Navbar";
 import { useState, useEffect } from "react";
 import api from "@/services/api";
 import { useAuth } from "@/contexts/auth";
+import withEmployeeAuth from "@/lib/withEmployeeAuth";
 
 
-export default function Alerts() {
+function Alerts() {
   interface Alert {
     id: string;
     title: string;
@@ -57,6 +58,7 @@ export default function Alerts() {
               title={alert.title}
               data={new Date(alert.timestamp).toLocaleString()}
               description={alert.message}
+              sender={alert.fromSystem}
             />
           ))
         ) : (
@@ -66,3 +68,5 @@ export default function Alerts() {
     </>
   );
 }
+
+export default withEmployeeAuth(Alerts);

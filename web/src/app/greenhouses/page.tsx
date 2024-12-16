@@ -72,7 +72,15 @@ function ManagerPage() {
       <div className='w-full grid md:grid-cols-2 sm:grid-cols-1 lg:grid-cols-3 xl:grid-cols-4  gap-12 align-center p-4 '>
         {
           greenhouses.map((gh, idx) => (
-            <GHouseCard key={idx} id={gh.id} image='/bg-greenhouse.png' greenhouse={gh.name} />
+            <GHouseCard
+              key={idx}
+              id={gh.id}
+              image='/bg-greenhouse.png'
+              greenhouse={gh.name}
+              onDelete={() => {
+                setGH((prev) => prev.filter((greenhouse) => greenhouse.id !== gh.id));
+              }}
+            />
           ))
         }
         {
@@ -130,4 +138,4 @@ function ManagerPage() {
   )
 }
 
-export default withAuth(ManagerPage)
+export default withAuth(ManagerPage);
