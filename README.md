@@ -18,36 +18,36 @@ A platform to help managing greenhouses for a plant store, on an eco-friendlier 
 ## Architecture
 ![Architecture](./reports/architecture.png) 
 
-## Tools
+## 🛠️ Tools
 
-### Backend
+#### Backend
 - [Spring Boot](https://spring.io/projects/spring-boot)
 - [JsonWebToken](https://jwt.io/)
 - [Swagger](https://swagger.io/)
 - [MongoDB](https://www.mongodb.com/)
 
-### Web
+#### Web
 
 - [Next.js](https://nextjs.org/)
 - [Tailwindcss](https://tailwindcss.com/)
 
-### Mobile
+#### Mobile
 
 - [React Native](https://reactnative.dev/)
 - [Expo](https://expo.dev/)
 
-### Event Streaming
+#### Event Streaming
 
 - [Kafka](https://kafka.apache.org/)
 - [Mosquitto](https://mosquitto.org/)
 
-### External services
+#### External services
 
 - [Gemini API](https://ai.google.dev/)
 - [Google Search API](https://developers.google.com/custom-search/v1/overview)
 - [Firebase Cloud Messaging](https://firebase.google.com/docs/cloud-messaging)
 
-### DevOps
+#### DevOps
 
 - [Docker](https://www.docker.com/)
 - [Github Actions](https://github.com/features/actions)
