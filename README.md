@@ -69,6 +69,14 @@ $ npm install
 $ npm run start
 ```
 
+### Running the virtual sensors
+
+```console
+$ cd raspberrypi/virtual-data
+$ poetry install
+$ poetry run virtual
+```
+
 ## Grade
 
 - 19.6 / 20.0
